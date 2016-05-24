@@ -58,18 +58,17 @@ namespace Assets.Code.Bon.Graph
 				width = BonConfig.SocketSize;
 			}
 			position.Set(
-					socket.X + width + socket.Parent.X,
-					socket.Y + (BonConfig.SocketSize / 2f) + socket.Parent.Y);
+				socket.X + width + socket.Parent.X,
+				socket.Y + (BonConfig.SocketSize/2f) + socket.Parent.Y);
 			return position;
 		}
 
 		public static Vector2 GetTangentPosition(Socket socket, Vector2 position)
 		{
 			if (socket.AlignLeft)
-				return position + Vector2.left * BonConfig.EdgeTangent;
+				return position + Vector2.left*BonConfig.EdgeTangent;
 			else
-				return position + Vector2.right * BonConfig.EdgeTangent;
-
+				return position + Vector2.right*BonConfig.EdgeTangent;
 		}
 	}
 }

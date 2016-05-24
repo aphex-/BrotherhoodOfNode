@@ -6,7 +6,7 @@
 		Based on http://martinecker.com/martincodes/unity-editor-window-zooming/
 
 **/
-namespace Assets.Editor
+namespace Assets.Editor.Bon
 {
 	public class EditorZoomArea
 	{

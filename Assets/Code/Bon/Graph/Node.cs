@@ -6,7 +6,6 @@ namespace Assets.Code.Bon.Graph
 {
 	public abstract class Node
 	{
-
 		public List<Socket> Sockets = new List<Socket>();
 		public readonly int Id;
 
@@ -117,8 +116,6 @@ namespace Assets.Code.Bon.Graph
 		}
 
 
-
-
 		public void GUIDrawWindow()
 		{
 			windowRect = GUI.Window(Id, windowRect, GUIDrawNodeWindow, this.GetType().Name);
@@ -163,7 +160,6 @@ namespace Assets.Code.Bon.Graph
 
 		void GUIDrawNodeWindow(int id)
 		{
-
 			foreach (var socket in Sockets) socket.Draw();
 
 			/*GUILayout.BeginHorizontal();
@@ -172,9 +168,9 @@ namespace Assets.Code.Bon.Graph
 
 			GUI.DragWindow();
 
-			if (Event.current.GetTypeForControl(id) == EventType.Used) 	lastFocusedNodeId = id;
+			if (Event.current.GetTypeForControl(id) == EventType.Used) lastFocusedNodeId = id;
 		}
-
-
 	}
 }
+
+

@@ -8,7 +8,6 @@ namespace Assets.Code.Bon
 {
 	public class BonController
 	{
-
 		private int _uniqueIdOffset = 0;
 
 		public void OnWindowOpen()
@@ -128,7 +127,6 @@ namespace Assets.Code.Bon
 			}
 			return true;
 		}
-
 	}
 }
 

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using UnityEditor;
-using UnityEngine;
 using Assets.Code.Bon.Graph;
+using UnityEngine;
 
-namespace Assets.Editor
+namespace Assets.Editor.Bon
 {
 	public class BonCanvas
 	{

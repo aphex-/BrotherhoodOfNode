@@ -3,12 +3,12 @@ using UnityEditor;
 using UnityEngine;
 using Assets.Code.Bon;
 using Assets.Code.Bon.Graph;
+using Assets.Editor.Bon;
 
 namespace Assets.Editor
 {
 	public class BonWindow : EditorWindow
 	{
-
 		private const string Name = "BrotherhoodOfNode";
 		private BonController _controller;
 
@@ -31,17 +31,17 @@ namespace Assets.Editor
 		private Vector2 _tmpVector02 = new Vector2();
 
 
-		[MenuItem ("Window/" + Name)]
-		public static void CreateEditor ()
+		[MenuItem("Window/" + Name)]
+		public static void CreateEditor()
 		{
-			BonWindow window = EditorWindow.GetWindow<BonWindow> ();
+			BonWindow window = EditorWindow.GetWindow<BonWindow>();
 			window.wantsMouseMove = true;
 			window.Show();
 		}
 
 		public BonWindow()
 		{
-			titleContent = new GUIContent (Name);
+			titleContent = new GUIContent(Name);
 			_controller = new BonController();
 			_controller.OnWindowOpen();
 			_canvas = new BonCanvas();
@@ -52,12 +52,12 @@ namespace Assets.Editor
 		}
 
 
-		void OnGUI ()
+		void OnGUI()
 		{
 			_zoomArea.Set(0, TopOffset, Screen.width, Screen.height);
 
 			HandleNodeRemoving();
-		 	HandleCanvasTranslation();
+			HandleCanvasTranslation();
 			HandleConextMenu();
 			HandleDragAndDrop();
 
@@ -67,9 +67,9 @@ namespace Assets.Editor
 				Event.current.Use();
 			}
 
-			GUI.Button(new Rect(0, 		1, 100, TopOffset - 1), "Open");
-			GUI.Button(new Rect(100, 	1, 100, TopOffset - 1), "Save");
-			GUI.Button(new Rect(200, 	1, 100, TopOffset - 1), "Help");
+			GUI.Button(new Rect(0, 1, 100, TopOffset - 1), "Open");
+			GUI.Button(new Rect(100, 1, 100, TopOffset - 1), "Save");
+			GUI.Button(new Rect(200, 1, 100, TopOffset - 1), "Help");
 
 			DrawZoomArea();
 
@@ -94,7 +94,6 @@ namespace Assets.Editor
 		}
 
 
-
 		private void HandleNodeRemoving()
 		{
 			// Delete or Backspace
@@ -116,18 +115,19 @@ namespace Assets.Editor
 			if (Event.current.type == EventType.ScrollWheel)
 			{
 				Vector2 zoomCoordsMousePos = ConvertScreenCoordsToZoomCoords(Event.current.mousePosition);
-				float zoomDelta = -Event.current.delta.y / 150.0f;
+				float zoomDelta = -Event.current.delta.y/150.0f;
 				float oldZoom = _canvas.Zoom;
 				_canvas.Zoom = Mathf.Clamp(_canvas.Zoom + zoomDelta, CanvasZoomMin, CanvasZoomMax);
-				_canvas.Position += (zoomCoordsMousePos - _canvas.Position) - (oldZoom / _canvas.Zoom) * (zoomCoordsMousePos - _canvas.Position);
+				_canvas.Position += (zoomCoordsMousePos - _canvas.Position) -
+				                    (oldZoom/_canvas.Zoom)*(zoomCoordsMousePos - _canvas.Position);
 				Event.current.Use();
 				return;
 			}
 
 			// Translate
 			if (Event.current.type == EventType.MouseDrag &&
-				(Event.current.button == 0 && Event.current.modifiers == EventModifiers.Alt) ||
-				Event.current.button == 2)
+			    (Event.current.button == 0 && Event.current.modifiers == EventModifiers.Alt) ||
+			    Event.current.button == 2)
 			{
 				Vector2 delta = Event.current.delta;
 				delta /= _canvas.Zoom;
@@ -198,16 +198,15 @@ namespace Assets.Editor
 		{
 			// Context Menu
 			if (Event.current.type == EventType.MouseDown &&
-				(Event.current.button == 0 && Event.current.modifiers == EventModifiers.Alt) ||
-				Event.current.button == 2)
+			    (Event.current.button == 0 && Event.current.modifiers == EventModifiers.Alt) ||
+			    Event.current.button == 2)
 			{
-
 			}
 		}
 
 		/// <summary> Returns true if the sockets can be linked.</summary>
 		/// <param name="socket01"> The first socket</param>
- 		/// <param name="socket02"> The second socket</param>
+		/// <param name="socket02"> The second socket</param>
 		/// <returns>True if the sockets can be linked.</returns>
 		private bool CanBeLinked(Socket socket01, Socket socket02)
 		{
@@ -237,13 +236,13 @@ namespace Assets.Editor
 
 		private Vector2 ConvertScreenCoordsToZoomCoords(Vector2 screenCoords)
 		{
-			return (screenCoords - _zoomArea.TopLeft()) / _canvas.Zoom + _canvas.Position;
+			return (screenCoords - _zoomArea.TopLeft())/_canvas.Zoom + _canvas.Position;
 		}
 
 		public Vector2 ProjectToDrawArea(Vector2 windowPosition)
 		{
-			windowPosition.y += (21) - ((TopOffset * 2));
-			windowPosition = windowPosition / _canvas.Zoom;
+			windowPosition.y += (21) - ((TopOffset*2));
+			windowPosition = windowPosition/_canvas.Zoom;
 			windowPosition.x -= (_canvas.DrawArea.x);
 			windowPosition.y -= (_canvas.DrawArea.y);
 			return windowPosition;
@@ -273,10 +272,7 @@ namespace Assets.Editor
 					_currentDragSocket.Type);
 			}
 		}
-
 	}
 }
-
-
 
 
