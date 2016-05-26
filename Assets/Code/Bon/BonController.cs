@@ -8,7 +8,7 @@ namespace Assets.Code.Bon
 {
 	public class BonController
 	{
-		private int _uniqueIdOffset = 0;
+
 
 		public void OnWindowOpen()
 		{
@@ -18,55 +18,50 @@ namespace Assets.Code.Bon
 		// =====  Graph Initialization =====
 		// =================================
 
-		public List<Node> LoadGraph(string graphId)
+		public Graph.Graph LoadGraph(string graphId)
 		{
-			List<Node> nodes = new List<Node>();
-			var samplerNode01 = new SamplerNode(GetUniqueId());
+			Graph.Graph g = new Graph.Graph();
+
+
+			var samplerNode01 = new SamplerNode(g.GetUniqueId());
 			samplerNode01.X = 20;
 			samplerNode01.Y = 20;
-			nodes.Add(samplerNode01);
+			g.nodes.Add(samplerNode01);
 
-			/*string json = JsonUtility.ToJson(samplerNode01);
-			Debug.Log(json);*/
-
-			var samplerNode02 = new SamplerNode(GetUniqueId());
+			var samplerNode02 = new SamplerNode(g.GetUniqueId());
 			samplerNode02.X = 200;
 			samplerNode02.Y = 200;
-			nodes.Add(samplerNode02);
+			g.nodes.Add(samplerNode02);
 
 			Link(samplerNode01.GetSocket(Color.red, 0), samplerNode02.GetSocket(Color.red, 0));
-			return nodes;
+
+			g.id = graphId;
+
+			//string json = JsonUtility.ToJson(g);
+
+			//Graph.Graph gg = JsonUtility.FromJson<Graph.Graph>(json);
+
+			return g;
 		}
 
 
-		public void SaveGraph(List<Node> nodes, string graphId)
+		public void SaveGraph(Graph.Graph g, string graphId)
 		{
 
 
 		}
 
 
-		public List<string> CreateNodeTypeList(string graphId)
+		public Dictionary<string, Type> CreateMenuEntries(string graphId)
 		{
-			List<string> nodeTypes = new List<string>();
-			nodeTypes.Add("Standard/SamplerNode");
-			nodeTypes.Add("Standard/Multiplex");
-			nodeTypes.Add("Math/Value");
-			return nodeTypes;
+			Dictionary<string, Type> menuEntries = new Dictionary<string, Type>();
+			menuEntries.Add("Standard/SamplerNode", 	typeof(SamplerNode));
+			menuEntries.Add("Standard/Multiplex", 	typeof(Multiplexer));
+			return menuEntries;
 		}
 
-		public Node CreateNode(string nodeType)
-		{
-			if (nodeType.Equals("Standard/Multiplex")) return new Multiplexer(GetUniqueId());
-			if (nodeType.Equals("Standard/SamplerNode")) return new SamplerNode(GetUniqueId());
-			return new SamplerNode(GetUniqueId());
-		}
 
-		private int GetUniqueId()
-		{
-			_uniqueIdOffset += 1;
-			return _uniqueIdOffset;
-		}
+
 
 		// ======= Events =======
 		// ======================

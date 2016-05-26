@@ -10,18 +10,17 @@ namespace Assets.Code.Bon.Graph
 		public Socket Source;
 		public Socket Sink;
 
+		// cached vectors for drawing
+		private Vector2 tmpStartPos;
+		private Vector2 tmpEndPos;
+		private Vector2 tmpTangent01;
+		private Vector2 tmpTangent02;
 
 		public Edge(Socket source, Socket sink)
 		{
 			Source = source;
 			Sink = sink;
 		}
-
-		private Vector2 tmpStartPos;
-		private Vector2 tmpEndPos;
-		private Vector2 tmpTangent01;
-		private Vector2 tmpTangent02;
-
 
 		public Socket GetOtherSocket(Socket socket)
 		{
@@ -72,6 +71,27 @@ namespace Assets.Code.Bon.Graph
 			else
 				return position + Vector2.right*BonConfig.EdgeTangent;
 		}
+
+		///<summary>Creates a serializable version of this edge.</summary>
+		/// <returns>A serializable version of this edge.</returns>
+		public SerializableEdge ToSerializedEgde()
+		{
+			SerializableEdge s = new SerializableEdge();
+			s.sinkNodeId = Sink.Parent.Id;
+			s.sinkSocketIndex = Sink.Parent.Sockets.IndexOf(Sink);
+			s.sourceNodeId = Source.Parent.Id;
+			s.sourceSocketIndex = Source.Parent.Sockets.IndexOf(Source);
+			return s;
+		}
+	}
+
+
+	[Serializable] public class SerializableEdge
+	{
+		[SerializeField] public int sourceNodeId = -1;
+		[SerializeField] public int sourceSocketIndex = -1;
+		[SerializeField] public int sinkNodeId = -1;
+		[SerializeField] public int sinkSocketIndex = -1;
 	}
 }
 

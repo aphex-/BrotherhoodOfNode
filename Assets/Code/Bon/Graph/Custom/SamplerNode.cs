@@ -3,8 +3,12 @@ using UnityEngine;
 
 namespace Assets.Code.Bon.Graph.Custom
 {
+	[Serializable]
 	public class SamplerNode : Node
 	{
+
+		[SerializeField]
+		public string foo = "bar";
 
 		public SamplerNode(int id) : base(id)
 		{
@@ -17,6 +21,12 @@ namespace Assets.Code.Bon.Graph.Custom
 		public override void OnGUI()
 		{
 
+		}
+
+		public override void ApplySerializationData(SerializableNode sNode)
+		{
+			sNode.data = JsonUtility.ToJson(this);
+			sNode.type = this.GetType();
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Assets.Code.Bon;
@@ -11,10 +12,11 @@ namespace Assets.Editor
 	{
 		private const string Name = "BrotherhoodOfNode";
 		private BonController _controller;
+		private Graph graph;
 
 		private readonly BonCanvas _canvas;
 		private Socket _currentDragSocket = null;
-		private List<string> _nodeTypes;
+		private Dictionary<string, Type> _menuEntryToNodeType;
 
 
 		public const int TopOffset = 20;
@@ -51,8 +53,10 @@ namespace Assets.Editor
 			_canvas = new BonCanvas();
 
 			string graphId = "default";
-			_nodeTypes = _controller.CreateNodeTypeList(graphId);
-			_canvas.Nodes = _controller.LoadGraph(graphId);
+
+			_menuEntryToNodeType = _controller.CreateMenuEntries(graphId);
+			graph = _controller.LoadGraph(graphId);
+			_canvas.Nodes = graph.nodes;
 		}
 
 
@@ -83,17 +87,18 @@ namespace Assets.Editor
 			_lastMousePosition = Event.current.mousePosition;
 		}
 
-
 		private GenericMenu CreateGenericMenu()
 		{
 			GenericMenu menu = new GenericMenu();
-			foreach (var nodeType in _nodeTypes) menu.AddItem(new GUIContent(nodeType), false, OnGenericMenuClick, nodeType);
+			foreach(KeyValuePair<string, Type> entry in _menuEntryToNodeType)
+				menu.AddItem(new GUIContent(entry.Key), false, OnGenericMenuClick, entry.Value);
+
 			return menu;
 		}
 
 		private void OnGenericMenuClick(object item)
 		{
-			Node node = _controller.CreateNode((string) item);
+			Node node = graph.CreateNode((Type) item);
 			Vector2 position = ProjectToDrawArea(_lastMousePosition);
 			node.X = position.x;
 			node.Y = position.y;

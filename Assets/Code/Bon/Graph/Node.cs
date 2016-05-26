@@ -10,8 +10,8 @@ namespace Assets.Code.Bon.Graph
 	{
 
 		public List<Socket> Sockets = new List<Socket>();
-
 		public readonly int Id;
+
 
 		// Editor related
 		private Rect windowRect;
@@ -28,6 +28,8 @@ namespace Assets.Code.Bon.Graph
 		}
 
 		public abstract void OnGUI();
+
+		public abstract void ApplySerializationData(SerializableNode sNode);
 
 		/// The x position of the node
 		public float X
@@ -181,6 +183,24 @@ namespace Assets.Code.Bon.Graph
 			if (Event.current.GetTypeForControl(id) == EventType.Used) lastFocusedNodeId = id;
 		}
 
+			public SerializableNode ToSerializedNode()
+			{
+				SerializableNode n = new SerializableNode();
+				n.id = Id;
+				n.windowRect = windowRect;
+				n.contentRect = contentRect;
+				ApplySerializationData(n);
+				return n;
+			}
+	}
+
+	[Serializable] public class SerializableNode
+	{
+		[SerializeField] public Type type;
+		[SerializeField] public int id;
+		[SerializeField] public Rect windowRect;
+		[SerializeField] public Rect contentRect;
+		[SerializeField] public string data;
 	}
 }
 
