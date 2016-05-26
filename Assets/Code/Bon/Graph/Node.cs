@@ -1,16 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Graph
 {
+
 	public abstract class Node
 	{
+
 		public List<Socket> Sockets = new List<Socket>();
+
 		public readonly int Id;
 
 		// Editor related
 		private Rect windowRect;
+		protected Rect contentRect;
+
 		private static int lastFocusedNodeId;
 
 		protected Node(int id)
@@ -21,7 +27,7 @@ namespace Assets.Code.Bon.Graph
 			Height = 100;
 		}
 
-		public abstract void Draw();
+		public abstract void OnGUI();
 
 		/// The x position of the node
 		public float X
@@ -120,7 +126,6 @@ namespace Assets.Code.Bon.Graph
 		{
 			windowRect = GUI.Window(Id, windowRect, GUIDrawNodeWindow, this.GetType().Name);
 			GUIAlignSockets();
-			Draw();
 		}
 
 		public void GUIDrawEdges()
@@ -155,21 +160,27 @@ namespace Assets.Code.Bon.Graph
 
 		private int GUICalcSocketTopOffset(int socketTopIndex)
 		{
-			return BonConfig.SocketOffsetTop + (socketTopIndex*BonConfig.SocketSize) + (socketTopIndex*BonConfig.SocketMargin);
+			return BonConfig.SocketOffsetTop + (socketTopIndex*BonConfig.SocketSize)
+				+ (socketTopIndex*BonConfig.SocketMargin);
 		}
 
 		void GUIDrawNodeWindow(int id)
 		{
 			foreach (var socket in Sockets) socket.Draw();
 
-			/*GUILayout.BeginHorizontal();
-			GUILayout.Button("sdfs");
-			GUILayout.EndHorizontal();*/
+			// start custom node layout
+			contentRect.Set(BonConfig.SocketSize, BonConfig.SocketOffsetTop,
+				Width - BonConfig.SocketSize * 2, Height - BonConfig.SocketOffsetTop);
+
+			GUILayout.BeginArea(contentRect);
+			OnGUI();
+			GUILayout.EndArea();
+			// end
 
 			GUI.DragWindow();
-
 			if (Event.current.GetTypeForControl(id) == EventType.Used) lastFocusedNodeId = id;
 		}
+
 	}
 }
 

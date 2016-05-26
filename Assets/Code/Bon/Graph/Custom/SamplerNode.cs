@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Assets.Code.Bon.Graph.Custom
 {
 	public class SamplerNode : Node
 	{
+
 		public SamplerNode(int id) : base(id)
 		{
 			Sockets.Add(new Socket(this, Color.white, true));
@@ -12,8 +14,9 @@ namespace Assets.Code.Bon.Graph.Custom
 			Sockets.Add(new Socket(this, Color.red, false));
 		}
 
-		public override void Draw()
+		public override void OnGUI()
 		{
+
 		}
 	}
 }

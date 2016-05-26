@@ -26,6 +26,9 @@ namespace Assets.Code.Bon
 			samplerNode01.Y = 20;
 			nodes.Add(samplerNode01);
 
+			/*string json = JsonUtility.ToJson(samplerNode01);
+			Debug.Log(json);*/
+
 			var samplerNode02 = new SamplerNode(GetUniqueId());
 			samplerNode02.X = 200;
 			samplerNode02.Y = 200;
@@ -35,7 +38,15 @@ namespace Assets.Code.Bon
 			return nodes;
 		}
 
-		public List<string> CreateNodeTypeList(string graphiId)
+
+		public void SaveGraph(List<Node> nodes, string graphId)
+		{
+
+
+		}
+
+
+		public List<string> CreateNodeTypeList(string graphId)
 		{
 			List<string> nodeTypes = new List<string>();
 			nodeTypes.Add("Standard/SamplerNode");
@@ -46,6 +57,8 @@ namespace Assets.Code.Bon
 
 		public Node CreateNode(string nodeType)
 		{
+			if (nodeType.Equals("Standard/Multiplex")) return new Multiplexer(GetUniqueId());
+			if (nodeType.Equals("Standard/SamplerNode")) return new SamplerNode(GetUniqueId());
 			return new SamplerNode(GetUniqueId());
 		}
 

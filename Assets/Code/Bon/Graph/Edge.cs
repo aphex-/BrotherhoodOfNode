@@ -1,8 +1,10 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Graph
 {
+
 	public class Edge
 	{
 		public Socket Source;

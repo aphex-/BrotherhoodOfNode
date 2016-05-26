@@ -30,6 +30,10 @@ namespace Assets.Editor
 		private Vector2 _tmpVector01 = new Vector2();
 		private Vector2 _tmpVector02 = new Vector2();
 
+		private Rect openButtonRect = new Rect(0, 0, 80, TopOffset);
+		private Rect saveButtonRect = new Rect(80, 0, 80, TopOffset);
+		private Rect helpButtonRect = new Rect(160, 0, 80, TopOffset);
+
 
 		[MenuItem("Window/" + Name)]
 		public static void CreateEditor()
@@ -67,9 +71,12 @@ namespace Assets.Editor
 				Event.current.Use();
 			}
 
-			GUI.Button(new Rect(0, 1, 100, TopOffset - 1), "Open");
-			GUI.Button(new Rect(100, 1, 100, TopOffset - 1), "Save");
-			GUI.Button(new Rect(200, 1, 100, TopOffset - 1), "Help");
+			if (GUI.Button(openButtonRect, "Open"))
+			{
+				var path = EditorUtility.OpenFilePanel("Open graph data", "", "json");
+			}
+			GUI.Button(saveButtonRect, "Save");
+			GUI.Button(helpButtonRect, "Help");
 
 			DrawZoomArea();
 

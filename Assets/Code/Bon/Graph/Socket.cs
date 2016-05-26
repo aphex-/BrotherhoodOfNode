@@ -1,9 +1,8 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Assets.Code.Bon.Graph
 {
+
 	public class Socket
 	{
 		public Edge Edge;
