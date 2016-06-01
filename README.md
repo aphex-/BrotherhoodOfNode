@@ -4,6 +4,7 @@ A visual graph editor for Unity3D
 ## Work in progress!
 
 This project is still under development. If you want to try it out:
+
 1. copy the files from the asset folder to your unity project asset folder
 2. in unity click on window->BrotherhoodOfNode to open the editor window
 3. start at Assets.Code.Bon.BonController.cs to learn how the project works
