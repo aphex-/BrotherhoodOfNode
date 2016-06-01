@@ -20,28 +20,29 @@ namespace Assets.Code.Bon
 
 		public Graph.Graph LoadGraph(string graphId)
 		{
-			Graph.Graph g = new Graph.Graph();
+			Debug.ClearDeveloperConsole();
 
+			Graph.Graph graph = new Graph.Graph();
 
-			var samplerNode01 = new SamplerNode(g.GetUniqueId());
+			var samplerNode01 = new SamplerNode(graph.GetUniqueId());
 			samplerNode01.X = 20;
 			samplerNode01.Y = 20;
-			g.nodes.Add(samplerNode01);
+			graph.nodes.Add(samplerNode01);
 
-			var samplerNode02 = new SamplerNode(g.GetUniqueId());
-			samplerNode02.X = 200;
-			samplerNode02.Y = 200;
-			g.nodes.Add(samplerNode02);
+			var multiplexer01 = new Multiplexer(graph.GetUniqueId());
+			multiplexer01.X = 200;
+			multiplexer01.Y = 200;
+			graph.nodes.Add(multiplexer01);
 
-			Link(samplerNode01.GetSocket(Color.red, 0), samplerNode02.GetSocket(Color.red, 0));
+			Link(samplerNode01.GetSocket(Color.red, 1), multiplexer01.GetSocket(Color.red, 0));
 
-			g.id = graphId;
+			graph.id = graphId;
 
-			//string json = JsonUtility.ToJson(g);
+			// test serialization an deserialization
+			string serializedJSON = JsonUtility.ToJson(graph);
+			Graph.Graph deserializedGraph = JsonUtility.FromJson<Graph.Graph>(serializedJSON);
 
-			//Graph.Graph gg = JsonUtility.FromJson<Graph.Graph>(json);
-
-			return g;
+			return deserializedGraph;
 		}
 
 
@@ -84,6 +85,7 @@ namespace Assets.Code.Bon
 
 		// ===== Graph Management =====
 		// ============================
+		// move to Graph class
 
 		public void RemoveNode(Node node)
 		{
@@ -126,6 +128,11 @@ namespace Assets.Code.Bon
 
 		public bool Link(Socket ownSocket, Socket foreignSocket)
 		{
+			if (ownSocket == null || foreignSocket == null)
+			{
+				Debug.LogWarning("Try to link sockets but at least one socket does not exist.");
+				return false;
+			}
 			if (ownSocket.Type == foreignSocket.Type)
 			{
 				Edge edge = new Edge(ownSocket, foreignSocket);

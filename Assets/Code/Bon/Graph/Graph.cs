@@ -40,20 +40,26 @@ namespace Assets.Code.Bon.Graph
 			return null;
 		}
 
+		public Node GetNode(int nodeId)
+		{
+			if (nodes == null) return null;
+			foreach (var node in nodes)
+			{
+				if (node.Id == nodeId)
+				{
+					return node;
+				}
+			}
+			return null;
+		}
+
 		/// <summary>Unity serialization callback.</summary>
 		public void OnBeforeSerialize()
 		{
-			Debug.Log("OnBefore");
-			if (nodes.Count == 0) return;
-
+			if (nodes.Count == 0) return; // nothing to serialize
 			serializedEdges.Clear();
 			serializedNodes.Clear();
-			Debug.Log("OnBefore Clear");
-
-			// serialize edges
-
-			Debug.Log("Node Count " + nodes.Count);
-
+			// serialize data
 			foreach (var node in nodes)
 			{
 				serializedNodes.Add(node.ToSerializedNode());
@@ -67,7 +73,6 @@ namespace Assets.Code.Bon.Graph
 							serializedEdges.Add(socket.Edge.ToSerializedEgde());
 						}
 					}
-
 				}
 			}
 		}
@@ -75,23 +80,41 @@ namespace Assets.Code.Bon.Graph
 		/// <summary>Unity serialization callback.</summary>
 		public void OnAfterDeserialize()
 		{
-			Debug.Log("OnAfter");
-			if (nodes.Count > 0) return;
+			if (serializedNodes.Count == 0) return;	// Nothing to deserialize.
+			nodes.Clear(); // clear original data.
 
-			//Debug.Log("OnAfter nodes.Count: " + nodes.Count + " serializedNodes.Count: " + serializedNodes.Count);
-
-
+			// deserialize nodes
 			foreach (var sNode in serializedNodes)
 			{
-
-				Debug.Log("Type " + sNode.type);
-				Node n = CreateNode(sNode.type, sNode.id);
+				Node n = CreateNode(Type.GetType(sNode.type), sNode.id);
 				if (n != null)
 				{
 					JsonUtility.FromJsonOverwrite(sNode.data, n);
-					Debug.Log("Created " + n);
+					n.X = sNode.X;
+					n.Y = sNode.Y;
 					nodes.Add(n);
 				}
+			}
+
+			// deserialize edges
+			foreach (var sEdge in serializedEdges)
+			{
+				Node sourceNode = GetNode(sEdge.sourceNodeId);
+				Node sinkNode = GetNode(sEdge.sinkNodeId);
+				if (sourceNode == null || sinkNode == null)
+				{
+					Debug.LogWarning("Try to create an edge but can not find at least on of the nodes.");
+					continue;
+				}
+
+				if (sEdge.sourceSocketIndex > sourceNode.Sockets.Count || sEdge.sinkSocketIndex > sinkNode.Sockets.Count)
+				{
+					Debug.LogWarning("Try to create an edge but can not find at least on of the sockets.");
+					continue;
+				}
+				Edge edge = new Edge(sourceNode.Sockets[sEdge.sourceSocketIndex], sinkNode.Sockets[sEdge.sinkSocketIndex]);
+				sourceNode.Sockets[sEdge.sourceSocketIndex].Edge = edge;
+				sinkNode.Sockets[sEdge.sinkSocketIndex].Edge = edge;
 			}
 		}
 	}

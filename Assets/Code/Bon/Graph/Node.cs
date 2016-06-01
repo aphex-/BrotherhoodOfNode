@@ -178,28 +178,28 @@ namespace Assets.Code.Bon.Graph
 			OnGUI();
 			GUILayout.EndArea();
 			// end
-
 			GUI.DragWindow();
 			if (Event.current.GetTypeForControl(id) == EventType.Used) lastFocusedNodeId = id;
 		}
 
-			public SerializableNode ToSerializedNode()
-			{
-				SerializableNode n = new SerializableNode();
-				n.id = Id;
-				n.windowRect = windowRect;
-				n.contentRect = contentRect;
-				ApplySerializationData(n);
-				return n;
-			}
+		public SerializableNode ToSerializedNode()
+		{
+			SerializableNode n = new SerializableNode();
+			n.type = this.GetType().FullName;
+			n.id = Id;
+			n.X = windowRect.xMin;
+			n.Y = windowRect.yMin;
+			ApplySerializationData(n);
+			return n;
+		}
 	}
 
 	[Serializable] public class SerializableNode
 	{
-		[SerializeField] public Type type;
+		[SerializeField] public string type;
 		[SerializeField] public int id;
-		[SerializeField] public Rect windowRect;
-		[SerializeField] public Rect contentRect;
+		[SerializeField] public float X;
+		[SerializeField] public float Y;
 		[SerializeField] public string data;
 	}
 }

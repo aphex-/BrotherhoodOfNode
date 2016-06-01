@@ -32,7 +32,7 @@ namespace Assets.Editor
 		private Vector2 _tmpVector01 = new Vector2();
 		private Vector2 _tmpVector02 = new Vector2();
 
-		private Rect openButtonRect = new Rect(0, 0, 80, TopOffset);
+		//private Rect openButtonRect = new Rect(0, 0, 80, TopOffset);
 		private Rect saveButtonRect = new Rect(80, 0, 80, TopOffset);
 		private Rect helpButtonRect = new Rect(160, 0, 80, TopOffset);
 
@@ -56,7 +56,7 @@ namespace Assets.Editor
 
 			_menuEntryToNodeType = _controller.CreateMenuEntries(graphId);
 			graph = _controller.LoadGraph(graphId);
-			_canvas.Nodes = graph.nodes;
+			_canvas.Nodes.AddRange(graph.nodes);
 		}
 
 
@@ -75,10 +75,10 @@ namespace Assets.Editor
 				Event.current.Use();
 			}
 
-			if (GUI.Button(openButtonRect, "Open"))
+			/*if (GUI.Button(openButtonRect, "Open"))
 			{
 				var path = EditorUtility.OpenFilePanel("Open graph data", "", "json");
-			}
+			}*/
 			GUI.Button(saveButtonRect, "Save");
 			GUI.Button(helpButtonRect, "Help");
 

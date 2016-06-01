@@ -26,7 +26,6 @@ namespace Assets.Code.Bon.Graph.Custom
 		public override void ApplySerializationData(SerializableNode sNode)
 		{
 			sNode.data = JsonUtility.ToJson(this);
-			sNode.type = this.GetType();
 		}
 	}
 }
