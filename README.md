@@ -1,6 +1,8 @@
 # BrotherhoodOfNode
 A visual graph editor for Unity3D
 
+![alt text](https://github.com/aphex-/BrotherhoodOfNode/blob/master/preview.png "preview")
+
 ## Work in progress!
 
 This project is still under development. If you want to try it out:
@@ -16,6 +18,3 @@ This project is still under development. If you want to try it out:
 
 ## Non-Features
 * nothing but a tool to create graphs and make them persitent
-
-
-
