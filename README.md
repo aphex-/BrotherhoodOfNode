@@ -18,3 +18,48 @@ This project is still under development. If you want to try it out:
 
 ## Non-Features
 * nothing but a tool to create graphs and make them persitent
+
+## How To Create A Custom Node
+To create your own nodes you need to create a new class. Let's call it MyNode.cs
+for this example. MyNode now needs to inherit from the class Node. And this 
+class needs the annotation [Serializable] in order to save it as a json file.
+```cs
+using System;
+using UnityEngine;
+
+namespace Assets.Code.Bon.Graph.Custom
+{
+	[Serializable]
+	public class MyNode : Node {
+
+		public MyNode(int id) : base(id)
+		{
+			Sockets.Add(new Socket(this, Color.red, true));
+			Sockets.Add(new Socket(this, Color.red, false));
+			Sockets.Add(new Socket(this, Color.red, false));
+			Height = 65;
+		}
+
+		public override void OnGUI()
+		{
+		}
+
+		public override void ApplySerializationData(SerializableNode sNode)
+		{
+			sNode.data = JsonUtility.ToJson(this);
+		}
+	}
+}
+
+```
+### Adding Sockets
+We created a node class that contains three red Sockets. A Socket needs a parent node as first parameter (this) and a connection type (Color.Red). The last boolean parameter tells the socket to be on the left (true) or on the right (false) side of the node.
+
+### Add UI elememts
+To add custom UI elements to your node simply use the OnGUI method as usual.
+
+### Save nodes as json
+(This may change in future versions)
+To be able to save the node in a json file (to make it persistent) we need 
+to override the method ApplySerializationData. It gives us a parameter 
+of the type SerializableNode where we can save our custom data.
