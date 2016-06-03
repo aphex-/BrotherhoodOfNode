@@ -84,8 +84,9 @@ and its method **CreateNode**. Notice: the method is overloaded.. we need the on
 You just need to create another if statement to check for our **MyNode** class and return a new instance.
 
 We also need to add a menu entry of our node to make it addable from the editor.
-```cs
 Find the class **BonController ** and its method **CreateMenuEntries** that looks like this:
+```cs
+
 	public Dictionary<string, Type> CreateMenuEntries(string graphId)
 	{
 		Dictionary<string, Type> menuEntries = new Dictionary<string, Type>();
