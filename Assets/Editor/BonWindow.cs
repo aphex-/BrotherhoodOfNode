@@ -32,7 +32,7 @@ namespace Assets.Editor
 		private Vector2 _tmpVector01 = new Vector2();
 		private Vector2 _tmpVector02 = new Vector2();
 
-		//private Rect openButtonRect = new Rect(0, 0, 80, TopOffset);
+		private Rect openButtonRect = new Rect(0, 0, 80, TopOffset);
 		private Rect saveButtonRect = new Rect(80, 0, 80, TopOffset);
 		private Rect helpButtonRect = new Rect(160, 0, 80, TopOffset);
 
@@ -52,10 +52,8 @@ namespace Assets.Editor
 			_controller.OnWindowOpen();
 			_canvas = new BonCanvas();
 
-			string graphId = "default";
-
-			_menuEntryToNodeType = _controller.CreateMenuEntries(graphId);
-			graph = _controller.LoadGraph(graphId);
+			_menuEntryToNodeType = _controller.CreateMenuEntries(BonConfig.DefaultGraphName);
+			graph = _controller.LoadGraph(BonConfig.DefaultGraphName);
 			_canvas.Nodes.AddRange(graph.nodes);
 		}
 
@@ -74,14 +72,7 @@ namespace Assets.Editor
 				CreateGenericMenu().ShowAsContext();
 				Event.current.Use();
 			}
-
-			/*if (GUI.Button(openButtonRect, "Open"))
-			{
-				var path = EditorUtility.OpenFilePanel("Open graph data", "", "json");
-			}*/
-			GUI.Button(saveButtonRect, "Save");
-			GUI.Button(helpButtonRect, "Help");
-
+			HandleMenuButtons();
 			DrawZoomArea();
 
 			_lastMousePosition = Event.current.mousePosition;
@@ -99,12 +90,39 @@ namespace Assets.Editor
 		private void OnGenericMenuClick(object item)
 		{
 			Node node = graph.CreateNode((Type) item);
-			Vector2 position = ProjectToDrawArea(_lastMousePosition);
+			var position = ProjectToDrawArea(_lastMousePosition);
 			node.X = position.x;
 			node.Y = position.y;
 			_canvas.Nodes.Add(node);
 		}
 
+
+		private void HandleMenuButtons()
+		{
+			if (GUI.Button(openButtonRect, "Load"))
+			{
+				var path = EditorUtility.OpenFilePanel("load graph data", "", "json");
+				if (!path.Equals(""))
+				{
+					graph = _controller.LoadGraph(path);
+					_canvas.Nodes.Clear();
+					_canvas.Nodes.AddRange(graph.nodes);
+				}
+			}
+
+			// Save Button
+			if (GUI.Button(saveButtonRect, "Save"))
+			{
+				var path = EditorUtility.SaveFilePanel("save graph data", "", "graph", "json");
+				if (!path.Equals(""))
+				{
+					_controller.SaveGraph(graph, path);
+				}
+			}
+
+			// Help Button
+			GUI.Button(helpButtonRect, "Help");
+		}
 
 		private void HandleNodeRemoving()
 		{

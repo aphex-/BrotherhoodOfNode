@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Security.AccessControl;
 using Assets.Code.Bon.Graph.Custom;
 using UnityEngine;
 
@@ -130,6 +132,37 @@ namespace Assets.Code.Bon.Graph
 
 
 		// === SERIALIZATION ===
+
+		public string ToJson()
+		{
+			return JsonUtility.ToJson(this);
+		}
+
+		public static Graph FromJson(string json)
+		{
+			return JsonUtility.FromJson<Graph>(json);
+		}
+
+		public static bool Save(string fileName, Graph graph)
+		{
+			var file = File.CreateText(fileName);
+			file.Write(graph.ToJson());
+			file.Close();
+			return true;
+		}
+
+		public static Graph Load(string fileName)
+		{
+			if(File.Exists(fileName)){
+				var file = File.OpenText(fileName);
+				var json = file.ReadToEnd();
+				file.Close();
+				return Graph.FromJson(json);
+			} else {
+				Debug.Log("Could not Open the file: " + fileName);
+				return null;
+			}
+		}
 
 		/// <summary>Unity serialization callback.</summary>
 		public void OnBeforeSerialize()

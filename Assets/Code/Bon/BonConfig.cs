@@ -6,6 +6,8 @@
 		public static int SocketOffsetTop = 20;
 		public static int SocketMargin = 5;
 		public static int EdgeTangent = 50;
+
+		public static string DefaultGraphName = "default";
 	}
 }
 

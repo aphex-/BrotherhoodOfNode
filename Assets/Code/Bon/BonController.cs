@@ -16,41 +16,47 @@ namespace Assets.Code.Bon
 		}
 
 		// =====  Graph Initialization =====
-		// =================================
-
-		public Graph.Graph LoadGraph(string graphId)
+		public Graph.Graph LoadGraph(string path)
 		{
 			Debug.ClearDeveloperConsole();
 
-			Graph.Graph graph = new Graph.Graph();
-			graph.RegisterListener(this);
+			if (path.Equals(BonConfig.DefaultGraphName))
+			{
+				Graph.Graph graph = new Graph.Graph();
+				graph.RegisterListener(this);
 
-			var samplerNode01 = new SamplerNode(graph.GetUniqueId());
-			samplerNode01.X = 20;
-			samplerNode01.Y = 20;
-			graph.nodes.Add(samplerNode01);
+				var samplerNode01 = new SamplerNode(graph.GetUniqueId());
+				samplerNode01.X = 20;
+				samplerNode01.Y = 20;
+				graph.nodes.Add(samplerNode01);
 
-			var multiplexer01 = new Multiplexer(graph.GetUniqueId());
-			multiplexer01.X = 200;
-			multiplexer01.Y = 200;
-			graph.nodes.Add(multiplexer01);
+				var multiplexer01 = new Multiplexer(graph.GetUniqueId());
+				multiplexer01.X = 200;
+				multiplexer01.Y = 200;
+				graph.nodes.Add(multiplexer01);
 
-			graph.Link(samplerNode01.GetSocket(Color.red, 1), multiplexer01.GetSocket(Color.red, 0));
+				graph.Link(samplerNode01.GetSocket(Color.red, 1), multiplexer01.GetSocket(Color.red, 0));
 
-			graph.id = graphId;
+				graph.id = path;
+				// test serialization an deserialization
+				string serializedJSON = graph.ToJson();
+				Graph.Graph deserializedGraph = Graph.Graph.FromJson(serializedJSON);
 
-			// test serialization an deserialization
-			string serializedJSON = JsonUtility.ToJson(graph);
-			Graph.Graph deserializedGraph = JsonUtility.FromJson<Graph.Graph>(serializedJSON);
+				return deserializedGraph;
+			}
+			else
+			{
+				Graph.Graph graph = Graph.Graph.Load(path);
+				graph.RegisterListener(this);
+				return graph;
+			}
 
-			return deserializedGraph;
 		}
 
 
-		public void SaveGraph(Graph.Graph g, string graphId)
+		public void SaveGraph(Graph.Graph g, string path)
 		{
-
-
+			Graph.Graph.Save(path, g);
 		}
 
 		public Dictionary<string, Type> CreateMenuEntries(string graphId)
