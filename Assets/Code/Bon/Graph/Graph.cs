@@ -12,8 +12,6 @@ namespace Assets.Code.Bon.Graph
 	{
 		public List<Node> nodes = new List<Node>();
 
-		private int _uniqueIdOffset = 0;
-
 		[SerializeField]
 		public String id;
 
@@ -32,8 +30,12 @@ namespace Assets.Code.Bon.Graph
 
 		public int GetUniqueId()
 		{
-			_uniqueIdOffset += 1;
-			return _uniqueIdOffset;
+			var tmpId = 0;
+			while (GetNode(tmpId) != null)
+			{
+				tmpId++;
+			}
+			return tmpId;
 		}
 
 		public Node CreateNode(Type nodeType)
@@ -45,6 +47,7 @@ namespace Assets.Code.Bon.Graph
 		{
 			if (nodeType == typeof(Multiplexer)) return new Multiplexer(id);
 			if (nodeType == typeof(SamplerNode)) return new SamplerNode(id);
+			Debug.Log("Can not create a node of the type '" + nodeType.FullName + "'");
 			return null;
 		}
 
@@ -121,7 +124,6 @@ namespace Assets.Code.Bon.Graph
 				Edge edge = new Edge(ownSocket, foreignSocket);
 				ownSocket.Edge = edge;
 				foreignSocket.Edge = edge;
-
 				if (listener != null)
 				{
 					listener.OnLink(edge);

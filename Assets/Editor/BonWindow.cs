@@ -55,8 +55,10 @@ namespace Assets.Editor
 			_menuEntryToNodeType = _controller.CreateMenuEntries(BonConfig.DefaultGraphName);
 			graph = _controller.LoadGraph(BonConfig.DefaultGraphName);
 			_canvas.Nodes.AddRange(graph.nodes);
+			menu = CreateGenericMenu();
 		}
 
+		private GenericMenu menu;
 
 		void OnGUI()
 		{
@@ -69,7 +71,7 @@ namespace Assets.Editor
 
 			if (Event.current.type == EventType.ContextClick)
 			{
-				CreateGenericMenu().ShowAsContext();
+				menu.ShowAsContext();
 				Event.current.Use();
 			}
 			HandleMenuButtons();
@@ -83,7 +85,6 @@ namespace Assets.Editor
 			GenericMenu menu = new GenericMenu();
 			foreach(KeyValuePair<string, Type> entry in _menuEntryToNodeType)
 				menu.AddItem(new GUIContent(entry.Key), false, OnGenericMenuClick, entry.Value);
-
 			return menu;
 		}
 
@@ -93,7 +94,15 @@ namespace Assets.Editor
 			var position = ProjectToDrawArea(_lastMousePosition);
 			node.X = position.x;
 			node.Y = position.y;
-			_canvas.Nodes.Add(node);
+			graph.nodes.Add(node);
+			UpdateCanvas();
+		}
+
+		private void UpdateCanvas()
+		{
+			_canvas.Nodes.Clear();
+			_canvas.Nodes.AddRange(graph.nodes);
+			Debug.Log("Node count " + _canvas.Nodes.Count);
 		}
 
 
@@ -105,8 +114,7 @@ namespace Assets.Editor
 				if (!path.Equals(""))
 				{
 					graph = _controller.LoadGraph(path);
-					_canvas.Nodes.Clear();
-					_canvas.Nodes.AddRange(graph.nodes);
+					UpdateCanvas();
 				}
 			}
 

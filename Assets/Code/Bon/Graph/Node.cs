@@ -126,7 +126,7 @@ namespace Assets.Code.Bon.Graph
 
 		public void GUIDrawWindow()
 		{
-			windowRect = GUI.Window(Id, windowRect, GUIDrawNodeWindow, this.GetType().Name);
+			windowRect = GUI.Window(Id, windowRect, GUIDrawNodeWindow, this.GetType().Name + " (" + this.Id + ")");
 			GUIAlignSockets();
 		}
 
