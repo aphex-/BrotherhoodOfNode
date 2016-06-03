@@ -98,4 +98,7 @@ You just need to add another entry to the **menuEntries** Dictionary. The first
 parameter is the menu hierarchy as a string. The second parameter is the type
 of node to create if the menu entry is clicked. In our case this would be **MyNode**.
 
-
+### Next Up..
+* The editor needs tab pages for multiple opened graphs. This is prepared via **graphId** or **path** The Graph listener also needs this as a parameter for every event.
+* Code style and code documentation (no idea whats the state of the art. Following microsofts or unitys recommendations?)
+* cleanup code, refactor namespaces
