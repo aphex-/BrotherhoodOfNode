@@ -21,6 +21,12 @@ namespace Assets.Code.Bon.Graph
 		[SerializeField]
 		private List<SerializableNode> serializedNodes = new List<SerializableNode>();
 
+		private IGraphListener listener;
+
+		public void RegisterListener(IGraphListener listener)
+		{
+			this.listener = listener;
+		}
 
 		public int GetUniqueId()
 		{
@@ -52,6 +58,78 @@ namespace Assets.Code.Bon.Graph
 			}
 			return null;
 		}
+
+
+		public void RemoveNode(Node node)
+		{
+			foreach (var socket in node.Sockets)
+			{
+				if (socket.Edge != null)
+				{
+					UnLink(socket);
+				}
+			}
+			if (listener != null)
+			{
+				listener.OnNodeRemoved(node);
+			}
+
+		}
+
+		public void UnLink(Socket s01, Socket s02)
+		{
+			if (listener != null)
+			{
+				listener.OnUnLink(s01, s02);
+			}
+
+			if (s01 != null && s01.Edge != null)
+			{
+				s01.Edge.Sink = null;
+				s01.Edge.Source = null;
+				s01.Edge = null;
+			}
+			if (s02 != null && s02.Edge != null)
+			{
+				s02.Edge.Sink = null;
+				s02.Edge.Source = null;
+				s02.Edge = null;
+			}
+		}
+
+		public void UnLink(Socket socket)
+		{
+			Socket socket2 = null;
+			if (socket.Edge != null)
+			{
+				socket2 = socket.Edge.GetOtherSocket(socket);
+			}
+			UnLink(socket, socket2);
+		}
+
+		public bool Link(Socket ownSocket, Socket foreignSocket)
+		{
+			if (ownSocket == null || foreignSocket == null)
+			{
+				Debug.LogWarning("Try to link sockets but at least one socket does not exist.");
+				return false;
+			}
+			if (ownSocket.Type == foreignSocket.Type)
+			{
+				Edge edge = new Edge(ownSocket, foreignSocket);
+				ownSocket.Edge = edge;
+				foreignSocket.Edge = edge;
+
+				if (listener != null)
+				{
+					listener.OnLink(edge);
+				}
+			}
+			return true;
+		}
+
+
+		// === SERIALIZATION ===
 
 		/// <summary>Unity serialization callback.</summary>
 		public void OnBeforeSerialize()

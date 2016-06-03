@@ -114,7 +114,7 @@ namespace Assets.Editor
 				Node node = GetFocusedNode();
 				if (node != null)
 				{
-					_controller.RemoveNode(node);
+					graph.RemoveNode(node);
 					_canvas.Nodes.Remove(node);
 					Repaint();
 				}
@@ -164,7 +164,7 @@ namespace Assets.Editor
 					else
 					{
 						_currentDragSocket = target.Edge.GetOtherSocket(target);
-						_controller.UnLink(_currentDragSocket, target);
+						graph.UnLink(_currentDragSocket, target);
 					}
 					Event.current.Use();
 				}
@@ -181,9 +181,9 @@ namespace Assets.Editor
 						if (target.Edge != null)
 						{
 							// replace edge
-							_controller.UnLink(target);
+							graph.UnLink(target);
 						}
-						_controller.Link(_currentDragSocket, target);
+						graph.Link(_currentDragSocket, target);
 						Event.current.Use();
 					}
 					_currentDragSocket = null;

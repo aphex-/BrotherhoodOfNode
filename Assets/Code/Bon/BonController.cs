@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Assets.Code.Bon
 {
-	public class BonController
+	public class BonController : IGraphListener
 	{
 
 
@@ -23,6 +23,7 @@ namespace Assets.Code.Bon
 			Debug.ClearDeveloperConsole();
 
 			Graph.Graph graph = new Graph.Graph();
+			graph.RegisterListener(this);
 
 			var samplerNode01 = new SamplerNode(graph.GetUniqueId());
 			samplerNode01.X = 20;
@@ -34,7 +35,7 @@ namespace Assets.Code.Bon
 			multiplexer01.Y = 200;
 			graph.nodes.Add(multiplexer01);
 
-			Link(samplerNode01.GetSocket(Color.red, 1), multiplexer01.GetSocket(Color.red, 0));
+			graph.Link(samplerNode01.GetSocket(Color.red, 1), multiplexer01.GetSocket(Color.red, 0));
 
 			graph.id = graphId;
 
@@ -52,7 +53,6 @@ namespace Assets.Code.Bon
 
 		}
 
-
 		public Dictionary<string, Type> CreateMenuEntries(string graphId)
 		{
 			Dictionary<string, Type> menuEntries = new Dictionary<string, Type>();
@@ -65,83 +65,23 @@ namespace Assets.Code.Bon
 
 
 		// ======= Events =======
-		// ======================
 
-		private static void OnLink(Edge edge)
+		public void OnLink(Edge edge)
 		{
 			Debug.Log("OnLink: Node " + edge.Source.Parent.Id + " with Node " + edge.Sink.Parent.Id);
 		}
 
-		private static void OnUnLink(Socket s01, Socket s02)
+		public void OnUnLink(Socket s01, Socket s02)
 		{
 			Debug.Log("OnUnLink: Node " + s01.Edge.Source.Parent.Id + " from Node " + s02.Edge.Sink.Parent.Id);
 		}
 
-		private static void OnNodeRemoved(Node node)
+		public void OnNodeRemoved(Node node)
 		{
 			Debug.Log("OnNodeRemoved: Node " + node.Id);
 		}
 
 
-		// ===== Graph Management =====
-		// ============================
-		// move to Graph class
-
-		public void RemoveNode(Node node)
-		{
-			foreach (var socket in node.Sockets)
-			{
-				if (socket.Edge != null)
-				{
-					UnLink(socket);
-				}
-			}
-			OnNodeRemoved(node);
-		}
-
-		public void UnLink(Socket s01, Socket s02)
-		{
-			OnUnLink(s01, s02);
-			if (s01 != null && s01.Edge != null)
-			{
-				s01.Edge.Sink = null;
-				s01.Edge.Source = null;
-				s01.Edge = null;
-			}
-			if (s02 != null && s02.Edge != null)
-			{
-				s02.Edge.Sink = null;
-				s02.Edge.Source = null;
-				s02.Edge = null;
-			}
-		}
-
-		public void UnLink(Socket socket)
-		{
-			Socket socket2 = null;
-			if (socket.Edge != null)
-			{
-				socket2 = socket.Edge.GetOtherSocket(socket);
-			}
-			UnLink(socket, socket2);
-		}
-
-		public bool Link(Socket ownSocket, Socket foreignSocket)
-		{
-			if (ownSocket == null || foreignSocket == null)
-			{
-				Debug.LogWarning("Try to link sockets but at least one socket does not exist.");
-				return false;
-			}
-			if (ownSocket.Type == foreignSocket.Type)
-			{
-				Edge edge = new Edge(ownSocket, foreignSocket);
-				ownSocket.Edge = edge;
-				foreignSocket.Edge = edge;
-				OnLink(edge);
-			}
-			return true;
-		}
 	}
 }
 
