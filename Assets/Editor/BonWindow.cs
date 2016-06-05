@@ -32,6 +32,7 @@ namespace Assets.Editor
 		private Dictionary<string, Type> menuEntryToNodeType;
 
 
+
 		[MenuItem("Window/" + Name)]
 		public static void CreateEditor()
 		{
@@ -45,6 +46,7 @@ namespace Assets.Editor
 			titleContent = new GUIContent(Name);
 			controller = new BonController();
 			controller.OnWindowOpen();
+
 
 			menuEntryToNodeType = controller.CreateMenuEntries(BonConfig.DefaultGraphName);
 			Graph graph = controller.LoadGraph(BonConfig.DefaultGraphName);
