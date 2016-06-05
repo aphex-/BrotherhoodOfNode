@@ -11,31 +11,25 @@ namespace Assets.Editor
 	public class BonWindow : EditorWindow
 	{
 		private const string Name = "BrotherhoodOfNode";
-		private BonController _controller;
-		private Graph graph;
-
-		private Socket _currentDragSocket = null;
-		private Dictionary<string, Type> _menuEntryToNodeType;
-
-
 		public const int TopOffset = 20;
 		private const int WindowTitleHeight = 21; // Unity issue
-
 		private const float CanvasZoomMin = 0.01f;
 		private const float CanvasZoomMax = 1.0f;
 
+		private readonly Rect openButtonRect = new Rect(0, 0, 80, TopOffset);
+		private readonly Rect saveButtonRect = new Rect(80, 0, 80, TopOffset);
+		private readonly Rect helpButtonRect = new Rect(160, 0, 80, TopOffset);
+
+		private BonController controller;
 		private Dictionary<string, BonCanvas> canvasList = new Dictionary<string, BonCanvas>();
-		private BonCanvas currentCanvas;
+		private BonCanvas currentCanvas = null;
+		private Rect canvasRegion = new Rect();
 
-		private Rect _zoomArea = new Rect();
+		private Socket currentDragSocket = null;
+		private Vector2 lastMousePosition = new Vector2();
 
-		private Vector2 _lastMousePosition = new Vector2();
-		private Vector2 _tmpVector01 = new Vector2();
-		private Vector2 _tmpVector02 = new Vector2();
-
-		private Rect openButtonRect = new Rect(0, 0, 80, TopOffset);
-		private Rect saveButtonRect = new Rect(80, 0, 80, TopOffset);
-		private Rect helpButtonRect = new Rect(160, 0, 80, TopOffset);
+		private GenericMenu menu;
+		private Dictionary<string, Type> menuEntryToNodeType;
 
 
 		[MenuItem("Window/" + Name)]
@@ -49,26 +43,23 @@ namespace Assets.Editor
 		public BonWindow()
 		{
 			titleContent = new GUIContent(Name);
-			_controller = new BonController();
-			_controller.OnWindowOpen();
+			controller = new BonController();
+			controller.OnWindowOpen();
 
-
-			_menuEntryToNodeType = _controller.CreateMenuEntries(BonConfig.DefaultGraphName);
-			graph = _controller.LoadGraph(BonConfig.DefaultGraphName);
+			menuEntryToNodeType = controller.CreateMenuEntries(BonConfig.DefaultGraphName);
+			Graph graph = controller.LoadGraph(BonConfig.DefaultGraphName);
 			currentCanvas = new BonCanvas(graph);
 			canvasList.Add(graph.id, currentCanvas);
 			menu = CreateGenericMenu();
 		}
 
-		private GenericMenu menu;
 
 		void OnGUI()
 		{
-			_zoomArea.Set(0, TopOffset, Screen.width, Screen.height);
+			canvasRegion.Set(0, TopOffset, Screen.width, Screen.height);
 
 			HandleNodeRemoving();
 			HandleCanvasTranslation();
-			HandleConextMenu();
 			HandleDragAndDrop();
 
 			if (Event.current.type == EventType.ContextClick)
@@ -77,27 +68,23 @@ namespace Assets.Editor
 				Event.current.Use();
 			}
 			HandleMenuButtons();
-			DrawZoomArea();
 
-			_lastMousePosition = Event.current.mousePosition;
+			currentCanvas.Draw((EditorWindow) this, canvasRegion, currentDragSocket);
+
+			lastMousePosition = Event.current.mousePosition;
 		}
 
 		private GenericMenu CreateGenericMenu()
 		{
-			GenericMenu menu = new GenericMenu();
-			foreach(KeyValuePair<string, Type> entry in _menuEntryToNodeType)
-				menu.AddItem(new GUIContent(entry.Key), false, OnGenericMenuClick, entry.Value);
-			return menu;
+			GenericMenu m = new GenericMenu();
+			foreach(KeyValuePair<string, Type> entry in menuEntryToNodeType)
+				m.AddItem(new GUIContent(entry.Key), false, OnGenericMenuClick, entry.Value);
+			return m;
 		}
 
 		private void OnGenericMenuClick(object item)
 		{
-			Node node = graph.CreateNode((Type) item);
-			var position = currentCanvas.ProjectToDrawArea(_lastMousePosition);
-			node.X = position.x;
-			node.Y = position.y;
-			graph.nodes.Add(node);
-			//UpdateCanvas();
+			currentCanvas.CreateNode((Type) item, lastMousePosition);
 		}
 
 
@@ -108,8 +95,7 @@ namespace Assets.Editor
 				var path = EditorUtility.OpenFilePanel("load graph data", "", "json");
 				if (!path.Equals(""))
 				{
-					graph = _controller.LoadGraph(path);
-					//UpdateCanvas();
+					currentCanvas.Graph = controller.LoadGraph(path);
 				}
 			}
 
@@ -119,7 +105,7 @@ namespace Assets.Editor
 				var path = EditorUtility.SaveFilePanel("save graph data", "", "graph", "json");
 				if (!path.Equals(""))
 				{
-					_controller.SaveGraph(graph, path);
+					controller.SaveGraph(currentCanvas.Graph, path);
 				}
 			}
 
@@ -132,12 +118,8 @@ namespace Assets.Editor
 			// Delete or Backspace
 			if (Event.current.keyCode == KeyCode.Delete || Input.GetKeyDown(KeyCode.Backspace))
 			{
-				Node node = currentCanvas.GetFocusedNode();
-				if (node != null)
-				{
-					graph.RemoveNode(node);
-					Repaint();
-				}
+				currentCanvas.RemoveFocusedNode();
+				Repaint();
 			}
 		}
 
@@ -175,16 +157,16 @@ namespace Assets.Editor
 			if (Event.current.type == EventType.MouseDown)
 			{
 				Socket target = currentCanvas.GetSocketAt(Event.current.mousePosition);
-				if (target != null && _currentDragSocket == null)
+				if (target != null && currentDragSocket == null)
 				{
 					if (target.Edge == null)
 					{
-						_currentDragSocket = target;
+						currentDragSocket = target;
 					}
 					else
 					{
-						_currentDragSocket = target.Edge.GetOtherSocket(target);
-						graph.UnLink(_currentDragSocket, target);
+						currentDragSocket = target.Edge.GetOtherSocket(target);
+						currentCanvas.Graph.UnLink(currentDragSocket, target);
 					}
 					Event.current.Use();
 				}
@@ -192,86 +174,36 @@ namespace Assets.Editor
 
 			if (Event.current.type == EventType.MouseUp)
 			{
-				if (_currentDragSocket != null)
+				if (currentDragSocket != null)
 				{
 					Socket target = currentCanvas.GetSocketAt(Event.current.mousePosition);
-					if (CanBeLinked(target, _currentDragSocket))
+					if (currentCanvas.Graph.CanBeLinked(target, currentDragSocket))
 					{
 						// drop edge event
 						if (target.Edge != null)
 						{
 							// replace edge
-							graph.UnLink(target);
+							currentCanvas.Graph.UnLink(target);
 						}
-						graph.Link(_currentDragSocket, target);
+						currentCanvas.Graph.Link(currentDragSocket, target);
 						Event.current.Use();
 					}
-					_currentDragSocket = null;
+					currentDragSocket = null;
 					Repaint();
 				}
 			}
 
 			if (Event.current.type == EventType.MouseDrag)
 			{
-				if (_currentDragSocket != null) Event.current.Use();
+				if (currentDragSocket != null) Event.current.Use();
 			}
 		}
-
-
-
-		private void HandleConextMenu()
-		{
-			// Context Menu
-			if (Event.current.type == EventType.MouseDown &&
-			    (Event.current.button == 0 && Event.current.modifiers == EventModifiers.Alt) ||
-			    Event.current.button == 2)
-			{
-			}
-		}
-
-		/// <summary> Returns true if the sockets can be linked.</summary>
-		/// <param name="socket01"> The first socket</param>
-		/// <param name="socket02"> The second socket</param>
-		/// <returns>True if the sockets can be linked.</returns>
-		private bool CanBeLinked(Socket socket01, Socket socket02)
-		{
-			return socket02 != null && socket01 != null && socket01.Type == socket02.Type
-			       && socket01 != socket02;
-		}
-
-
 
 		private Vector2 ConvertScreenCoordsToZoomCoords(Vector2 screenCoords)
 		{
-			return (screenCoords - _zoomArea.TopLeft())/currentCanvas.Zoom + currentCanvas.Position;
+			return (screenCoords - canvasRegion.TopLeft())/currentCanvas.Zoom + currentCanvas.Position;
 		}
 
-
-
-		private void DrawZoomArea()
-		{
-			EditorZoomArea.Begin(currentCanvas.Zoom, _zoomArea);
-			currentCanvas.DrawArea.Set(currentCanvas.Position.x, currentCanvas.Position.y, 100000.0f, 100000.0f);
-			GUILayout.BeginArea(currentCanvas.DrawArea, currentCanvas.Style);
-			currentCanvas.DrawEdges();
-			BeginWindows();
-			currentCanvas.DrawNodes();
-			EndWindows();
-			DrawDragEdge();
-			GUILayout.EndArea();
-			EditorZoomArea.End();
-		}
-
-		private void DrawDragEdge()
-		{
-			if (_currentDragSocket != null)
-			{
-				_tmpVector01 = Edge.GetEdgePosition(_currentDragSocket, _tmpVector01);
-				_tmpVector02 = Edge.GetTangentPosition(_currentDragSocket, _tmpVector01);
-				Edge.DrawEdge(_tmpVector01, _tmpVector02, Event.current.mousePosition, Event.current.mousePosition,
-					_currentDragSocket.Type);
-			}
-		}
 	}
 }
 

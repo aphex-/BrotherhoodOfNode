@@ -67,6 +67,8 @@ namespace Assets.Code.Bon.Graph
 
 		public void RemoveNode(Node node)
 		{
+			if (node == null) return;
+
 			foreach (var socket in node.Sockets)
 			{
 				if (socket.Edge != null)
@@ -74,6 +76,8 @@ namespace Assets.Code.Bon.Graph
 					UnLink(socket);
 				}
 			}
+
+			nodes.Remove(node);
 			if (listener != null)
 			{
 				listener.OnNodeRemoved(node);
@@ -130,6 +134,16 @@ namespace Assets.Code.Bon.Graph
 				}
 			}
 			return true;
+		}
+
+		/// <summary> Returns true if the sockets can be linked.</summary>
+		/// <param name="socket01"> The first socket</param>
+		/// <param name="socket02"> The second socket</param>
+		/// <returns>True if the sockets can be linked.</returns>
+		public bool CanBeLinked(Socket socket01, Socket socket02)
+		{
+			return socket02 != null && socket01 != null && socket01.Type == socket02.Type
+				   && socket01 != socket02;
 		}
 
 
