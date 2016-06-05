@@ -13,9 +13,6 @@ namespace Assets.Code.Bon.Graph
 		public List<Node> nodes = new List<Node>();
 
 		[SerializeField]
-		public String id;
-
-		[SerializeField]
 		private List<SerializableEdge> serializedEdges = new List<SerializableEdge>();
 
 		[SerializeField]
@@ -161,6 +158,7 @@ namespace Assets.Code.Bon.Graph
 
 		public static bool Save(string fileName, Graph graph)
 		{
+			Debug.Log("Save " + fileName);
 			var file = File.CreateText(fileName);
 			file.Write(graph.ToJson());
 			file.Close();

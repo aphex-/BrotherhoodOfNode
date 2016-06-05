@@ -37,7 +37,7 @@ namespace Assets.Code.Bon
 
 				graph.Link(samplerNode01.GetSocket(Color.red, 1), multiplexer01.GetSocket(Color.red, 0));
 
-				graph.id = path;
+
 				// test serialization an deserialization
 				string serializedJSON = graph.ToJson();
 				Graph.Graph deserializedGraph = Graph.Graph.FromJson(serializedJSON);

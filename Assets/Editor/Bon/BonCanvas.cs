@@ -12,6 +12,8 @@ namespace Assets.Editor.Bon
 
 		public const float CanvasSize = 100000;
 
+		public string FilePath;
+
 		public Rect DrawArea = new Rect();
 		public float Zoom = 1;
 		public Vector2 Position = new Vector2();

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Security;
 using UnityEditor;
 using UnityEngine;
 using Assets.Code.Bon;
@@ -11,7 +13,7 @@ namespace Assets.Editor
 	public class BonWindow : EditorWindow
 	{
 		private const string Name = "BrotherhoodOfNode";
-		public const int TopOffset = 40;
+		public const int TopOffset = 32;
 		public const int TopMenuHeight = 20;
 
 		private const int TabButtonWidth = 200;
@@ -24,7 +26,8 @@ namespace Assets.Editor
 
 		private readonly Rect openButtonRect = new Rect(0, 0, 80, TopMenuHeight);
 		private readonly Rect saveButtonRect = new Rect(80, 0, 80, TopMenuHeight);
-		private readonly Rect helpButtonRect = new Rect(160, 0, 80, TopMenuHeight);
+		private readonly Rect newButtonRect = new Rect(160, 0, 80, TopMenuHeight);
+		private readonly Rect helpButtonRect = new Rect(240, 0, 80, TopMenuHeight);
 
 		private readonly Color TabColorUnselected = new Color(0.8f, 0.8f, 0.8f, 0.5f);
 		private readonly Color TabColorSelected = Color.white;
@@ -66,8 +69,6 @@ namespace Assets.Editor
 
 		void OnGUI()
 		{
-			canvasRegion.Set(0, TopOffset, Screen.width, Screen.height);
-
 			HandleNodeRemoving();
 			HandleCanvasTranslation();
 			HandleDragAndDrop();
@@ -80,8 +81,12 @@ namespace Assets.Editor
 			HandleMenuButtons();
 
 			HandleTabButtons();
-			currentCanvas.Draw((EditorWindow) this, canvasRegion, currentDragSocket);
 
+			if (currentCanvas != null)
+			{
+				canvasRegion.Set(0, TopOffset, Screen.width, Screen.height);
+				currentCanvas.Draw((EditorWindow) this, canvasRegion, currentDragSocket);
+			}
 			lastMousePosition = Event.current.mousePosition;
 		}
 
@@ -100,10 +105,15 @@ namespace Assets.Editor
 					TopMenuHeight + TabButtonMargin, TabCloseButtonSize, TabCloseButtonSize);
 
 				bool isSelected = (currentCanvas == tmpCanvas);
+				string tabName;
+				if (tmpCanvas.FilePath == null) tabName = "untitled";
+				else tabName = Path.GetFileName(tmpCanvas.FilePath);
+
+
 				if (isSelected) GUI.backgroundColor = TabColorSelected;
 				else GUI.backgroundColor = TabColorUnselected;
 
-				if (GUI.Button(tmpCanvas.TabButton, (string) tmpCanvas.Graph.id))
+				if (GUI.Button(tmpCanvas.TabButton, tabName))
 				{
 					SetCurrentCanvas(tmpCanvas);
 				}
@@ -119,21 +129,26 @@ namespace Assets.Editor
 
 			GUI.backgroundColor = standardBackgroundColor;
 			if (canvasToClose != null) 	CloseCanvas(canvasToClose);
+
 		}
 
 		private void SetCurrentCanvas(BonCanvas canvas)
 		{
-
 			currentCanvas = canvas;
 		}
 
 		private void CloseCanvas(BonCanvas canvas)
 		{
-			bool doSave = EditorUtility.DisplayDialog("Do you want to save.", "So you want to save the graph " + canvas.Graph.id + " ?",
+			bool doSave = EditorUtility.DisplayDialog("Do you want to save.", "Do you want to save the graph " + canvas.FilePath + " ?",
 				"Yes", "No");
-			if (doSave) controller.SaveGraph(currentCanvas.Graph, canvas.Graph.id);
+			if (doSave)
+			{
+				if (canvas.FilePath == null) OpenSaveDialog();
+				else controller.SaveGraph(canvas.Graph, canvas.FilePath);
+			}
 			canvasList.Remove(canvas);
-			currentCanvas = canvasList[0];
+			if (canvasList.Count > 0) currentCanvas = canvasList[0];
+			else currentCanvas = null;
 		}
 
 		private GenericMenu CreateGenericMenu()
@@ -146,31 +161,50 @@ namespace Assets.Editor
 
 		private void OnGenericMenuClick(object item)
 		{
-			currentCanvas.CreateNode((Type) item, lastMousePosition);
+			if (currentCanvas != null)
+			{
+				currentCanvas.CreateNode((Type) item, lastMousePosition);
+			}
 		}
 
+		private void CreateCanvas(string path)
+		{
+			BonCanvas canvas;
+			if (path != null) canvas = new BonCanvas(controller.LoadGraph(path));
+			else canvas = new BonCanvas(new Graph());
+			canvas.FilePath = path;
+			canvasList.Add(canvas);
+			SetCurrentCanvas(canvas);
+		}
+
+		private void OpenSaveDialog()
+		{
+			var path = EditorUtility.SaveFilePanel("save graph data", "", "graph", "json");
+			if (!path.Equals(""))
+			{
+				controller.SaveGraph(currentCanvas.Graph, path);
+				currentCanvas.FilePath = path;
+			}
+		}
 
 		private void HandleMenuButtons()
 		{
-			if (GUI.Button(openButtonRect, "Load"))
+			if (GUI.Button(openButtonRect, "Open"))
 			{
 				var path = EditorUtility.OpenFilePanel("load graph data", "", "json");
-				if (!path.Equals(""))
-				{
-					Graph g = controller.LoadGraph(path);
-					BonCanvas canvas = new BonCanvas(g);
-					canvasList.Add(canvas);
-				}
+				if (!path.Equals("")) CreateCanvas(path);
 			}
 
 			// Save Button
 			if (GUI.Button(saveButtonRect, "Save"))
 			{
-				var path = EditorUtility.SaveFilePanel("save graph data", "", "graph", "json");
-				if (!path.Equals(""))
-				{
-					controller.SaveGraph(currentCanvas.Graph, path);
-				}
+				OpenSaveDialog();
+			}
+
+			// New Button
+			if (GUI.Button(newButtonRect, "New"))
+			{
+				CreateCanvas(null);
 			}
 
 			// Help Button
@@ -182,13 +216,18 @@ namespace Assets.Editor
 			// Delete or Backspace
 			if (Event.current.keyCode == KeyCode.Delete || Input.GetKeyDown(KeyCode.Backspace))
 			{
-				currentCanvas.RemoveFocusedNode();
-				Repaint();
+				if (currentCanvas != null)
+				{
+					currentCanvas.RemoveFocusedNode();
+					Repaint();
+				}
 			}
 		}
 
 		private void HandleCanvasTranslation()
 		{
+			if (currentCanvas == null) return;
+
 			// Zoom
 			if (Event.current.type == EventType.ScrollWheel)
 			{
@@ -218,6 +257,8 @@ namespace Assets.Editor
 
 		private void HandleDragAndDrop()
 		{
+			if (currentCanvas == null) return;
+
 			if (Event.current.type == EventType.MouseDown)
 			{
 				Socket target = currentCanvas.GetSocketAt(Event.current.mousePosition);
