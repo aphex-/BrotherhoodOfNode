@@ -17,6 +17,9 @@ namespace Assets.Editor.Bon
 		public Vector2 Position = new Vector2();
 		public Graph Graph;
 
+		public Rect TabButton = new Rect();
+		public Rect CloseTabButton = new Rect();
+
 		private Vector2 _tmpVector01 = new Vector2();
 		private Vector2 _tmpVector02 = new Vector2();
 
@@ -49,6 +52,11 @@ namespace Assets.Editor.Bon
 				Edge.DrawEdge(_tmpVector01, _tmpVector02, Event.current.mousePosition, Event.current.mousePosition,
 					currentDragingSocket.Type);
 			}
+		}
+
+		public void DrawTabButton(int canvasIndex)
+		{
+
 		}
 
 		public void DrawNodes()

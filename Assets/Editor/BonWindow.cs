@@ -11,17 +11,27 @@ namespace Assets.Editor
 	public class BonWindow : EditorWindow
 	{
 		private const string Name = "BrotherhoodOfNode";
-		public const int TopOffset = 20;
+		public const int TopOffset = 40;
+		public const int TopMenuHeight = 20;
+
+		private const int TabButtonWidth = 200;
+		private const int TabButtonMargin = 4;
+		private const int TabCloseButtonSize = TopMenuHeight;
+
 		private const int WindowTitleHeight = 21; // Unity issue
 		private const float CanvasZoomMin = 0.01f;
 		private const float CanvasZoomMax = 1.0f;
 
-		private readonly Rect openButtonRect = new Rect(0, 0, 80, TopOffset);
-		private readonly Rect saveButtonRect = new Rect(80, 0, 80, TopOffset);
-		private readonly Rect helpButtonRect = new Rect(160, 0, 80, TopOffset);
+		private readonly Rect openButtonRect = new Rect(0, 0, 80, TopMenuHeight);
+		private readonly Rect saveButtonRect = new Rect(80, 0, 80, TopMenuHeight);
+		private readonly Rect helpButtonRect = new Rect(160, 0, 80, TopMenuHeight);
+
+		private readonly Color TabColorUnselected = new Color(0.8f, 0.8f, 0.8f, 0.5f);
+		private readonly Color TabColorSelected = Color.white;
+
 
 		private BonController controller;
-		private Dictionary<string, BonCanvas> canvasList = new Dictionary<string, BonCanvas>();
+		private List<BonCanvas> canvasList = new List<BonCanvas>();
 		private BonCanvas currentCanvas = null;
 		private Rect canvasRegion = new Rect();
 
@@ -30,8 +40,6 @@ namespace Assets.Editor
 
 		private GenericMenu menu;
 		private Dictionary<string, Type> menuEntryToNodeType;
-
-
 
 		[MenuItem("Window/" + Name)]
 		public static void CreateEditor()
@@ -51,7 +59,7 @@ namespace Assets.Editor
 			menuEntryToNodeType = controller.CreateMenuEntries(BonConfig.DefaultGraphName);
 			Graph graph = controller.LoadGraph(BonConfig.DefaultGraphName);
 			currentCanvas = new BonCanvas(graph);
-			canvasList.Add(graph.id, currentCanvas);
+			canvasList.Add(currentCanvas);
 			menu = CreateGenericMenu();
 		}
 
@@ -71,9 +79,61 @@ namespace Assets.Editor
 			}
 			HandleMenuButtons();
 
+			HandleTabButtons();
 			currentCanvas.Draw((EditorWindow) this, canvasRegion, currentDragSocket);
 
 			lastMousePosition = Event.current.mousePosition;
+		}
+
+		private void HandleTabButtons()
+		{
+			Color standardBackgroundColor = GUI.backgroundColor;
+			int tabIndex = 0;
+			BonCanvas canvasToClose = null;
+			foreach (BonCanvas tmpCanvas in canvasList)
+			{
+				int width = TabButtonWidth + TabButtonMargin + TabCloseButtonSize;
+				int xOffset = width*tabIndex;
+
+				tmpCanvas.TabButton.Set(xOffset, TopMenuHeight + TabButtonMargin,TabButtonWidth, TopMenuHeight);
+				tmpCanvas.CloseTabButton.Set(xOffset + width - TabCloseButtonSize - TabButtonMargin -4,
+					TopMenuHeight + TabButtonMargin, TabCloseButtonSize, TabCloseButtonSize);
+
+				bool isSelected = (currentCanvas == tmpCanvas);
+				if (isSelected) GUI.backgroundColor = TabColorSelected;
+				else GUI.backgroundColor = TabColorUnselected;
+
+				if (GUI.Button(tmpCanvas.TabButton, (string) tmpCanvas.Graph.id))
+				{
+					SetCurrentCanvas(tmpCanvas);
+				}
+				if (isSelected)
+				{
+					if (GUI.Button(tmpCanvas.CloseTabButton, "X"))
+					{
+						canvasToClose = tmpCanvas;
+					}
+				}
+				tabIndex++;
+			}
+
+			GUI.backgroundColor = standardBackgroundColor;
+			if (canvasToClose != null) 	CloseCanvas(canvasToClose);
+		}
+
+		private void SetCurrentCanvas(BonCanvas canvas)
+		{
+
+			currentCanvas = canvas;
+		}
+
+		private void CloseCanvas(BonCanvas canvas)
+		{
+			bool doSave = EditorUtility.DisplayDialog("Do you want to save.", "So you want to save the graph " + canvas.Graph.id + " ?",
+				"Yes", "No");
+			if (doSave) controller.SaveGraph(currentCanvas.Graph, canvas.Graph.id);
+			canvasList.Remove(canvas);
+			currentCanvas = canvasList[0];
 		}
 
 		private GenericMenu CreateGenericMenu()
@@ -97,7 +157,9 @@ namespace Assets.Editor
 				var path = EditorUtility.OpenFilePanel("load graph data", "", "json");
 				if (!path.Equals(""))
 				{
-					currentCanvas.Graph = controller.LoadGraph(path);
+					Graph g = controller.LoadGraph(path);
+					BonCanvas canvas = new BonCanvas(g);
+					canvasList.Add(canvas);
 				}
 			}
 
