@@ -14,7 +14,6 @@ namespace Assets.Editor
 		private BonController _controller;
 		private Graph graph;
 
-		private readonly BonCanvas _canvas;
 		private Socket _currentDragSocket = null;
 		private Dictionary<string, Type> _menuEntryToNodeType;
 
@@ -25,10 +24,12 @@ namespace Assets.Editor
 		private const float CanvasZoomMin = 0.01f;
 		private const float CanvasZoomMax = 1.0f;
 
+		private Dictionary<string, BonCanvas> canvasList = new Dictionary<string, BonCanvas>();
+		private BonCanvas currentCanvas;
+
 		private Rect _zoomArea = new Rect();
 
 		private Vector2 _lastMousePosition = new Vector2();
-
 		private Vector2 _tmpVector01 = new Vector2();
 		private Vector2 _tmpVector02 = new Vector2();
 
@@ -50,11 +51,12 @@ namespace Assets.Editor
 			titleContent = new GUIContent(Name);
 			_controller = new BonController();
 			_controller.OnWindowOpen();
-			_canvas = new BonCanvas();
+
 
 			_menuEntryToNodeType = _controller.CreateMenuEntries(BonConfig.DefaultGraphName);
 			graph = _controller.LoadGraph(BonConfig.DefaultGraphName);
-			_canvas.Nodes.AddRange(graph.nodes);
+			currentCanvas = new BonCanvas(graph);
+			canvasList.Add(graph.id, currentCanvas);
 			menu = CreateGenericMenu();
 		}
 
@@ -91,18 +93,11 @@ namespace Assets.Editor
 		private void OnGenericMenuClick(object item)
 		{
 			Node node = graph.CreateNode((Type) item);
-			var position = ProjectToDrawArea(_lastMousePosition);
+			var position = currentCanvas.ProjectToDrawArea(_lastMousePosition);
 			node.X = position.x;
 			node.Y = position.y;
 			graph.nodes.Add(node);
-			UpdateCanvas();
-		}
-
-		private void UpdateCanvas()
-		{
-			_canvas.Nodes.Clear();
-			_canvas.Nodes.AddRange(graph.nodes);
-			Debug.Log("Node count " + _canvas.Nodes.Count);
+			//UpdateCanvas();
 		}
 
 
@@ -114,7 +109,7 @@ namespace Assets.Editor
 				if (!path.Equals(""))
 				{
 					graph = _controller.LoadGraph(path);
-					UpdateCanvas();
+					//UpdateCanvas();
 				}
 			}
 
@@ -137,11 +132,10 @@ namespace Assets.Editor
 			// Delete or Backspace
 			if (Event.current.keyCode == KeyCode.Delete || Input.GetKeyDown(KeyCode.Backspace))
 			{
-				Node node = GetFocusedNode();
+				Node node = currentCanvas.GetFocusedNode();
 				if (node != null)
 				{
 					graph.RemoveNode(node);
-					_canvas.Nodes.Remove(node);
 					Repaint();
 				}
 			}
@@ -154,10 +148,10 @@ namespace Assets.Editor
 			{
 				Vector2 zoomCoordsMousePos = ConvertScreenCoordsToZoomCoords(Event.current.mousePosition);
 				float zoomDelta = -Event.current.delta.y/150.0f;
-				float oldZoom = _canvas.Zoom;
-				_canvas.Zoom = Mathf.Clamp(_canvas.Zoom + zoomDelta, CanvasZoomMin, CanvasZoomMax);
-				_canvas.Position += (zoomCoordsMousePos - _canvas.Position) -
-				                    (oldZoom/_canvas.Zoom)*(zoomCoordsMousePos - _canvas.Position);
+				float oldZoom = currentCanvas.Zoom;
+				currentCanvas.Zoom = Mathf.Clamp(currentCanvas.Zoom + zoomDelta, CanvasZoomMin, CanvasZoomMax);
+				currentCanvas.Position += (zoomCoordsMousePos - currentCanvas.Position) -
+				                    (oldZoom/currentCanvas.Zoom)*(zoomCoordsMousePos - currentCanvas.Position);
 				Event.current.Use();
 				return;
 			}
@@ -168,8 +162,8 @@ namespace Assets.Editor
 			    Event.current.button == 2)
 			{
 				Vector2 delta = Event.current.delta;
-				delta /= _canvas.Zoom;
-				_canvas.Position += delta;
+				delta /= currentCanvas.Zoom;
+				currentCanvas.Position += delta;
 
 				Event.current.Use();
 				return;
@@ -180,7 +174,7 @@ namespace Assets.Editor
 		{
 			if (Event.current.type == EventType.MouseDown)
 			{
-				Socket target = GetSocketAt(Event.current.mousePosition);
+				Socket target = currentCanvas.GetSocketAt(Event.current.mousePosition);
 				if (target != null && _currentDragSocket == null)
 				{
 					if (target.Edge == null)
@@ -200,7 +194,7 @@ namespace Assets.Editor
 			{
 				if (_currentDragSocket != null)
 				{
-					Socket target = GetSocketAt(Event.current.mousePosition);
+					Socket target = currentCanvas.GetSocketAt(Event.current.mousePosition);
 					if (CanBeLinked(target, _currentDragSocket))
 					{
 						// drop edge event
@@ -223,14 +217,7 @@ namespace Assets.Editor
 			}
 		}
 
-		private Node GetFocusedNode()
-		{
-			foreach (Node node in _canvas.Nodes)
-			{
-				if (node.HasFocus()) return node;
-			}
-			return null;
-		}
+
 
 		private void HandleConextMenu()
 		{
@@ -252,48 +239,23 @@ namespace Assets.Editor
 			       && socket01 != socket02;
 		}
 
-		/// <summary> Returns the socket at the window position.</summary>
-		/// <param name="windowPosition"> The position to get the Socket from in window coordinates</param>
-		/// <returns>The socket at the posiiton or null or null.</returns>
-		private Socket GetSocketAt(Vector2 windowPosition)
-		{
-			Vector2 projectedPosition = ProjectToDrawArea(windowPosition);
-			foreach (Node node in _canvas.Nodes)
-			{
-				if (node.Intersects(projectedPosition))
-				{
-					Socket socket = node.SearchSocketAt(projectedPosition);
-					if (socket != null)
-					{
-						return socket;
-					}
-				}
-			}
-			return null;
-		}
+
 
 		private Vector2 ConvertScreenCoordsToZoomCoords(Vector2 screenCoords)
 		{
-			return (screenCoords - _zoomArea.TopLeft())/_canvas.Zoom + _canvas.Position;
+			return (screenCoords - _zoomArea.TopLeft())/currentCanvas.Zoom + currentCanvas.Position;
 		}
 
-		public Vector2 ProjectToDrawArea(Vector2 windowPosition)
-		{
-			windowPosition.y += (21) - ((TopOffset*2));
-			windowPosition = windowPosition/_canvas.Zoom;
-			windowPosition.x -= (_canvas.DrawArea.x);
-			windowPosition.y -= (_canvas.DrawArea.y);
-			return windowPosition;
-		}
+
 
 		private void DrawZoomArea()
 		{
-			EditorZoomArea.Begin(_canvas.Zoom, _zoomArea);
-			_canvas.DrawArea.Set(_canvas.Position.x, _canvas.Position.y, 100000.0f, 100000.0f);
-			GUILayout.BeginArea(_canvas.DrawArea, _canvas.Style);
-			_canvas.DrawEdges();
+			EditorZoomArea.Begin(currentCanvas.Zoom, _zoomArea);
+			currentCanvas.DrawArea.Set(currentCanvas.Position.x, currentCanvas.Position.y, 100000.0f, 100000.0f);
+			GUILayout.BeginArea(currentCanvas.DrawArea, currentCanvas.Style);
+			currentCanvas.DrawEdges();
 			BeginWindows();
-			_canvas.DrawNodes();
+			currentCanvas.DrawNodes();
 			EndWindows();
 			DrawDragEdge();
 			GUILayout.EndArea();
