@@ -35,17 +35,22 @@ namespace Assets.Code.Bon.Graph
 			return tmpId;
 		}
 
-		public Node CreateNode(Type nodeType)
+		public object CreateNode(Type nodeType)
 		{
 			return CreateNode(nodeType, GetUniqueId());
 		}
 
-		public Node CreateNode(Type nodeType, int id)
+		public object CreateNode(Type nodeType, int id)
 		{
-			if (nodeType == typeof(Multiplexer)) return new Multiplexer(id);
-			if (nodeType == typeof(SamplerNode)) return new SamplerNode(id);
-			Debug.Log("Can not create a node of the type '" + nodeType.FullName + "'");
-			return null;
+			try
+			{
+				return Activator.CreateInstance(nodeType, id); ;
+			}
+			catch (Exception exception)
+			{
+				Debug.LogErrorFormat("Node {0} could not be created", nodeType.FullName);
+				throw exception;
+			}
 		}
 
 		public Node GetNode(int nodeId)
@@ -211,7 +216,7 @@ namespace Assets.Code.Bon.Graph
 			// deserialize nodes
 			foreach (var sNode in serializedNodes)
 			{
-				Node n = CreateNode(Type.GetType(sNode.type), sNode.id);
+				Node n = (Node)CreateNode(Type.GetType(sNode.type), sNode.id);
 				if (n != null)
 				{
 					JsonUtility.FromJsonOverwrite(sNode.data, n);
