@@ -5,11 +5,12 @@ A visual graph editor for Unity3D
 
 ### Install
 
-#### This project is still under development... But can use it already!
+#### This project is still under development... But you can use it already!
 
 1. copy the files from the asset folder to your unity project asset folder
 2. in unity click on window->BrotherhoodOfNode to open the editor window
-3. start at Assets.Code.Bon.BonController.cs to learn how the project works
+3. continue reading and later take a look at Assets.Code.Bon.BonController.cs to learn how the project works
+4. help us make it even better
 
 ### Features
 * user friendly editor UI
