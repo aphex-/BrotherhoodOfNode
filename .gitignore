@@ -28,3 +28,9 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+# IDE: JetBrains Rider EAP
+.idea
+
+# OSX
+.DS_Store

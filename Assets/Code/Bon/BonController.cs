@@ -71,7 +71,7 @@ namespace Assets.Code.Bon
 
 			foreach (Type type in classesExtendingNode)
 			{
-				menuEntries.Add(getItemMenuName(type), type);
+				menuEntries.Add(GetItemMenuName(type), type);
 			}
 
 			menuEntries.OrderBy(x => x.Key);
@@ -79,7 +79,7 @@ namespace Assets.Code.Bon
 			return menuEntries;
 		}
 
-		private string getItemMenuName(Type type)
+		private string GetItemMenuName(Type type)
 		{
 			object[] attrs = type.GetCustomAttributes(typeof(GraphContextMenuItem), true);
 
