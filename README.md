@@ -35,6 +35,7 @@ using UnityEngine;
 namespace Assets.Code.Bon.Graph.Custom
 {
 	[Serializable]
+	[GraphContextMenuItem("Standard", "MyNode")]
 	public class MyNode : Node {
 
 		public MyNode(int id) : base(id)
@@ -55,8 +56,9 @@ namespace Assets.Code.Bon.Graph.Custom
 		}
 	}
 }
-
 ```
+The anotation **[GraphContextMenuItem]** tells the editor where to add the menu entry for our **Node**.
+
 ### Adding Sockets
 We created a node class that contains three red **Sockets**. A **Socket** needs a parent node as first parameter (this) and a connection type (Color.Red). The last boolean parameter tells the socket to be on the left (true) or on the right (false) side of the node.
 
@@ -69,37 +71,8 @@ To be able to save the node in a json file (to make it persistent) we need
 to override the method **ApplySerializationData**. It gives us a parameter 
 of the type **SerializableNode** where we can save our custom data.
 
-## How To Register A Custom Node
-In order to let the editor know about your cutsom node you need to add logic how to create it. Find the class Graph.cs
-and its method **CreateNode**. Notice: the method is overloaded.. we need the one that looks like this:
-```cs
-	public Node CreateNode(Type nodeType, int id)
-	{
-		if (nodeType == typeof(Multiplexer)) return new Multiplexer(id);
-		if (nodeType == typeof(SamplerNode)) return new SamplerNode(id);
-		Debug.Log("Can not create a node of the type '" + nodeType.FullName + "'");
-		return null;
-	}
-```
-You just need to create another if statement to check for our **MyNode** class and return a new instance.
-
-We also need to add a menu entry of our node to make it addable from the editor.
-Find the class **BonController ** and its method **CreateMenuEntries** that looks like this:
-```cs
-
-	public Dictionary<string, Type> CreateMenuEntries(string graphId)
-	{
-		Dictionary<string, Type> menuEntries = new Dictionary<string, Type>();
-		menuEntries.Add("Standard/SamplerNode", 	typeof(SamplerNode));
-		menuEntries.Add("Standard/Multiplex", 	typeof(Multiplexer));
-		return menuEntries;
-	}
-```
-You just need to add another entry to the **menuEntries** Dictionary. The first 
-parameter is the menu hierarchy as a string. The second parameter is the type
-of node to create if the menu entry is clicked. In our case this would be **MyNode**.
-
 ### Next Up..
-* The editor needs tab pages for multiple opened graphs. This is prepared via **graphId** or **path** The Graph listener also needs this as a parameter for every event.
+* The IGraphListener needs a graph-id parameter for each method. 
+* * A help dialog to explain the controls.
 * Code style and code documentation (no idea whats the state of the art. Following microsofts or unitys recommendations?)
 * cleanup code, refactor namespaces
