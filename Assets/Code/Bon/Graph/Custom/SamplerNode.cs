@@ -4,6 +4,7 @@ using UnityEngine;
 namespace Assets.Code.Bon.Graph.Custom
 {
 	[Serializable]
+	[GraphContextMenuItem("Standard")]
 	public class SamplerNode : Node
 	{
 
