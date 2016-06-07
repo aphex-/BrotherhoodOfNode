@@ -9,7 +9,7 @@ A visual graph editor for Unity3D
 
 1. copy the files from the asset folder to your unity project asset folder
 2. in unity click on window->BrotherhoodOfNode to open the editor window
-3. continue reading and later take a look at Assets.Code.Bon.BonController.cs to learn how the project works
+3. continue reading and afterwards take a look at Assets.Code.Bon.BonController.cs to learn how the project works
 4. help us make it even better
 
 ### Features
