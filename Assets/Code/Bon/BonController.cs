@@ -62,46 +62,6 @@ namespace Assets.Code.Bon
 			Graph.Graph.Save(path, g);
 		}
 
-		public Dictionary<string, Type> CreateMenuEntries(string graphId)
-		{
-			Dictionary<string, Type> menuEntries = new Dictionary<string, Type>();
-
-			IEnumerable<Type> classesExtendingNode = Assembly.GetAssembly(typeof(Node)).GetTypes()
-				.Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(Node)));
-
-			foreach (Type type in classesExtendingNode)
-			{
-				menuEntries.Add(GetItemMenuName(type), type);
-			}
-
-			menuEntries.OrderBy(x => x.Key);
-
-			return menuEntries;
-		}
-
-		private string GetItemMenuName(Type type)
-		{
-			object[] attrs = type.GetCustomAttributes(typeof(GraphContextMenuItem), true);
-
-			if (attrs.Length == 0)
-			{
-				return type.Name;
-			}
-			else
-			{
-				GraphContextMenuItem attr = (GraphContextMenuItem)attrs[0];
-				StringBuilder name = new StringBuilder(string.IsNullOrEmpty(attr.Name) ? type.Name : attr.Name);
-
-				if (!string.IsNullOrEmpty(attr.Path))
-				{
-					name.Insert(0, string.Format("{0}{1}", attr.Path, attr.Path.EndsWith("/") ? "" : "/"));
-				}
-
-				return name.ToString();
-			}
-
-		}
-
 
 
 

@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Security;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 using Assets.Code.Bon;
 using Assets.Code.Bon.Graph;
 using Assets.Editor.Bon;
+using System.Linq;
+
 
 namespace Assets.Editor
 {
@@ -59,14 +63,53 @@ namespace Assets.Editor
 			controller.OnWindowOpen();
 
 
-			menuEntryToNodeType = controller.CreateMenuEntries(BonConfig.DefaultGraphName);
+			menuEntryToNodeType = CreateMenuEntries();
 			Graph graph = controller.LoadGraph(BonConfig.DefaultGraphName);
 			currentCanvas = new BonCanvas(graph);
 			canvasList.Add(currentCanvas);
 			menu = CreateGenericMenu();
 		}
 
+		/// <summary>Creates a dictonary that maps a menu entry string to a node type using reflection.</summary>
+		/// <returns>Dictonary that maps a menu entry string to a node type</returns>
+		public Dictionary<string, Type> CreateMenuEntries()
+		{
+			Dictionary<string, Type> menuEntries = new Dictionary<string, Type>();
 
+			IEnumerable<Type> classesExtendingNode = Assembly.GetAssembly(typeof(Node)).GetTypes()
+				.Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(Node)));
+
+			foreach (Type type in classesExtendingNode) menuEntries.Add(GetItemMenuName(type), type);
+
+			menuEntries.OrderBy(x => x.Key);
+			return menuEntries;
+		}
+
+		private string GetItemMenuName(Type type)
+		{
+			object[] attrs = type.GetCustomAttributes(typeof(GraphContextMenuItem), true);
+
+			if (attrs.Length == 0)
+			{
+				return type.Name;
+			}
+			else
+			{
+				GraphContextMenuItem attr = (GraphContextMenuItem) attrs[0];
+				StringBuilder name = new StringBuilder(string.IsNullOrEmpty(attr.Name) ? type.Name : attr.Name);
+
+				if (!string.IsNullOrEmpty(attr.Path))
+				{
+					name.Insert(0, string.Format("{0}{1}", attr.Path, attr.Path.EndsWith("/") ? "" : "/"));
+				}
+
+				return name.ToString();
+			}
+
+		}
+
+
+		/// <summary>Draws the UI</summary>
 		void OnGUI()
 		{
 			HandleNodeRemoving();
