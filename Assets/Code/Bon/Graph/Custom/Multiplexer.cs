@@ -13,7 +13,7 @@ namespace Assets.Code.Bon.Graph.Custom
 			Sockets.Add(new Socket(this, Color.red, true));
 			Sockets.Add(new Socket(this, Color.red, false));
 			Sockets.Add(new Socket(this, Color.red, false));
-			Height = 65;
+			Height = 60;
 		}
 
 		public override void OnGUI()

@@ -15,26 +15,32 @@ namespace Assets.Code.Bon.Graph.Custom
 
 		public NumberNode(int id) : base(id)
 		{
+
 			Sockets.Add(new Socket(this, Color.red, false));
 			Height = 20 + BonConfig.SocketOffsetTop;
 		}
 
 		public override void OnGUI()
 		{
-			string text = GUI.TextField(textFieldArea, number.ToString());
+			string textFieldValue = GUI.TextField(textFieldArea, number.ToString());
+			float newNumber = GetValidNumber(textFieldValue);
+			if (Math.Abs(newNumber - number) > 0)
+			{
+				number = newNumber;
+				OnChange();
+			}
+		}
 
+		private float GetValidNumber(string text)
+		{
 			float newNumber;
 			if (text.Equals("") || text.Length == 0) text = "0";
 			bool isNumeric = float.TryParse(text, out newNumber);
 			if (isNumeric)
 			{
-				if (Math.Abs(newNumber - number) > 0)
-				{
-					// a new number is set by the user
-					number = newNumber;
-					OnChange();
-				}
+				return newNumber;
 			}
+			return number;
 		}
 
 		public override void ApplySerializationData(SerializableNode sNode)
