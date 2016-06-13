@@ -40,6 +40,9 @@ namespace Assets.Code.Bon.Graph.Custom
 	[GraphContextMenuItem("Standard", "MyNode")]
 	public class MyNode : Node {
 
+		[Serializable]
+		private int myNumber;
+
 		public MyNode(int id) : base(id)
 		{
 			Sockets.Add(new Socket(this, Color.red, true));
@@ -50,11 +53,17 @@ namespace Assets.Code.Bon.Graph.Custom
 
 		public override void OnGUI()
 		{
+			// for custom ui elements
 		}
 
-		public override void ApplySerializationData(SerializableNode sNode)
+		public override void OnSerialization(SerializableNode sNode)
 		{
-			sNode.data = JsonUtility.ToJson(this);
+			// for custom serialization
+		}
+
+		public override void OnDeserialization(SerializableNode sNode)
+		{
+			// for custom deserialization
 		}
 	}
 }
@@ -67,11 +76,13 @@ We created a node class that contains three red **Sockets**. A **Socket** needs 
 ### Add UI elememts
 To add custom UI elements to your node simply use the **OnGUI** method as usual.
 
-### Save nodes as json
-(This may change in future versions)
-To be able to save the node in a json file (to make it persistent) we need 
-to override the method **ApplySerializationData**. It gives us a parameter 
-of the type **SerializableNode** where we can save our custom data.
+### Save nodes as json (serialization / deserializaiton)
+If we have got class members (like myNumber) we want to make persistent
+we need to prefix the annotation **[Serializable]**
+to it.
+Also take a look at: http://docs.unity3d.com/Manual/JSONSerialization.html
+If you really need a more complex way to serialize your **Node** you can use
+the methods **OnSerialization** and **OnDeserialization** to add your logic.
 
 ### Next Up..
 * The IGraphListener needs a graph-id parameter for each method. 
