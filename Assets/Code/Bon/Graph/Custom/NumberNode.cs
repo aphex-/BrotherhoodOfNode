@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Assets.Code.Bon.Graph.Custom
 {
 	[Serializable]
-	[GraphContextMenuItem("Standard", "Number")]
+	[GraphContextMenuItem("Math", "Number")]
 	public class NumberNode : Node
 	{
 

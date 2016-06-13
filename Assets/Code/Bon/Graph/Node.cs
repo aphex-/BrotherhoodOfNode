@@ -13,6 +13,7 @@ namespace Assets.Code.Bon.Graph
 		public readonly int Id;
 
 		private INodeListener listener;
+		private string nodeName;
 
 		// Editor related
 		private Rect windowRect;
@@ -26,6 +27,7 @@ namespace Assets.Code.Bon.Graph
 			// default size
 			Width = 100;
 			Height = 100;
+			nodeName = GetNodeName(this.GetType());
 		}
 
 		public abstract void OnGUI();
@@ -142,7 +144,7 @@ namespace Assets.Code.Bon.Graph
 
 		public void GUIDrawWindow()
 		{
-			windowRect = GUI.Window(Id, windowRect, GUIDrawNodeWindow, this.GetType().Name + " (" + this.Id + ")");
+			windowRect = GUI.Window(Id, windowRect, GUIDrawNodeWindow, nodeName + " (" + this.Id + ")");
 			GUIAlignSockets();
 		}
 
@@ -194,6 +196,20 @@ namespace Assets.Code.Bon.Graph
 			GUILayout.EndArea();
 			GUI.DragWindow();
 			if (Event.current.GetTypeForControl(id) == EventType.Used) lastFocusedNodeId = id;
+		}
+
+		public static string GetNodeName(Type nodeType)
+		{
+			object[] attrs = nodeType.GetCustomAttributes(typeof(GraphContextMenuItem), true);
+			GraphContextMenuItem attr = (GraphContextMenuItem) attrs[0];
+			return string.IsNullOrEmpty(attr.Name) ? nodeType.Name : attr.Name;
+		}
+
+		public static string GetNodePath(Type nodeType)
+		{
+			object[] attrs = nodeType.GetCustomAttributes(typeof(GraphContextMenuItem), true);
+			GraphContextMenuItem attr = (GraphContextMenuItem) attrs[0];
+			return string.IsNullOrEmpty(attr.Path) ? null : attr.Path;
 		}
 
 		public SerializableNode ToSerializedNode()

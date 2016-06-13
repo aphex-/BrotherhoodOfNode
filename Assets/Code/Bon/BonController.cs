@@ -32,12 +32,12 @@ namespace Assets.Code.Bon
 				numberNode01.Y = 20;
 				graph.AddNode(numberNode01);
 
-				var multiplexer01 = new Multiplexer(graph.GetUniqueId());
-				multiplexer01.X = 200;
-				multiplexer01.Y = 200;
-				graph.AddNode(multiplexer01);
+				var operator01 = new MathOperatorNode(graph.GetUniqueId());
+				operator01.X = 200;
+				operator01.Y = 200;
+				graph.AddNode(operator01);
 
-				graph.Link(numberNode01.GetSocket(Color.red, 0), multiplexer01.GetSocket(Color.red, 0));
+				graph.Link(numberNode01.GetSocket(Color.red, 0), operator01.GetSocket(Color.red, 0));
 
 
 				// test serialization an deserialization

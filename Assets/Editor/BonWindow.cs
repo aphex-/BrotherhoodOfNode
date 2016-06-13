@@ -87,25 +87,9 @@ namespace Assets.Editor
 
 		private string GetItemMenuName(Type type)
 		{
-			object[] attrs = type.GetCustomAttributes(typeof(GraphContextMenuItem), true);
-
-			if (attrs.Length == 0)
-			{
-				return type.Name;
-			}
-			else
-			{
-				GraphContextMenuItem attr = (GraphContextMenuItem) attrs[0];
-				StringBuilder name = new StringBuilder(string.IsNullOrEmpty(attr.Name) ? type.Name : attr.Name);
-
-				if (!string.IsNullOrEmpty(attr.Path))
-				{
-					name.Insert(0, string.Format("{0}{1}", attr.Path, attr.Path.EndsWith("/") ? "" : "/"));
-				}
-
-				return name.ToString();
-			}
-
+			string path = Node.GetNodePath(type);
+			if (path != null) return path + "/" + Node.GetNodeName(type);
+			return Node.GetNodeName(type);
 		}
 
 
@@ -279,7 +263,7 @@ namespace Assets.Editor
 				float oldZoom = currentCanvas.Zoom;
 				currentCanvas.Zoom = Mathf.Clamp(currentCanvas.Zoom + zoomDelta, CanvasZoomMin, CanvasZoomMax);
 				currentCanvas.Position += (zoomCoordsMousePos - currentCanvas.Position) -
-				                    (oldZoom/currentCanvas.Zoom)*(zoomCoordsMousePos - currentCanvas.Position);
+					(oldZoom/currentCanvas.Zoom)*(zoomCoordsMousePos - currentCanvas.Position);
 				Event.current.Use();
 				return;
 			}
