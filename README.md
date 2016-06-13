@@ -85,7 +85,7 @@ If you really need a more complex way to serialize your **Node** you can use
 the methods **OnSerialization** and **OnDeserialization** to add your logic.
 
 ### Next Up..
-* The IGraphListener needs a graph-id parameter for each method. 
-* * A help dialog to explain the controls.
+* Multiple edges per socket?
+* A help dialog to explain the controls.
 * Code style and code documentation (no idea whats the state of the art. Following microsofts or unitys recommendations?)
 * cleanup code, refactor namespaces
