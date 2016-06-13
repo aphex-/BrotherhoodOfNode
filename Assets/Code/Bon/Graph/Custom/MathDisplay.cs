@@ -63,7 +63,11 @@ public class MathDisplay : Node, IMathNode
 		}
 		else
 		{
-			value = ((IMathNode) inSocket.Edge.GetOtherSocket(inSocket).Parent).GetNumber(null);
+			Socket connectedSocket = inSocket.GetConnectedSocket();
+			Node connectedNode = connectedSocket.Parent;
+
+			Debug.Log("MathDisplay connected node " + connectedNode);
+			value = ((IMathNode) connectedNode).GetNumber(connectedSocket);
 			errorMessage = null;
 		}
 	}

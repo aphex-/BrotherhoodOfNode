@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Security.Cryptography;
+using UnityEngine;
 
 namespace Assets.Code.Bon.Graph
 {
@@ -13,6 +14,7 @@ namespace Assets.Code.Bon.Graph
 		private Rect boxRect = new Rect();
 		public SocketDirection Direction;
 
+		private static RectOffset padding = new RectOffset(0,0,0,0);
 
 		public Socket(Node parent, Color type, SocketDirection direciton)
 		{
@@ -37,6 +39,18 @@ namespace Assets.Code.Bon.Graph
 			set { boxRect.y = value; }
 		}
 
+		public Socket GetConnectedSocket()
+		{
+			if (Edge == null)
+			{
+				return null;
+			}
+			if (Direction == SocketDirection.Input)
+			{
+				return Edge.Output;
+			}
+			return Edge.Input;
+		}
 
 		public bool Intersects(Vector2 nodePosition)
 		{
@@ -46,7 +60,9 @@ namespace Assets.Code.Bon.Graph
 		public void Draw()
 		{
 			GUI.color = Type;
-			GUI.Box(boxRect, "");
+			GUI.skin.box.padding = padding;
+			GUI.skin.box.fontSize = 10;
+			GUI.Box(boxRect, ">");
 		}
 	}
 

@@ -317,7 +317,16 @@ namespace Assets.Editor
 							// replace edge
 							currentCanvas.graph.UnLink(target);
 						}
-						currentCanvas.graph.Link(currentDragSocket, target);
+
+						if (currentDragSocket.Direction == SocketDirection.Input)
+						{
+							currentCanvas.graph.Link(currentDragSocket, target);
+						}
+						else
+						{
+							currentCanvas.graph.Link(target, currentDragSocket);
+						}
+
 						Event.current.Use();
 					}
 					currentDragSocket = null;

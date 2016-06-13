@@ -119,14 +119,14 @@ namespace Assets.Code.Bon.Graph
 			}
 			if (s01 != null && s01.Edge != null)
 			{
-				s01.Edge.Sink = null;
-				s01.Edge.Source = null;
+				s01.Edge.Input = null;
+				s01.Edge.Output = null;
 				s01.Edge = null;
 			}
 			if (s02 != null && s02.Edge != null)
 			{
-				s02.Edge.Sink = null;
-				s02.Edge.Source = null;
+				s02.Edge.Input = null;
+				s02.Edge.Output = null;
 				s02.Edge = null;
 			}
 			if (listener != null)
@@ -172,7 +172,7 @@ namespace Assets.Code.Bon.Graph
 		public bool CanBeLinked(Socket socket01, Socket socket02)
 		{
 			return socket02 != null && socket01 != null && socket01.Type == socket02.Type
-				   && socket01 != socket02;
+				   && socket01 != socket02 && socket01.Direction != socket02.Direction;
 		}
 
 
@@ -227,7 +227,7 @@ namespace Assets.Code.Bon.Graph
 					if (socket.Edge != null)
 					{
 						// serialize only the edge of the source (to avoid doubled edges)
-						if (socket.Edge.Source.Parent == node)
+						if (socket.Edge.Output.Parent == node)
 						{
 							serializedEdges.Add(socket.Edge.ToSerializedEgde());
 						}

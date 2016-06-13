@@ -15,13 +15,13 @@ public class StandardGraphController : IGraphListener
 	// ======= Events =======
 	public void OnLink(Edge edge)
 	{
-		Debug.Log("OnLink: Node " + edge.Source.Parent.Id + " with Node " + edge.Sink.Parent.Id);
+		Debug.Log("OnLink: Node " + edge.Output.Parent.Id + " with Node " + edge.Input.Parent.Id);
 		UpdateDisplayNodes();
 	}
 
 	public void OnUnLink(Socket s01, Socket s02)
 	{
-		Debug.Log("OnUnLink: Node " + s01.Edge.Source.Parent.Id + " from Node " + s02.Edge.Sink.Parent.Id);
+		Debug.Log("OnUnLink: Node " + s01.Edge.Output.Parent.Id + " from Node " + s02.Edge.Input.Parent.Id);
 		UpdateDisplayNodes();
 	}
 

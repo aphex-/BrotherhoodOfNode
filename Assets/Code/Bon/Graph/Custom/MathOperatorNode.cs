@@ -55,7 +55,59 @@ namespace Assets.Code.Bon.Graph.Custom
 
 		public float GetNumber(Socket outSocket)
 		{
-			return ((IMathNode) inputSocket01.Parent).GetNumber(null);
+
+
+			float value01;
+			float value02;
+
+			Socket connectedSocket01 = inputSocket01.GetConnectedSocket();
+			Socket connectedSocket02 = inputSocket02.GetConnectedSocket();
+
+			Debug.Log("So far 01 " + connectedSocket01);
+			Debug.Log("So far 02 " + connectedSocket02);
+
+
+
+			if (connectedSocket01 != null && connectedSocket02 != null)
+			{
+
+				Node connectedNode01 = connectedSocket01.Parent;
+				Node connectedNode02 = connectedSocket02.Parent;
+
+				Debug.Log("Sasaso far 01 " + connectedNode01);
+				Debug.Log("SasaSo far 02 " + connectedNode02);
+
+				value01 = ((IMathNode) connectedNode01).GetNumber(connectedSocket01);
+				value02 = ((IMathNode) connectedNode02).GetNumber(connectedSocket02);
+
+				if (!float.IsNaN(value01) && !float.IsNaN(value02))
+				{
+					return Calculate(value01, value02);
+				}
+			}
+			return float.NaN;
+		}
+
+		public float Calculate(float value01, float value02)
+		{
+			if (selectedMode == 0)
+			{
+				return value01 + value02;
+			}
+			if (selectedMode == 1)
+			{
+				return value01 - value02;
+			}
+			if (selectedMode == 2)
+			{
+				return value01 * value02;
+			}
+			if (selectedMode == 3)
+			{
+				if (value02.Equals(0)) return float.NaN;
+				return value01 / value02;
+			}
+			return float.NaN;
 		}
 	}
 }

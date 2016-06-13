@@ -7,8 +7,8 @@ namespace Assets.Code.Bon.Graph
 
 	public class Edge
 	{
-		public Socket Source;
-		public Socket Sink;
+		public Socket Input;
+		public Socket Output;
 
 		// cached vectors for drawing
 		private Vector2 tmpStartPos;
@@ -16,27 +16,27 @@ namespace Assets.Code.Bon.Graph
 		private Vector2 tmpTangent01;
 		private Vector2 tmpTangent02;
 
-		public Edge(Socket source, Socket sink)
+		public Edge(Socket input, Socket output)
 		{
-			Source = source;
-			Sink = sink;
+			Input = input;
+			Output = output;
 		}
 
 		public Socket GetOtherSocket(Socket socket)
 		{
-			if (socket == Sink) return Source;
-			else return Sink;
+			if (socket == Input) return Output;
+			else return Input;
 		}
 
 		public void Draw()
 		{
-			if (Source != null && Sink != null)
+			if (Input != null && Output != null)
 			{
-				tmpStartPos = GetEdgePosition(Source, tmpStartPos);
-				tmpEndPos = GetEdgePosition(Sink, tmpEndPos);
-				tmpTangent01 = GetTangentPosition(Source, tmpStartPos);
-				tmpTangent02 = GetTangentPosition(Sink, tmpEndPos);
-				DrawEdge(tmpStartPos, tmpTangent01, tmpEndPos, tmpTangent02, Source.Type);
+				tmpStartPos = GetEdgePosition(Output, tmpStartPos);
+				tmpEndPos = GetEdgePosition(Input, tmpEndPos);
+				tmpTangent01 = GetTangentPosition(Output, tmpStartPos);
+				tmpTangent02 = GetTangentPosition(Input, tmpEndPos);
+				DrawEdge(tmpStartPos, tmpTangent01, tmpEndPos, tmpTangent02, Output.Type);
 			}
 		}
 
@@ -77,10 +77,10 @@ namespace Assets.Code.Bon.Graph
 		public SerializableEdge ToSerializedEgde()
 		{
 			SerializableEdge s = new SerializableEdge();
-			s.sinkNodeId = Sink.Parent.Id;
-			s.sinkSocketIndex = Sink.Parent.Sockets.IndexOf(Sink);
-			s.sourceNodeId = Source.Parent.Id;
-			s.sourceSocketIndex = Source.Parent.Sockets.IndexOf(Source);
+			s.sinkNodeId = Input.Parent.Id;
+			s.sinkSocketIndex = Input.Parent.Sockets.IndexOf(Input);
+			s.sourceNodeId = Output.Parent.Id;
+			s.sourceSocketIndex = Output.Parent.Sockets.IndexOf(Output);
 			return s;
 		}
 	}

@@ -88,15 +88,16 @@ namespace Assets.Code.Bon.Graph
 
 		/// <summary> Returns the socket of the type and index.</summary>
 		/// <param name="type"> The type of the socket.</param>
+		/// <param name="direction"> The input or output direction of the socket.</param>
 		/// <param name="index"> The index of sockets of this type.
 		/// You can have multiple sockets of the same type.</param>
 		/// <returns>The socket of the type with the index or null.</returns>
-		public Socket GetSocket(Color type, int index)
+		public Socket GetSocket(Color type, SocketDirection direction, int index)
 		{
 			var searchIndex = -1;
 			foreach (var socket in Sockets)
 			{
-				if (socket.Type == type)
+				if (socket.Type == type && socket.Direction == direction)
 				{
 					searchIndex++;
 					if (searchIndex == index) return socket;
@@ -152,8 +153,7 @@ namespace Assets.Code.Bon.Graph
 		{
 			foreach (var socket in Sockets)
 			{
-				// draw edges only for source nodes
-				if (socket.Edge != null && ContainsSocket(socket.Edge.Source)) socket.Edge.Draw();
+				if (socket.Edge != null && ContainsSocket(socket.Edge.Output)) socket.Edge.Draw();
 			}
 		}
 

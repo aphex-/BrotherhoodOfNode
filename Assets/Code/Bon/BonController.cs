@@ -37,7 +37,9 @@ namespace Assets.Code.Bon
 				operator01.Y = 200;
 				graph.AddNode(operator01);
 
-				graph.Link(numberNode01.GetSocket(Color.red, 0), operator01.GetSocket(Color.red, 0));
+				graph.Link(
+					numberNode01.GetSocket(Color.red, SocketDirection.Output, 0),
+					operator01.GetSocket(Color.red, SocketDirection.Input, 0));
 
 
 				// test serialization an deserialization
