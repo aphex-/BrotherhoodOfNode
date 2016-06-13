@@ -84,7 +84,11 @@ namespace Assets.Code.Bon.Graph
 		public void AddNode(Node node)
 		{
 			nodes.Add(node);
-			if (listener != null) node.RegisterListener(listener);
+			if (listener != null)
+			{
+				node.RegisterListener(listener);
+				listener.OnNodeAdded(node);
+			}
 		}
 
 		public void RemoveNode(Node node)
@@ -113,7 +117,6 @@ namespace Assets.Code.Bon.Graph
 			{
 				listener.OnUnLink(s01, s02);
 			}
-
 			if (s01 != null && s01.Edge != null)
 			{
 				s01.Edge.Sink = null;
@@ -125,6 +128,10 @@ namespace Assets.Code.Bon.Graph
 				s02.Edge.Sink = null;
 				s02.Edge.Source = null;
 				s02.Edge = null;
+			}
+			if (listener != null)
+			{
+				listener.OnUnLinked(s01, s02);
 			}
 		}
 
@@ -179,6 +186,7 @@ namespace Assets.Code.Bon.Graph
 		public static Graph FromJson(string json, IGraphListener listener)
 		{
 			Graph g = JsonUtility.FromJson<Graph>(json);
+			listener.OnCreate(g);
 			g.RegisterListener(listener);
 			return g;
 		}

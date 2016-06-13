@@ -5,7 +5,7 @@ namespace Assets.Code.Bon.Graph.Custom
 {
 	[Serializable]
 	[GraphContextMenuItem("Math", "Number")]
-	public class NumberNode : Node
+	public class NumberNode : Node, IMathNode
 	{
 
 		[SerializeField]
@@ -51,6 +51,11 @@ namespace Assets.Code.Bon.Graph.Custom
 		public override void OnDeserialization(SerializableNode sNode)
 		{
 
+		}
+
+		public float GetNumber(Socket outSocket)
+		{
+			return number;
 		}
 	}
 }

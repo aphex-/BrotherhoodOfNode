@@ -5,7 +5,7 @@ namespace Assets.Code.Bon.Graph.Custom
 {
 	[Serializable]
 	[GraphContextMenuItem("Math", "Operator")]
-	public class MathOperatorNode : Node
+	public class MathOperatorNode : Node, IMathNode
 	{
 
 		[SerializeField]
@@ -13,13 +13,19 @@ namespace Assets.Code.Bon.Graph.Custom
 
 		public static readonly string[] Operations = { "add", "sub", "mul", "div" };
 
+		private Socket inputSocket01;
+		private Socket inputSocket02;
+
 		public MathOperatorNode(int id) : base(id)
 		{
-			Sockets.Add(new Socket(this, Color.red, true));
-			Sockets.Add(new Socket(this, Color.red, true));
+
+			inputSocket01 = new Socket(this, Color.red, true);
+			Sockets.Add(inputSocket01);
+			inputSocket02 = new Socket(this, Color.red, true);
+			Sockets.Add(inputSocket02);
 			Sockets.Add(new Socket(this, Color.red, false));
 			Height = 95;
-
+			Width = 80;
 		}
 
 		public override void OnGUI()
@@ -27,7 +33,12 @@ namespace Assets.Code.Bon.Graph.Custom
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			selectedMode = GUILayout.SelectionGrid(selectedMode,Operations,1,"toggle");
+			int newMode = GUILayout.SelectionGrid(selectedMode,Operations,1,"toggle");
+			if (newMode != selectedMode)
+			{
+				selectedMode = newMode;
+				OnChange();
+			}
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
@@ -40,6 +51,11 @@ namespace Assets.Code.Bon.Graph.Custom
 		public override void OnDeserialization(SerializableNode sNode)
 		{
 
+		}
+
+		public float GetNumber(Socket outSocket)
+		{
+			return ((IMathNode) inputSocket01.Parent).GetNumber(null);
 		}
 	}
 }

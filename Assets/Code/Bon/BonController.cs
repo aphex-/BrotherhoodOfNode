@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Assets.Code.Bon
 {
-	public class BonController : IGraphListener
+	public class BonController
 	{
 
 
@@ -42,13 +42,13 @@ namespace Assets.Code.Bon
 
 				// test serialization an deserialization
 				string serializedJSON = graph.ToJson();
-				Graph.Graph deserializedGraph = Graph.Graph.FromJson(serializedJSON, this);
+				Graph.Graph deserializedGraph = Graph.Graph.FromJson(serializedJSON, new StandardGraphController());
 
 				return deserializedGraph;
 			}
 			else
 			{
-				Graph.Graph graph = Graph.Graph.Load(path, this);
+				Graph.Graph graph = Graph.Graph.Load(path, new StandardGraphController());
 				return graph;
 			}
 
@@ -60,32 +60,6 @@ namespace Assets.Code.Bon
 			Graph.Graph.Save(path, g);
 		}
 
-
-		// ======= Events =======
-		public void OnLink(Edge edge)
-		{
-			Debug.Log("OnLink: Node " + edge.Source.Parent.Id + " with Node " + edge.Sink.Parent.Id);
-		}
-
-		public void OnUnLink(Socket s01, Socket s02)
-		{
-			Debug.Log("OnUnLink: Node " + s01.Edge.Source.Parent.Id + " from Node " + s02.Edge.Sink.Parent.Id);
-		}
-
-		public void OnNodeAdded(Node node)
-		{
-			Debug.Log("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
-		}
-
-		public void OnNodeRemoved(Node node)
-		{
-			Debug.Log("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
-		}
-
-		public void OnNodeChanged(Node node)
-		{
-			Debug.Log("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
-		}
 	}
 }
 
