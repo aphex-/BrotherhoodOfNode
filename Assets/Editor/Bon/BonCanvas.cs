@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Assets.Code.Bon.Graph;
 using UnityEditor;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace Assets.Editor.Bon
 		public Rect DrawArea = new Rect();
 		public float Zoom = 1;
 		public Vector2 Position = new Vector2();
-		public Graph Graph;
+		public Graph graph;
 
 		public Rect TabButton = new Rect();
 		public Rect CloseTabButton = new Rect();
@@ -27,7 +28,7 @@ namespace Assets.Editor.Bon
 
 		public BonCanvas(Graph graph)
 		{
-			Graph = graph;
+			this.graph = graph;
 			Style.normal.background = Texture2D.whiteTexture;
 		}
 
@@ -43,9 +44,10 @@ namespace Assets.Editor.Bon
 			window.EndWindows();
 			this.DrawDragEdge(currentDragingSocket);
 
-			foreach (Node node in Graph.nodes)
+
+			for (var i = 0; i < graph.GetNodeCount(); i++)
 			{
-				node.GUIDrawSockets();
+				graph.GetNodeAt(i).GUIDrawSockets();
 			}
 
 			GUILayout.EndArea();
@@ -70,24 +72,25 @@ namespace Assets.Editor.Bon
 
 		public void DrawNodes()
 		{
-			foreach (Node node in Graph.nodes)
+			for (var i = 0; i < graph.GetNodeCount(); i++)
 			{
-				node.GUIDrawWindow();
+				graph.GetNodeAt(i).GUIDrawWindow();
 			}
 		}
 
 		public void DrawEdges()
 		{
-			foreach (Node node in Graph.nodes)
+			for (var i = 0; i < graph.GetNodeCount(); i++)
 			{
-				node.GUIDrawEdges();
+				graph.GetNodeAt(i).GUIDrawEdges();
 			}
 		}
 
 		public Node GetFocusedNode()
 		{
-			foreach (Node node in Graph.nodes)
+			for (var i = 0; i < graph.GetNodeCount(); i++)
 			{
+				Node node = graph.GetNodeAt(i);
 				if (node.HasFocus()) return node;
 			}
 			return null;
@@ -99,8 +102,10 @@ namespace Assets.Editor.Bon
 		public Socket GetSocketAt(Vector2 windowPosition)
 		{
 			Vector2 projectedPosition = ProjectToCanvas(windowPosition);
-			foreach (Node node in Graph.nodes)
+
+			for (var i = 0; i < graph.GetNodeCount(); i++)
 			{
+				Node node = graph.GetNodeAt(i);
 				Socket socket = node.SearchSocketAt(projectedPosition);
 				if (socket != null)
 				{
@@ -112,11 +117,11 @@ namespace Assets.Editor.Bon
 
 		public Node CreateNode(Type nodeType, Vector2 windowPosition)
 		{
-			Node node = (Node)Graph.CreateNode(nodeType);
+			Node node = (Node) graph.CreateNode(nodeType);
 			var position = ProjectToCanvas(windowPosition);
 			node.X = position.x;
 			node.Y = position.y;
-			Graph.nodes.Add(node);
+			graph.AddNode(node);
 			return node;
 		}
 
@@ -124,7 +129,7 @@ namespace Assets.Editor.Bon
 		{
 
 			Node node = GetFocusedNode();
-			if (node != null) Graph.RemoveNode(node);
+			if (node != null) graph.RemoveNode(node);
 		}
 
 		public Vector2 ProjectToCanvas(Vector2 windowPosition)

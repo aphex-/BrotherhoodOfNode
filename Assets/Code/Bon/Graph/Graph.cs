@@ -10,7 +10,7 @@ namespace Assets.Code.Bon.Graph
 	[Serializable]
 	public class Graph : ISerializationCallbackReceiver
 	{
-		public List<Node> nodes = new List<Node>();
+		private List<Node> nodes = new List<Node>();
 
 		[SerializeField]
 		private List<SerializableEdge> serializedEdges = new List<SerializableEdge>();
@@ -23,6 +23,10 @@ namespace Assets.Code.Bon.Graph
 		public void RegisterListener(IGraphListener listener)
 		{
 			this.listener = listener;
+			foreach (var node in nodes)
+			{
+				node.RegisterListener(listener);
+			}
 		}
 
 		public int GetUniqueId()
@@ -35,7 +39,7 @@ namespace Assets.Code.Bon.Graph
 			return tmpId;
 		}
 
-		public object CreateNode(Type nodeType)
+		public Node CreateNode(Type nodeType)
 		{
 			return CreateNode(nodeType, GetUniqueId());
 		}
@@ -66,6 +70,22 @@ namespace Assets.Code.Bon.Graph
 			return null;
 		}
 
+		public int GetNodeCount()
+		{
+			return nodes.Count;
+		}
+
+		public Node GetNodeAt(int index)
+		{
+
+			return nodes[index];
+		}
+
+		public void AddNode(Node node)
+		{
+			nodes.Add(node);
+			if (listener != null) node.RegisterListener(listener);
+		}
 
 		public void RemoveNode(Node node)
 		{
@@ -84,7 +104,7 @@ namespace Assets.Code.Bon.Graph
 			{
 				listener.OnNodeRemoved(node);
 			}
-
+			node.RegisterListener(null);
 		}
 
 		public void UnLink(Socket s01, Socket s02)
@@ -156,27 +176,28 @@ namespace Assets.Code.Bon.Graph
 			return JsonUtility.ToJson(this);
 		}
 
-		public static Graph FromJson(string json)
+		public static Graph FromJson(string json, IGraphListener listener)
 		{
-			return JsonUtility.FromJson<Graph>(json);
+			Graph g = JsonUtility.FromJson<Graph>(json);
+			g.RegisterListener(listener);
+			return g;
 		}
 
 		public static bool Save(string fileName, Graph graph)
 		{
-			Debug.Log("Save " + fileName);
 			var file = File.CreateText(fileName);
 			file.Write(graph.ToJson());
 			file.Close();
 			return true;
 		}
 
-		public static Graph Load(string fileName)
+		public static Graph Load(string fileName, IGraphListener listener)
 		{
 			if(File.Exists(fileName)){
 				var file = File.OpenText(fileName);
 				var json = file.ReadToEnd();
 				file.Close();
-				return Graph.FromJson(json);
+				return Graph.FromJson(json, listener);
 			} else {
 				Debug.Log("Could not Open the file: " + fileName);
 				return null;
@@ -222,7 +243,7 @@ namespace Assets.Code.Bon.Graph
 					JsonUtility.FromJsonOverwrite(sNode.data, n);
 					n.X = sNode.X;
 					n.Y = sNode.Y;
-					nodes.Add(n);
+					AddNode(n);
 				}
 			}
 

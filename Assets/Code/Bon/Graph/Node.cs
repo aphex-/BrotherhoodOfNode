@@ -12,6 +12,7 @@ namespace Assets.Code.Bon.Graph
 		public List<Socket> Sockets = new List<Socket>();
 		public readonly int Id;
 
+		private INodeListener listener;
 
 		// Editor related
 		private Rect windowRect;
@@ -121,6 +122,16 @@ namespace Assets.Code.Bon.Graph
 				if (socket.Intersects(canvasPosition)) return socket;
 			}
 			return null;
+		}
+
+		public void RegisterListener(INodeListener l)
+		{
+			this.listener = l;
+		}
+
+		protected void OnChange() // call this method if your nodes content has changed
+		{
+			if (this.listener != null) this.listener.OnNodeChanged(this);
 		}
 
 		public void GUIDrawSockets()

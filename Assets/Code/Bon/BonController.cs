@@ -26,31 +26,29 @@ namespace Assets.Code.Bon
 			if (path.Equals(BonConfig.DefaultGraphName))
 			{
 				Graph.Graph graph = new Graph.Graph();
-				graph.RegisterListener(this);
 
 				var numberNode01 = new NumberNode(graph.GetUniqueId());
 				numberNode01.X = 20;
 				numberNode01.Y = 20;
-				graph.nodes.Add(numberNode01);
+				graph.AddNode(numberNode01);
 
 				var multiplexer01 = new Multiplexer(graph.GetUniqueId());
 				multiplexer01.X = 200;
 				multiplexer01.Y = 200;
-				graph.nodes.Add(multiplexer01);
+				graph.AddNode(multiplexer01);
 
 				graph.Link(numberNode01.GetSocket(Color.red, 0), multiplexer01.GetSocket(Color.red, 0));
 
 
 				// test serialization an deserialization
 				string serializedJSON = graph.ToJson();
-				Graph.Graph deserializedGraph = Graph.Graph.FromJson(serializedJSON);
+				Graph.Graph deserializedGraph = Graph.Graph.FromJson(serializedJSON, this);
 
 				return deserializedGraph;
 			}
 			else
 			{
-				Graph.Graph graph = Graph.Graph.Load(path);
-				graph.RegisterListener(this);
+				Graph.Graph graph = Graph.Graph.Load(path, this);
 				return graph;
 			}
 
@@ -63,10 +61,7 @@ namespace Assets.Code.Bon
 		}
 
 
-
-
 		// ======= Events =======
-
 		public void OnLink(Edge edge)
 		{
 			Debug.Log("OnLink: Node " + edge.Source.Parent.Id + " with Node " + edge.Sink.Parent.Id);
@@ -77,12 +72,20 @@ namespace Assets.Code.Bon
 			Debug.Log("OnUnLink: Node " + s01.Edge.Source.Parent.Id + " from Node " + s02.Edge.Sink.Parent.Id);
 		}
 
-		public void OnNodeRemoved(Node node)
+		public void OnNodeAdded(Node node)
 		{
-			Debug.Log("OnNodeRemoved: Node " + node.Id);
+			Debug.Log("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
 		}
 
+		public void OnNodeRemoved(Node node)
+		{
+			Debug.Log("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
+		}
 
+		public void OnNodeChanged(Node node)
+		{
+			Debug.Log("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
+		}
 	}
 }
 

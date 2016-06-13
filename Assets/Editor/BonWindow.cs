@@ -187,7 +187,7 @@ namespace Assets.Editor
 			if (doSave)
 			{
 				if (canvas.FilePath == null) OpenSaveDialog();
-				else controller.SaveGraph(canvas.Graph, canvas.FilePath);
+				else controller.SaveGraph(canvas.graph, canvas.FilePath);
 			}
 			canvasList.Remove(canvas);
 			if (canvasList.Count > 0) currentCanvas = canvasList[0];
@@ -225,7 +225,7 @@ namespace Assets.Editor
 			var path = EditorUtility.SaveFilePanel("save graph data", "", "graph", "json");
 			if (!path.Equals(""))
 			{
-				controller.SaveGraph(currentCanvas.Graph, path);
+				controller.SaveGraph(currentCanvas.graph, path);
 				currentCanvas.FilePath = path;
 			}
 		}
@@ -257,14 +257,14 @@ namespace Assets.Editor
 		private void HandleNodeRemoving()
 		{
 			// Delete or Backspace
-			if (Event.current.keyCode == KeyCode.Delete || Input.GetKeyDown(KeyCode.Backspace))
+			/*if (Event.current.keyCode == KeyCode.Delete || Input.GetKeyDown(KeyCode.Backspace))
 			{
 				if (currentCanvas != null)
 				{
 					currentCanvas.RemoveFocusedNode();
 					Repaint();
 				}
-			}
+			}*/
 		}
 
 		private void HandleCanvasTranslation()
@@ -314,7 +314,7 @@ namespace Assets.Editor
 					else
 					{
 						currentDragSocket = target.Edge.GetOtherSocket(target);
-						currentCanvas.Graph.UnLink(currentDragSocket, target);
+						currentCanvas.graph.UnLink(currentDragSocket, target);
 					}
 					Event.current.Use();
 				}
@@ -325,15 +325,15 @@ namespace Assets.Editor
 				if (currentDragSocket != null)
 				{
 					Socket target = currentCanvas.GetSocketAt(Event.current.mousePosition);
-					if (currentCanvas.Graph.CanBeLinked(target, currentDragSocket))
+					if (currentCanvas.graph.CanBeLinked(target, currentDragSocket))
 					{
 						// drop edge event
 						if (target.Edge != null)
 						{
 							// replace edge
-							currentCanvas.Graph.UnLink(target);
+							currentCanvas.graph.UnLink(target);
 						}
-						currentCanvas.Graph.Link(currentDragSocket, target);
+						currentCanvas.graph.Link(currentDragSocket, target);
 						Event.current.Use();
 					}
 					currentDragSocket = null;
