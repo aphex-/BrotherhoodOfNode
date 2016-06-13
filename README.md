@@ -84,6 +84,42 @@ Also take a look at: http://docs.unity3d.com/Manual/JSONSerialization.html
 If you really need a more complex way to serialize your **Node** you can use
 the methods **OnSerialization** and **OnDeserialization** to add your logic.
 
+
+## How To Receive Graph Events
+
+Every time a **Graph** is created you should register a **IGraphListener**
+in order to receive events of this graph. You can create your own class 
+that inherits from **IGraphListener** and add your own logic.
+The default implementation that inherits from **IGraphListener** is our
+**BonController**.
+
+```cs
+	public void OnLink(Edge edge)
+	{
+		Debug.Log("OnLink: Node " + edge.Source.Parent.Id + " with Node " + edge.Sink.Parent.Id);
+	}
+
+	public void OnUnLink(Socket s01, Socket s02)
+	{
+		Debug.Log("OnUnLink: Node " + s01.Edge.Source.Parent.Id + " from Node " + s02.Edge.Sink.Parent.Id);
+	}
+
+	public void OnNodeAdded(Node node)
+	{
+		Debug.Log("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
+	}
+
+	public void OnNodeRemoved(Node node)
+	{
+		Debug.Log("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
+	}
+
+	public void OnNodeChanged(Node node)
+	{
+		Debug.Log("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
+	}
+```
+
 ### Next Up..
 * Multiple edges per socket?
 * A help dialog to explain the controls.
