@@ -19,11 +19,11 @@ namespace Assets.Code.Bon.Graph.Custom
 		public MathOperatorNode(int id) : base(id)
 		{
 
-			inputSocket01 = new Socket(this, Color.red, true);
+			inputSocket01 = new Socket(this, Color.red, SocketDirection.Input);
 			Sockets.Add(inputSocket01);
-			inputSocket02 = new Socket(this, Color.red, true);
+			inputSocket02 = new Socket(this, Color.red, SocketDirection.Input);
 			Sockets.Add(inputSocket02);
-			Sockets.Add(new Socket(this, Color.red, false));
+			Sockets.Add(new Socket(this, Color.red, SocketDirection.Output));
 			Height = 95;
 			Width = 80;
 		}

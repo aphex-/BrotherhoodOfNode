@@ -20,9 +20,9 @@ public class MathDisplay : Node, IMathNode
 
 	public MathDisplay(int id) : base(id)
 	{
-		inSocket = new Socket(this, Color.red, true);
+		inSocket = new Socket(this, Color.red, SocketDirection.Input);
 		Sockets.Add(inSocket);
-		Sockets.Add(new Socket(this, Color.red, false));
+		Sockets.Add(new Socket(this, Color.red, SocketDirection.Output));
 		Height = 20 + BonConfig.SocketOffsetTop;
 		//errorMessage = NotConnectedMessage;
 	}

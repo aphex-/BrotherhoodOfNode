@@ -11,16 +11,16 @@ namespace Assets.Code.Bon.Graph
 
 		// Editor related
 		private Rect boxRect = new Rect();
-		public bool AlignLeft = true;
+		public SocketDirection Direction;
 
 
-		public Socket(Node parent, Color type, bool alignLeft)
+		public Socket(Node parent, Color type, SocketDirection direciton)
 		{
 			Parent = parent;
 			Type = type;
 			boxRect.width = BonConfig.SocketSize;
 			boxRect.height = BonConfig.SocketSize;
-			AlignLeft = alignLeft;
+			Direction = direciton;
 		}
 
 		/// The x position of the node
@@ -48,6 +48,12 @@ namespace Assets.Code.Bon.Graph
 			GUI.color = Type;
 			GUI.Box(boxRect, "");
 		}
+	}
+
+	public enum SocketDirection
+	{
+		Input,
+		Output
 	}
 }
 

@@ -16,7 +16,7 @@ namespace Assets.Code.Bon.Graph.Custom
 		public NumberNode(int id) : base(id)
 		{
 
-			Sockets.Add(new Socket(this, Color.red, false));
+			Sockets.Add(new Socket(this, Color.red, SocketDirection.Output));
 			Height = 20 + BonConfig.SocketOffsetTop;
 		}
 

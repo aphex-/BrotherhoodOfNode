@@ -9,7 +9,7 @@ namespace Assets.Code.Bon.Graph.Custom
 	{
 		public RidiculouslyNamedNode(int id) : base(id)
 		{
-			Sockets.Add(new Socket(this, Color.red, true));
+			Sockets.Add(new Socket(this, Color.red, SocketDirection.Output));
 			Height = 65;
 		}
 

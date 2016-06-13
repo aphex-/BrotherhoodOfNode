@@ -163,7 +163,7 @@ namespace Assets.Code.Bon.Graph
 			var rightCount = 0;
 			foreach (var socket in Sockets)
 			{
-				if (socket.AlignLeft)
+				if (socket.Direction == SocketDirection.Input)
 				{
 					socket.X = - BonConfig.SocketSize + windowRect.x;
 					socket.Y = GUICalcSocketTopOffset(leftCount) + windowRect.y;

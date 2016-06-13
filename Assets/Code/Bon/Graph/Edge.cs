@@ -54,7 +54,7 @@ namespace Assets.Code.Bon.Graph
 		public static Vector2 GetEdgePosition(Socket socket, Vector2 position)
 		{
 			float width = 0;
-			if (!socket.AlignLeft)
+			if (socket.Direction == SocketDirection.Output)
 			{
 				width = BonConfig.SocketSize;
 			}
@@ -66,7 +66,7 @@ namespace Assets.Code.Bon.Graph
 
 		public static Vector2 GetTangentPosition(Socket socket, Vector2 position)
 		{
-			if (socket.AlignLeft)
+			if (socket.Direction == SocketDirection.Input)
 				return position + Vector2.left*BonConfig.EdgeTangent;
 			else
 				return position + Vector2.right*BonConfig.EdgeTangent;
