@@ -40,7 +40,7 @@ namespace Assets.Code.Bon.Graph.Custom
 	[GraphContextMenuItem("Standard", "MyNode")]
 	public class MyNode : Node {
 
-		[Serializable]
+		[SerializeField]
 		private int myNumber;
 
 		public MyNode(int id) : base(id)
@@ -78,7 +78,7 @@ To add custom UI elements to your node simply use the **OnGUI** method as usual.
 
 ### Save nodes as json (serialization / deserializaiton)
 If we have got class members (like myNumber) we want to make persistent
-we need to prefix the annotation **[Serializable]**
+we need to prefix the annotation **[SerializeField]**
 to it.
 Also take a look at: http://docs.unity3d.com/Manual/JSONSerialization.html
 If you really need a more complex way to serialize your **Node** you can use
