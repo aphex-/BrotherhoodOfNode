@@ -115,14 +115,18 @@ namespace Assets.Code.Bon.Graph
 		/// <returns>The at the position or null.</returns>
 		public Socket SearchSocketAt(Vector2 canvasPosition)
 		{
-			Vector2 nodePosition = ProjectToNode(canvasPosition);
+			//Vector2 nodePosition = ProjectToNode(canvasPosition);
 			foreach (var socket in Sockets)
 			{
-				if (socket.Intersects(nodePosition)) return socket;
+				if (socket.Intersects(canvasPosition)) return socket;
 			}
 			return null;
 		}
 
+		public void GUIDrawSockets()
+		{
+			foreach (var socket in Sockets) socket.Draw();
+		}
 
 		public void GUIDrawWindow()
 		{
@@ -147,14 +151,14 @@ namespace Assets.Code.Bon.Graph
 			{
 				if (socket.AlignLeft)
 				{
-					socket.X = -1;
-					socket.Y = GUICalcSocketTopOffset(leftCount);
+					socket.X = - BonConfig.SocketSize + windowRect.x;
+					socket.Y = GUICalcSocketTopOffset(leftCount) + windowRect.y;
 					leftCount++;
 				}
 				else
 				{
-					socket.X = windowRect.width - BonConfig.SocketSize + 1;
-					socket.Y = GUICalcSocketTopOffset(rightCount);
+					socket.X = windowRect.width + windowRect.x;
+					socket.Y = GUICalcSocketTopOffset(rightCount) + windowRect.y;
 					rightCount++;
 				}
 			}
@@ -168,16 +172,16 @@ namespace Assets.Code.Bon.Graph
 
 		void GUIDrawNodeWindow(int id)
 		{
-			foreach (var socket in Sockets) socket.Draw();
+
 
 			// start custom node layout
-			contentRect.Set(BonConfig.SocketSize, BonConfig.SocketOffsetTop,
-				Width - BonConfig.SocketSize * 2, Height - BonConfig.SocketOffsetTop);
+			contentRect.Set(0, BonConfig.SocketOffsetTop,
+				Width, Height - BonConfig.SocketOffsetTop);
 
 			GUILayout.BeginArea(contentRect);
+			GUI.color = Color.white;
 			OnGUI();
 			GUILayout.EndArea();
-			// end
 			GUI.DragWindow();
 			if (Event.current.GetTypeForControl(id) == EventType.Used) lastFocusedNodeId = id;
 		}

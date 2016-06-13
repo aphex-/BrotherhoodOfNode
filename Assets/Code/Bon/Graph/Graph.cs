@@ -48,7 +48,7 @@ namespace Assets.Code.Bon.Graph
 			}
 			catch (Exception exception)
 			{
-				Debug.LogErrorFormat("Node {0} could not be created", nodeType.FullName);
+				Debug.LogErrorFormat("Node {0} could not be created " + exception.HelpLink, nodeType.FullName);
 			}
 			return null;
 		}

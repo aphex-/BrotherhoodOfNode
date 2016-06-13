@@ -37,10 +37,17 @@ namespace Assets.Editor.Bon
 			this.DrawArea.Set(this.Position.x, this.Position.y, CanvasSize, CanvasSize);
 			GUILayout.BeginArea(this.DrawArea, this.Style);
 			this.DrawEdges();
+
 			window.BeginWindows();
 			this.DrawNodes();
 			window.EndWindows();
 			this.DrawDragEdge(currentDragingSocket);
+
+			foreach (Node node in Graph.nodes)
+			{
+				node.GUIDrawSockets();
+			}
+
 			GUILayout.EndArea();
 			EditorZoomArea.End();
 		}
@@ -94,13 +101,10 @@ namespace Assets.Editor.Bon
 			Vector2 projectedPosition = ProjectToCanvas(windowPosition);
 			foreach (Node node in Graph.nodes)
 			{
-				if (node.Intersects(projectedPosition))
+				Socket socket = node.SearchSocketAt(projectedPosition);
+				if (socket != null)
 				{
-					Socket socket = node.SearchSocketAt(projectedPosition);
-					if (socket != null)
-					{
-						return socket;
-					}
+					return socket;
 				}
 			}
 			return null;

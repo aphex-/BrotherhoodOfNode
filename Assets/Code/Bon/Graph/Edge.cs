@@ -59,8 +59,8 @@ namespace Assets.Code.Bon.Graph
 				width = BonConfig.SocketSize;
 			}
 			position.Set(
-				socket.X + width + socket.Parent.X,
-				socket.Y + (BonConfig.SocketSize/2f) + socket.Parent.Y);
+				socket.X + width,
+				socket.Y + (BonConfig.SocketSize/2f));
 			return position;
 		}
 

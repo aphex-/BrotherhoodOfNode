@@ -28,17 +28,17 @@ namespace Assets.Code.Bon
 				Graph.Graph graph = new Graph.Graph();
 				graph.RegisterListener(this);
 
-				var samplerNode01 = new SamplerNode(graph.GetUniqueId());
-				samplerNode01.X = 20;
-				samplerNode01.Y = 20;
-				graph.nodes.Add(samplerNode01);
+				var numberNode01 = new NumberNode(graph.GetUniqueId());
+				numberNode01.X = 20;
+				numberNode01.Y = 20;
+				graph.nodes.Add(numberNode01);
 
 				var multiplexer01 = new Multiplexer(graph.GetUniqueId());
 				multiplexer01.X = 200;
 				multiplexer01.Y = 200;
 				graph.nodes.Add(multiplexer01);
 
-				graph.Link(samplerNode01.GetSocket(Color.red, 1), multiplexer01.GetSocket(Color.red, 0));
+				graph.Link(numberNode01.GetSocket(Color.red, 0), multiplexer01.GetSocket(Color.red, 0));
 
 
 				// test serialization an deserialization
