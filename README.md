@@ -40,6 +40,9 @@ namespace Assets.Code.Bon.Graph.Custom
 	[GraphContextMenuItem("Standard", "MyNode")]
 	public class MyNode : Node {
 
+		[SerializeField]
+		private int myNumber;
+
 		public MyNode(int id) : base(id)
 		{
 			Sockets.Add(new Socket(this, Color.red, true));
@@ -50,11 +53,17 @@ namespace Assets.Code.Bon.Graph.Custom
 
 		public override void OnGUI()
 		{
+			// for custom ui elements
 		}
 
-		public override void ApplySerializationData(SerializableNode sNode)
+		public override void OnSerialization(SerializableNode sNode)
 		{
-			sNode.data = JsonUtility.ToJson(this);
+			// for custom serialization
+		}
+
+		public override void OnDeserialization(SerializableNode sNode)
+		{
+			// for custom deserialization
 		}
 	}
 }
@@ -67,14 +76,52 @@ We created a node class that contains three red **Sockets**. A **Socket** needs 
 ### Add UI elememts
 To add custom UI elements to your node simply use the **OnGUI** method as usual.
 
-### Save nodes as json
-(This may change in future versions)
-To be able to save the node in a json file (to make it persistent) we need 
-to override the method **ApplySerializationData**. It gives us a parameter 
-of the type **SerializableNode** where we can save our custom data.
+### Save nodes as json (serialization / deserializaiton)
+If we have got class members (like myNumber) we want to make persistent
+we need to prefix the annotation **[SerializeField]**
+to it.
+Also take a look at: http://docs.unity3d.com/Manual/JSONSerialization.html
+If you really need a more complex way to serialize your **Node** you can use
+the methods **OnSerialization** and **OnDeserialization** to add your logic.
+
+
+## How To Receive Graph Events
+
+Every time a **Graph** is created you should register a **IGraphListener**
+in order to receive events of this graph. You can create your own class 
+that inherits from **IGraphListener** and add your own logic.
+The default implementation that inherits from **IGraphListener** is our
+**BonController**.
+
+```cs
+	public void OnLink(Edge edge)
+	{
+		Debug.Log("OnLink: Node " + edge.Source.Parent.Id + " with Node " + edge.Sink.Parent.Id);
+	}
+
+	public void OnUnLink(Socket s01, Socket s02)
+	{
+		Debug.Log("OnUnLink: Node " + s01.Edge.Source.Parent.Id + " from Node " + s02.Edge.Sink.Parent.Id);
+	}
+
+	public void OnNodeAdded(Node node)
+	{
+		Debug.Log("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
+	}
+
+	public void OnNodeRemoved(Node node)
+	{
+		Debug.Log("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
+	}
+
+	public void OnNodeChanged(Node node)
+	{
+		Debug.Log("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
+	}
+```
 
 ### Next Up..
-* The IGraphListener needs a graph-id parameter for each method. 
-* * A help dialog to explain the controls.
+* Multiple edges per socket?
+* A help dialog to explain the controls.
 * Code style and code documentation (no idea whats the state of the art. Following microsofts or unitys recommendations?)
 * cleanup code, refactor namespaces
