@@ -30,7 +30,8 @@ namespace Assets.Code.Bon.Graph
 
 		public abstract void OnGUI();
 
-		public abstract void ApplySerializationData(SerializableNode sNode);
+		public abstract void OnSerialization(SerializableNode sNode);
+		public abstract void OnDeserialization(SerializableNode sNode);
 
 		/// The x position of the node
 		public float X
@@ -183,8 +184,6 @@ namespace Assets.Code.Bon.Graph
 
 		void GUIDrawNodeWindow(int id)
 		{
-
-
 			// start custom node layout
 			contentRect.Set(0, BonConfig.SocketOffsetTop,
 				Width, Height - BonConfig.SocketOffsetTop);
@@ -204,7 +203,8 @@ namespace Assets.Code.Bon.Graph
 			n.id = Id;
 			n.X = windowRect.xMin;
 			n.Y = windowRect.yMin;
-			ApplySerializationData(n);
+			n.data = JsonUtility.ToJson(this);
+			OnSerialization(n);
 			return n;
 		}
 	}

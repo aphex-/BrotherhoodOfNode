@@ -43,9 +43,14 @@ namespace Assets.Code.Bon.Graph.Custom
 			return number;
 		}
 
-		public override void ApplySerializationData(SerializableNode sNode)
+		public override void OnSerialization(SerializableNode sNode)
 		{
-			sNode.data = JsonUtility.ToJson(this);
+
+		}
+
+		public override void OnDeserialization(SerializableNode sNode)
+		{
+
 		}
 	}
 }

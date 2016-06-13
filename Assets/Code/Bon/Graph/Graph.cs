@@ -241,6 +241,7 @@ namespace Assets.Code.Bon.Graph
 				if (n != null)
 				{
 					JsonUtility.FromJsonOverwrite(sNode.data, n);
+					n.OnDeserialization(sNode);
 					n.X = sNode.X;
 					n.Y = sNode.Y;
 					AddNode(n);
