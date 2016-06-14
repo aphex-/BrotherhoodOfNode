@@ -22,7 +22,6 @@ namespace Assets.Code.Bon
 			UpdateDisplayNodes();
 		}
 
-
 		public void OnUnLink(Socket s01, Socket s02)
 		{
 			Debug.Log("OnUnLink: Node " + s01.Edge.Output.Parent.Id + " from Node " + s02.Edge.Input.Parent.Id);

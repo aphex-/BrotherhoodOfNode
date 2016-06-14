@@ -226,6 +226,7 @@ namespace Assets.Code.Bon
 		}
 	}
 
+	/// <summary> A class to serialize a Node.</summary>
 	[Serializable] public class SerializableNode
 	{
 		[SerializeField] public string type;
@@ -233,6 +234,28 @@ namespace Assets.Code.Bon
 		[SerializeField] public float X;
 		[SerializeField] public float Y;
 		[SerializeField] public string data;
+	}
+
+	/// <summary> Annotation to register menu entries of Nodes to the editor.</summary>
+	[AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+	public sealed class GraphContextMenuItem : Attribute
+	{
+		private readonly string menuPath;
+		public string Path { get { return menuPath; } }
+
+		private readonly string itemName;
+		public string Name { get { return itemName; } }
+
+		public GraphContextMenuItem(string menuPath) : this(menuPath, null)
+		{
+		}
+
+		public GraphContextMenuItem(string menuPath, string itemName)
+		{
+			this.menuPath = menuPath;
+			this.itemName = itemName;
+		}
+
 	}
 }
 
