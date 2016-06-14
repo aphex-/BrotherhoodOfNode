@@ -19,7 +19,6 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public NumberNode(int id) : base(id)
 		{
-
 			Sockets.Add(new Socket(this, FloatType, SocketDirection.Output));
 			Height = 20 + BonConfig.SocketOffsetTop;
 		}
@@ -64,7 +63,7 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public override bool CanGetResultOf(Socket outSocket)
 		{
-			return true;
+			return AllInputSocketsConnected();
 		}
 
 	}
