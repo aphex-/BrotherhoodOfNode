@@ -18,6 +18,8 @@ namespace Assets.Code.Bon
 		[SerializeField]
 		private List<SerializableNode> serializedNodes = new List<SerializableNode>();
 
+		[SerializeField] private int version = BonConfig.Version;
+
 		private IGraphListener listener;
 
 		public bool TriggerEvents = true;

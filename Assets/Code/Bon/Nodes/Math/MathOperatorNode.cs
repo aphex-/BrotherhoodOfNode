@@ -16,7 +16,10 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public static readonly string[] Operations = { "add", "sub", "mul", "div" };
 
+		[System.NonSerialized]
 		private Socket inputSocket01;
+
+		 [System.NonSerialized]
 		private Socket inputSocket02;
 
 		public MathOperatorNode(int id) : base(id)
@@ -40,7 +43,7 @@ namespace Assets.Code.Bon.Nodes.Math
 			if (newMode != selectedMode)
 			{
 				selectedMode = newMode;
-				OnChange();
+				TriggerChangeEvent();
 			}
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();

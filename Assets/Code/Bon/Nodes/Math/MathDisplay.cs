@@ -11,13 +11,18 @@ namespace Assets.Code.Bon.Nodes.Math
 	public class MathDisplay : Node
 	{
 
+		[System.NonSerialized]
 		public float value;
+
+		[System.NonSerialized]
 		private string errorMessage;
 
 		private const string NotConnectedMessage = "not connected";
 
+		[System.NonSerialized]
 		private Rect textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
 
+		[System.NonSerialized]
 		private Socket inSocket;
 
 		public MathDisplay(int id) : base(id)

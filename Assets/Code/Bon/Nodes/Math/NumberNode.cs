@@ -31,7 +31,7 @@ namespace Assets.Code.Bon.Nodes.Math
 			if (System.Math.Abs(newNumber - Number) > 0)
 			{
 				Number = newNumber;
-				OnChange();
+				TriggerChangeEvent();
 			}
 		}
 

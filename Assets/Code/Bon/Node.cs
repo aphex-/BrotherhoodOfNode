@@ -9,17 +9,26 @@ namespace Assets.Code.Bon
 
 	public abstract class Node
 	{
-
+ 		[System.NonSerialized]
 		public List<Socket> Sockets = new List<Socket>();
+
+		[System.NonSerialized]
 		public readonly int Id;
 
+		[System.NonSerialized]
 		private INodeListener listener;
+
+		[System.NonSerialized]
 		public string nodeName;
 
 		// Editor related
+		 [System.NonSerialized]
 		public Rect windowRect;
+
+		 [System.NonSerialized]
 		public Rect contentRect;
 
+		[System.NonSerialized]
 		public static int lastFocusedNodeId;
 
 		protected Node(int id)
@@ -137,7 +146,7 @@ namespace Assets.Code.Bon
 			this.listener = l;
 		}
 
-		protected void OnChange() // call this method if your nodes content has changed
+		protected void TriggerChangeEvent() // call this method if your nodes content has changed
 		{
 			if (this.listener != null) this.listener.OnNodeChanged(this);
 		}
