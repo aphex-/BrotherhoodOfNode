@@ -13,6 +13,7 @@ namespace Assets.Code.Bon
 		public void OnCreate(Graph graph)
 		{
 			this.graph = graph;
+			UpdateDisplayNodes();
 		}
 
 		// ======= Events =======

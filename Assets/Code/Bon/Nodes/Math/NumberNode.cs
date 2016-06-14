@@ -13,9 +13,9 @@ namespace Assets.Code.Bon.Nodes.Math
 		public static Color FloatType = new Color(0.32f, 0.58f, 0.86f);
 
 		[SerializeField]
-		public float number;
+		public float Number;
 
-		private Rect textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
+		private readonly Rect textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
 
 		public NumberNode(int id) : base(id)
 		{
@@ -26,11 +26,11 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public override void OnGUI()
 		{
-			string textFieldValue = GUI.TextField(textFieldArea, number.ToString());
-			float newNumber = GetValidNumber(textFieldValue);
-			if (System.Math.Abs(newNumber - number) > 0)
+			var textFieldValue = GUI.TextField(textFieldArea, Number.ToString());
+			var newNumber = GetValidNumber(textFieldValue);
+			if (System.Math.Abs(newNumber - Number) > 0)
 			{
-				number = newNumber;
+				Number = newNumber;
 				OnChange();
 			}
 		}
@@ -39,12 +39,12 @@ namespace Assets.Code.Bon.Nodes.Math
 		{
 			float newNumber;
 			if (text.Equals("") || text.Length == 0) text = "0";
-			bool isNumeric = float.TryParse(text, out newNumber);
+			var isNumeric = float.TryParse(text, out newNumber);
 			if (isNumeric)
 			{
 				return newNumber;
 			}
-			return number;
+			return Number;
 		}
 
 		public override void OnSerialization(SerializableNode sNode)
@@ -59,7 +59,7 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public override object GetResultOf(Socket outSocket)
 		{
-			return number;
+			return Number;
 		}
 
 		public override bool CanGetResultOf(Socket outSocket)

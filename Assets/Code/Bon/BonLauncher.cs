@@ -26,24 +26,46 @@ namespace Assets.Code.Bon
 			{
 				Graph graph = new Graph();
 
+				// create a default grpah programmatically
 				var numberNode01 = new NumberNode(graph.GetUniqueId());
 				numberNode01.X = 20;
 				numberNode01.Y = 20;
+				numberNode01.Number = 355;
 				graph.AddNode(numberNode01);
+
+				var numberNode02 = new NumberNode(graph.GetUniqueId());
+				numberNode02.X = 20;
+				numberNode02.Y = 80;
+				numberNode02.Number = 113;
+				graph.AddNode(numberNode02);
 
 				var operator01 = new MathOperatorNode(graph.GetUniqueId());
 				operator01.X = 200;
-				operator01.Y = 200;
+				operator01.Y = 40;
+				operator01.SetMode(Operator.Divide);
 				graph.AddNode(operator01);
+
+				var diplay01 = new MathDisplay(graph.GetUniqueId());
+				diplay01.X = 320;
+				diplay01.Y = 80;
+				graph.AddNode(diplay01);
 
 				graph.Link(
 					numberNode01.GetSocket(NumberNode.FloatType, SocketDirection.Output, 0),
 					operator01.GetSocket(NumberNode.FloatType, SocketDirection.Input, 0));
 
+				graph.Link(
+					numberNode02.GetSocket(NumberNode.FloatType, SocketDirection.Output, 0),
+					operator01.GetSocket(NumberNode.FloatType, SocketDirection.Input, 1));
 
-				// test serialization an deserialization
-				string serializedJSON = graph.ToJson();
-				Graph deserializedGraph = Graph.FromJson(serializedJSON, new StandardGraphController());
+				graph.Link(
+					operator01.GetSocket(NumberNode.FloatType, SocketDirection.Output, 0),
+					diplay01.GetSocket(NumberNode.FloatType, SocketDirection.Input, 0));
+
+				// == test serialization an deserialization ==
+				var serializedJSON = graph.ToJson();
+				var deserializedGraph = Graph.FromJson(serializedJSON, new StandardGraphController());
+				// =====
 
 				return deserializedGraph;
 			}

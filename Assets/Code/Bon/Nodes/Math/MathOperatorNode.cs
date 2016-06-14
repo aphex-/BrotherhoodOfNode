@@ -102,5 +102,21 @@ namespace Assets.Code.Bon.Nodes.Math
 			}
 			return float.NaN;
 		}
+
+		public void SetMode(Operator o)
+		{
+			if (o == Operator.Add) selectedMode = 0;
+			if (o == Operator.Substract) selectedMode = 1;
+			if (o == Operator.Multiply) selectedMode = 2;
+			if (o == Operator.Divide) selectedMode = 3;
+		}
+	}
+
+	public enum Operator
+	{
+		Add,
+		Substract,
+		Multiply,
+		Divide
 	}
 }
