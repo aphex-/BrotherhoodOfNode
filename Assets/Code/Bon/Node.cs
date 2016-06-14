@@ -22,8 +22,10 @@ namespace Assets.Code.Bon
 		public string nodeName;
 
 		// Editor related
-		 [System.NonSerialized]
+		[System.NonSerialized]
 		public Rect windowRect;
+		[System.NonSerialized]
+		public bool VisitFlag = false;
 
 		 [System.NonSerialized]
 		public Rect contentRect;

@@ -20,6 +20,10 @@ namespace Assets.Code.Bon
 
 		[SerializeField] private int version = BonConfig.Version;
 
+		// be warned to allow circles.. if you parse the graph you can end up in
+		// an endless recursion this can crash unity.
+		[SerializeField] public bool AllowCicles = false;
+
 		private IGraphListener listener;
 
 		public bool TriggerEvents = true;
@@ -159,6 +163,7 @@ namespace Assets.Code.Bon
 			if (!CanBeLinked(inputSocket, sourceSocket))
 			{
 				Debug.LogWarning("Sockets can not be linked.");
+				return false;
 			}
 
 			if (inputSocket.Type == sourceSocket.Type)
@@ -166,12 +171,54 @@ namespace Assets.Code.Bon
 				Edge edge = new Edge(inputSocket, sourceSocket);
 				inputSocket.Edge = edge;
 				sourceSocket.Edge = edge;
+
+				if (!AllowCicles && HasCicle())
+				{
+					// revert
+					Debug.Log("Can not link sockets. Circles are not allowed.");
+					return false;
+				}
+
 				if (listener != null && TriggerEvents)
 				{
 					listener.OnLink(edge);
 				}
 			}
 			return true;
+		}
+
+
+		public bool HasCicle()
+		{
+			foreach (var node in nodes)
+			{
+				if (HasCicle(node))
+				{
+					ResetVisitFlags();
+					return true;
+				}
+				ResetVisitFlags();
+			}
+			return false;
+		}
+
+		private void ResetVisitFlags()
+		{
+			foreach (var node in nodes) node.VisitFlag = false;
+		}
+
+		private bool HasCicle(Node node)
+		{
+			if (node.VisitFlag) return true;
+			node.VisitFlag = true;
+			foreach (Socket s in node.Sockets)
+			{
+				if (s.Direction == SocketDirection.Output && s.Edge != null)
+				{
+					return HasCicle(s.Edge.Input.Parent);
+				}
+			}
+			return false;
 		}
 
 		/// <summary> Returns true if the sockets can be linked.</summary>
