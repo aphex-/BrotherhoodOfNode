@@ -36,6 +36,9 @@ namespace Assets.Code.Bon
 		public abstract void OnSerialization(SerializableNode sNode);
 		public abstract void OnDeserialization(SerializableNode sNode);
 
+		public abstract object GetResultOf(Socket outSocket);
+		public abstract bool CanGetResultOf(Socket outSocket);
+
 		/// The x position of the node
 		public float X
 		{
@@ -137,6 +140,15 @@ namespace Assets.Code.Bon
 		protected void OnChange() // call this method if your nodes content has changed
 		{
 			if (this.listener != null) this.listener.OnNodeChanged(this);
+		}
+
+		public bool AllInputSocketsConnected()
+		{
+			foreach (var socket in Sockets)
+			{
+				if (socket.Edge == null && socket.Direction == SocketDirection.Input) return false;
+			}
+			return true;
 		}
 
 		public void GUIDrawSockets()

@@ -7,7 +7,7 @@ namespace Assets.Code.Bon.Nodes.Math
 {
 	[Serializable]
 	[GraphContextMenuItem("Math", "Number")]
-	public class NumberNode : Node, IMathNode
+	public class NumberNode : Node
 	{
 
 		public static Color FloatType = new Color(0.32f, 0.58f, 0.86f);
@@ -57,10 +57,16 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		}
 
-		public float GetNumber(Socket outSocket)
+		public override object GetResultOf(Socket outSocket)
 		{
 			return number;
 		}
+
+		public override bool CanGetResultOf(Socket outSocket)
+		{
+			return true;
+		}
+
 	}
 }
 

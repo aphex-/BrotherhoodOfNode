@@ -59,7 +59,7 @@ namespace Assets.Code.Bon
 				Node n = graph.GetNodeAt(i);
 				if (typeof(MathDisplay) == n.GetType())
 				{
-					((MathDisplay) n).UpdateValue();
+					n.GetResultOf(n.GetSocket(NumberNode.FloatType, SocketDirection.Input, 0));
 				}
 			}
 		}

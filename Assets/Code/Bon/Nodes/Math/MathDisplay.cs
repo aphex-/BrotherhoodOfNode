@@ -8,7 +8,7 @@ namespace Assets.Code.Bon.Nodes.Math
 
 	[Serializable]
 	[GraphContextMenuItem("Math", "Display")]
-	public class MathDisplay : Node, IMathNode
+	public class MathDisplay : Node
 	{
 
 		public float value;
@@ -53,26 +53,39 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		}
 
-		public float GetNumber(Socket outSocket)
+		public override object GetResultOf(Socket outSocket)
 		{
-			return value;
-		}
-
-		public void UpdateValue()
-		{
-			if (inSocket.Edge == null)
+			if (CanGetResultOf(outSocket))
 			{
-				errorMessage = NotConnectedMessage;
+				return UpdateValue();
 			}
 			else
 			{
-				Socket connectedSocket = inSocket.GetConnectedSocket();
-				Node connectedNode = connectedSocket.Parent;
-
-				Debug.Log("MathDisplay connected node " + connectedNode);
-				value = ((IMathNode) connectedNode).GetNumber(connectedSocket);
-				errorMessage = null;
+				return float.NaN;
 			}
+		}
+
+		public override bool CanGetResultOf(Socket outSocket)
+		{
+			if (AllInputSocketsConnected())
+			{
+				errorMessage = null;
+				return true;
+			}
+			else
+			{
+				errorMessage = NotConnectedMessage;
+				return false;
+			}
+		}
+
+
+		public float UpdateValue()
+		{
+			Socket connectedSocket = inSocket.GetConnectedSocket();
+			Node connectedNode = connectedSocket.Parent;
+			value = (float) connectedNode.GetResultOf(connectedSocket);
+			return value;
 		}
 	}
 }
