@@ -55,6 +55,12 @@ namespace Assets.Code.Bon
 
 		private void UpdateDisplayNodes()
 		{
+			if (graph.HasCicle())
+			{
+				Debug.Log("This parser is not made for graphs that contain circles.");
+				return;
+			}
+
 			for (var i = 0; i < graph.GetNodeCount(); i++)
 			{
 				Node n = graph.GetNodeAt(i);
