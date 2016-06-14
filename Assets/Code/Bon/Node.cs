@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Assets.Code.Bon.Interface;
 using UnityEditor;
 using UnityEngine;
 
-namespace Assets.Code.Bon.Graph
+namespace Assets.Code.Bon
 {
 
 	public abstract class Node

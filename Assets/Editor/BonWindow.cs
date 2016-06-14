@@ -7,7 +7,6 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using Assets.Code.Bon;
-using Assets.Code.Bon.Graph;
 using Assets.Editor.Bon;
 using System.Linq;
 
@@ -37,7 +36,7 @@ namespace Assets.Editor
 		private readonly Color TabColorSelected = Color.white;
 
 
-		private BonController controller;
+		private BonLauncher launcher;
 		private List<BonCanvas> canvasList = new List<BonCanvas>();
 		private BonCanvas currentCanvas = null;
 		private Rect canvasRegion = new Rect();
@@ -59,12 +58,12 @@ namespace Assets.Editor
 		public BonWindow()
 		{
 			titleContent = new GUIContent(Name);
-			controller = new BonController();
-			controller.OnWindowOpen();
+			launcher = new BonLauncher();
+			launcher.OnWindowOpen();
 
 
 			menuEntryToNodeType = CreateMenuEntries();
-			Graph graph = controller.LoadGraph(BonConfig.DefaultGraphName);
+			Graph graph = launcher.LoadGraph(BonConfig.DefaultGraphName);
 			currentCanvas = new BonCanvas(graph);
 			canvasList.Add(currentCanvas);
 			menu = CreateGenericMenu();
@@ -171,7 +170,7 @@ namespace Assets.Editor
 			if (doSave)
 			{
 				if (canvas.FilePath == null) OpenSaveDialog();
-				else controller.SaveGraph(canvas.graph, canvas.FilePath);
+				else launcher.SaveGraph(canvas.graph, canvas.FilePath);
 			}
 			canvasList.Remove(canvas);
 			if (canvasList.Count > 0) currentCanvas = canvasList[0];
@@ -197,7 +196,7 @@ namespace Assets.Editor
 		private void CreateCanvas(string path)
 		{
 			BonCanvas canvas;
-			if (path != null) canvas = new BonCanvas(controller.LoadGraph(path));
+			if (path != null) canvas = new BonCanvas(launcher.LoadGraph(path));
 			else canvas = new BonCanvas(new Graph());
 			canvas.FilePath = path;
 			canvasList.Add(canvas);
@@ -209,7 +208,7 @@ namespace Assets.Editor
 			var path = EditorUtility.SaveFilePanel("save graph data", "", "graph", "json");
 			if (!path.Equals(""))
 			{
-				controller.SaveGraph(currentCanvas.graph, path);
+				launcher.SaveGraph(currentCanvas.graph, path);
 				currentCanvas.FilePath = path;
 			}
 		}

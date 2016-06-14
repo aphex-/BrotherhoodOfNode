@@ -1,12 +1,16 @@
 ﻿using System;
+using Assets.Code.Bon.Interface;
+using Assets.Code.Bon;
 using UnityEngine;
 
-namespace Assets.Code.Bon.Graph.Custom
+namespace Assets.Code.Bon.Nodes.Math
 {
 	[Serializable]
 	[GraphContextMenuItem("Math", "Number")]
 	public class NumberNode : Node, IMathNode
 	{
+
+		public static Color FloatType = new Color(0.32f, 0.58f, 0.86f);
 
 		[SerializeField]
 		public float number;
@@ -16,7 +20,7 @@ namespace Assets.Code.Bon.Graph.Custom
 		public NumberNode(int id) : base(id)
 		{
 
-			Sockets.Add(new Socket(this, Color.red, SocketDirection.Output));
+			Sockets.Add(new Socket(this, FloatType, SocketDirection.Output));
 			Height = 20 + BonConfig.SocketOffsetTop;
 		}
 
@@ -24,7 +28,7 @@ namespace Assets.Code.Bon.Graph.Custom
 		{
 			string textFieldValue = GUI.TextField(textFieldArea, number.ToString());
 			float newNumber = GetValidNumber(textFieldValue);
-			if (Math.Abs(newNumber - number) > 0)
+			if (System.Math.Abs(newNumber - number) > 0)
 			{
 				number = newNumber;
 				OnChange();

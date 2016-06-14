@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using UnityEngine;
 
-namespace Assets.Code.Bon.Graph
+namespace Assets.Code.Bon
 {
 
 	public class Socket

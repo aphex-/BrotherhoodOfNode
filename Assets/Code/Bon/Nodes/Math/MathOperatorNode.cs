@@ -1,8 +1,11 @@
 ﻿using System;
+using Assets.Code.Bon;
+using Assets.Code.Bon.Interface;
 using UnityEngine;
 
-namespace Assets.Code.Bon.Graph.Custom
+namespace Assets.Code.Bon.Nodes.Math
 {
+
 	[Serializable]
 	[GraphContextMenuItem("Math", "Operator")]
 	public class MathOperatorNode : Node, IMathNode
@@ -19,11 +22,11 @@ namespace Assets.Code.Bon.Graph.Custom
 		public MathOperatorNode(int id) : base(id)
 		{
 
-			inputSocket01 = new Socket(this, Color.red, SocketDirection.Input);
+			inputSocket01 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
 			Sockets.Add(inputSocket01);
-			inputSocket02 = new Socket(this, Color.red, SocketDirection.Input);
+			inputSocket02 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
 			Sockets.Add(inputSocket02);
-			Sockets.Add(new Socket(this, Color.red, SocketDirection.Output));
+			Sockets.Add(new Socket(this, NumberNode.FloatType, SocketDirection.Output));
 			Height = 95;
 			Width = 80;
 		}

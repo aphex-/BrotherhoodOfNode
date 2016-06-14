@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Assets.Code.Bon.Graph
+namespace Assets.Code.Bon
 {
     [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
     public sealed class GraphContextMenuItem : Attribute

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.AccessControl;
-using Assets.Code.Bon.Graph.Custom;
+using Assets.Code.Bon.Interface;
 using UnityEngine;
 
-namespace Assets.Code.Bon.Graph
+namespace Assets.Code.Bon
 {
+
 	[Serializable]
 	public class Graph : ISerializationCallbackReceiver
 	{
@@ -194,7 +194,7 @@ namespace Assets.Code.Bon.Graph
 		public static bool Save(string fileName, Graph graph)
 		{
 			var file = File.CreateText(fileName);
-			file.Write(graph.ToJson());
+			file.Write((string) graph.ToJson());
 			file.Close();
 			return true;
 		}
@@ -205,7 +205,7 @@ namespace Assets.Code.Bon.Graph
 				var file = File.OpenText(fileName);
 				var json = file.ReadToEnd();
 				file.Close();
-				return Graph.FromJson(json, listener);
+				return FromJson(json, listener);
 			} else {
 				Debug.Log("Could not Open the file: " + fileName);
 				return null;
