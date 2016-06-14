@@ -60,7 +60,7 @@ namespace Assets.Code.Bon.Graph.Custom
 			// (if your nodes content has changed call: TriggerChangeEvent())
 		}
 		
-		// To return a result of your one of the nodes output sockets.
+		// To return a result of one of the nodes output sockets.
 		public override object GetResultOf(Socket outSocket)
 		{
 			// Check if the assigned socket is ready for a result..
