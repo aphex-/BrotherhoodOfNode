@@ -159,6 +159,7 @@ The default implementation that inherits from **IGraphListener** is the
 
 ### Next Up..
 * Check for recursion in the graph.
+* Unit tests
 * A help dialog to explain the controls.
 * Code style and code documentation (no idea whats the state of the art. Following microsofts or unitys recommendations?)
 * cleanup code, refactor namespaces
