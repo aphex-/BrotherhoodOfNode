@@ -75,7 +75,7 @@ namespace Assets.Code.Bon.Graph.Custom
 			}
 		}
 		
-		// To return if the nodes socket can is ready for a result.
+		// To return if the nodes socket is ready for a result.
 		public override bool CanGetResultOf(Socket outSocket)
 		{
 			// In our case just check if all input sockets are connected
