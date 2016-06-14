@@ -77,7 +77,6 @@ namespace Assets.Code.Bon.Nodes.Math
 			}
 		}
 
-
 		public float UpdateValue()
 		{
 			Socket connectedSocket = inSocket.GetConnectedSocket();

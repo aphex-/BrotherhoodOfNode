@@ -16,10 +16,18 @@ namespace Assets.Code.Bon
 		private Vector2 tmpTangent01;
 		private Vector2 tmpTangent02;
 
-		public Edge(Socket input, Socket output)
+		public Edge(Socket socket01, Socket socket02)
 		{
-			Input = input;
-			Output = output;
+			if (socket01.Direction == SocketDirection.Input)
+			{
+				Input = socket01;
+				Output = socket02;
+			}
+			else
+			{
+				Input = socket02;
+				Output = socket01;
+			}
 		}
 
 		public Socket GetOtherSocket(Socket socket)
@@ -37,6 +45,12 @@ namespace Assets.Code.Bon
 				tmpTangent01 = GetTangentPosition(Output, tmpStartPos);
 				tmpTangent02 = GetTangentPosition(Input, tmpEndPos);
 				DrawEdge(tmpStartPos, tmpTangent01, tmpEndPos, tmpTangent02, Output.Type);
+
+				Handles.color = Color.black;
+				tmpStartPos.Set(tmpEndPos.x - 5, tmpEndPos.y - 5);
+				Handles.DrawLine(tmpEndPos, tmpStartPos);
+				tmpStartPos.Set(tmpEndPos.x - 5, tmpEndPos.y + 5);
+				Handles.DrawLine(tmpEndPos, tmpStartPos);
 			}
 		}
 
@@ -77,10 +91,10 @@ namespace Assets.Code.Bon
 		public SerializableEdge ToSerializedEgde()
 		{
 			SerializableEdge s = new SerializableEdge();
-			s.sinkNodeId = Input.Parent.Id;
-			s.sinkSocketIndex = Input.Parent.Sockets.IndexOf(Input);
-			s.sourceNodeId = Output.Parent.Id;
-			s.sourceSocketIndex = Output.Parent.Sockets.IndexOf(Output);
+			s.InputNodeId = Input.Parent.Id;
+			s.InputSocketIndex = Input.Parent.Sockets.IndexOf(Input);
+			s.OutputNodeId = Output.Parent.Id;
+			s.OutputSocketIndex = Output.Parent.Sockets.IndexOf(Output);
 			return s;
 		}
 	}
@@ -88,10 +102,10 @@ namespace Assets.Code.Bon
 
 	[Serializable] public class SerializableEdge
 	{
-		[SerializeField] public int sourceNodeId = -1;
-		[SerializeField] public int sourceSocketIndex = -1;
-		[SerializeField] public int sinkNodeId = -1;
-		[SerializeField] public int sinkSocketIndex = -1;
+		[SerializeField] public int OutputNodeId = -1;
+		[SerializeField] public int OutputSocketIndex = -1;
+		[SerializeField] public int InputNodeId = -1;
+		[SerializeField] public int InputSocketIndex = -1;
 	}
 }
 

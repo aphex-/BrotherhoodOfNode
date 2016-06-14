@@ -14,13 +14,13 @@ namespace Assets.Code.Bon
 		public readonly int Id;
 
 		private INodeListener listener;
-		private string nodeName;
+		public string nodeName;
 
 		// Editor related
-		private Rect windowRect;
-		protected Rect contentRect;
+		public Rect windowRect;
+		public Rect contentRect;
 
-		private static int lastFocusedNodeId;
+		public static int lastFocusedNodeId;
 
 		protected Node(int id)
 		{
@@ -156,11 +156,11 @@ namespace Assets.Code.Bon
 			foreach (var socket in Sockets) socket.Draw();
 		}
 
-		public void GUIDrawWindow()
+		/*public void GUIDrawWindow()
 		{
 			windowRect = GUI.Window(Id, windowRect, GUIDrawNodeWindow, nodeName + " (" + this.Id + ")");
 			GUIAlignSockets();
-		}
+		}*/
 
 		public void GUIDrawEdges()
 		{
@@ -170,7 +170,7 @@ namespace Assets.Code.Bon
 			}
 		}
 
-		protected void GUIAlignSockets()
+		public void GUIAlignSockets()
 		{
 			var leftCount = 0;
 			var rightCount = 0;
@@ -197,7 +197,7 @@ namespace Assets.Code.Bon
 				+ (socketTopIndex*BonConfig.SocketMargin);
 		}
 
-		void GUIDrawNodeWindow(int id)
+		/*void GUIDrawNodeWindow(int id)
 		{
 			// start custom node layout
 			contentRect.Set(0, BonConfig.SocketOffsetTop,
@@ -209,7 +209,7 @@ namespace Assets.Code.Bon
 			GUILayout.EndArea();
 			GUI.DragWindow();
 			if (Event.current.GetTypeForControl(id) == EventType.Used) lastFocusedNodeId = id;
-		}
+		}*/
 
 		public static string GetNodeName(Type nodeType)
 		{

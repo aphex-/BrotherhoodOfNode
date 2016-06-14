@@ -20,6 +20,8 @@ namespace Assets.Code.Bon
 
 		private IGraphListener listener;
 
+		public bool TriggerEvents = true;
+
 		public void RegisterListener(IGraphListener listener)
 		{
 			this.listener = listener;
@@ -84,7 +86,7 @@ namespace Assets.Code.Bon
 		public void AddNode(Node node)
 		{
 			nodes.Add(node);
-			if (listener != null)
+			if (listener != null && TriggerEvents)
 			{
 				node.RegisterListener(listener);
 				listener.OnNodeAdded(node);
@@ -104,16 +106,21 @@ namespace Assets.Code.Bon
 			}
 
 			nodes.Remove(node);
-			if (listener != null)
+			if (listener != null && TriggerEvents)
 			{
 				listener.OnNodeRemoved(node);
 			}
 			node.RegisterListener(null);
 		}
 
+		public void RemoveNode(int id)
+		{
+			RemoveNode(GetNode(id));
+		}
+
 		public void UnLink(Socket s01, Socket s02)
 		{
-			if (listener != null)
+			if (listener != null && TriggerEvents)
 			{
 				listener.OnUnLink(s01, s02);
 			}
@@ -129,7 +136,7 @@ namespace Assets.Code.Bon
 				s02.Edge.Output = null;
 				s02.Edge = null;
 			}
-			if (listener != null)
+			if (listener != null && TriggerEvents)
 			{
 				listener.OnUnLinked(s01, s02);
 			}
@@ -145,19 +152,19 @@ namespace Assets.Code.Bon
 			UnLink(socket, socket2);
 		}
 
-		public bool Link(Socket ownSocket, Socket foreignSocket)
+		public bool Link(Socket inputSocket, Socket sourceSocket)
 		{
-			if (ownSocket == null || foreignSocket == null)
+			if (!CanBeLinked(inputSocket, sourceSocket))
 			{
-				Debug.LogWarning("Try to link sockets but at least one socket does not exist.");
-				return false;
+				Debug.LogWarning("Sockets can not be linked.");
 			}
-			if (ownSocket.Type == foreignSocket.Type)
+
+			if (inputSocket.Type == sourceSocket.Type)
 			{
-				Edge edge = new Edge(ownSocket, foreignSocket);
-				ownSocket.Edge = edge;
-				foreignSocket.Edge = edge;
-				if (listener != null)
+				Edge edge = new Edge(inputSocket, sourceSocket);
+				inputSocket.Edge = edge;
+				sourceSocket.Edge = edge;
+				if (listener != null && TriggerEvents)
 				{
 					listener.OnLink(edge);
 				}
@@ -216,6 +223,9 @@ namespace Assets.Code.Bon
 		public void OnBeforeSerialize()
 		{
 			if (nodes.Count == 0) return; // nothing to serialize
+			bool wasTriggering = TriggerEvents;
+			TriggerEvents = false;
+
 			serializedEdges.Clear();
 			serializedNodes.Clear();
 			// serialize data
@@ -234,12 +244,16 @@ namespace Assets.Code.Bon
 					}
 				}
 			}
+			TriggerEvents = wasTriggering;
 		}
 
 		/// <summary>Unity serialization callback.</summary>
 		public void OnAfterDeserialize()
 		{
 			if (serializedNodes.Count == 0) return;	// Nothing to deserialize.
+			bool wasTriggering = TriggerEvents;
+			TriggerEvents = false;
+
 			nodes.Clear(); // clear original data.
 
 			// deserialize nodes
@@ -259,23 +273,24 @@ namespace Assets.Code.Bon
 			// deserialize edges
 			foreach (var sEdge in serializedEdges)
 			{
-				Node sourceNode = GetNode(sEdge.sourceNodeId);
-				Node sinkNode = GetNode(sEdge.sinkNodeId);
-				if (sourceNode == null || sinkNode == null)
+				Node inputNode = GetNode(sEdge.InputNodeId);
+				Node outputNode = GetNode(sEdge.OutputNodeId);
+				if (inputNode == null || outputNode == null)
 				{
 					Debug.LogWarning("Try to create an edge but can not find at least on of the nodes.");
 					continue;
 				}
 
-				if (sEdge.sourceSocketIndex > sourceNode.Sockets.Count || sEdge.sinkSocketIndex > sinkNode.Sockets.Count)
+				if (sEdge.OutputSocketIndex > outputNode.Sockets.Count || sEdge.InputSocketIndex > inputNode.Sockets.Count)
 				{
 					Debug.LogWarning("Try to create an edge but can not find at least on of the sockets.");
 					continue;
 				}
-				Edge edge = new Edge(sourceNode.Sockets[sEdge.sourceSocketIndex], sinkNode.Sockets[sEdge.sinkSocketIndex]);
-				sourceNode.Sockets[sEdge.sourceSocketIndex].Edge = edge;
-				sinkNode.Sockets[sEdge.sinkSocketIndex].Edge = edge;
+				Edge edge = new Edge(inputNode.Sockets[sEdge.InputSocketIndex], outputNode.Sockets[sEdge.OutputSocketIndex]);
+				inputNode.Sockets[sEdge.InputSocketIndex].Edge = edge;
+				outputNode.Sockets[sEdge.OutputSocketIndex].Edge = edge;
 			}
+			TriggerEvents = wasTriggering;
 		}
 	}
 }

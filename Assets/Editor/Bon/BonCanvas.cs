@@ -3,7 +3,6 @@ using UnityEditor;
 using UnityEngine;
 using Assets.Code.Bon;
 
-
 namespace Assets.Editor.Bon
 {
 	public class BonCanvas
@@ -64,18 +63,45 @@ namespace Assets.Editor.Bon
 			}
 		}
 
-		public void DrawTabButton(int canvasIndex)
-		{
-
-		}
-
 		public void DrawNodes()
 		{
 			for (var i = 0; i < graph.GetNodeCount(); i++)
 			{
-				graph.GetNodeAt(i).GUIDrawWindow();
+				Node node = graph.GetNodeAt(i);
+				node.windowRect = GUI.Window(node.Id, node.windowRect, GUIDrawNodeWindow, node.nodeName + " (" + node.Id + ")");
+				node.GUIAlignSockets();
 			}
 		}
+
+		void GUIDrawNodeWindow(int nodeId)
+		{
+			Node node = graph.GetNode(nodeId);
+			node.contentRect.Set(0, BonConfig.SocketOffsetTop,
+				node.Width, node.Height - BonConfig.SocketOffsetTop);
+
+			if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
+			{
+				GenericMenu m = new GenericMenu();
+				m.AddDisabledItem(new GUIContent(node.nodeName + " (" + nodeId + ")"));
+				m.AddSeparator("");
+				m.AddItem(new GUIContent("Delete"), false, DeleteNode, nodeId);
+				m.ShowAsContext();
+				Event.current.Use();
+			}
+
+			GUILayout.BeginArea(node.contentRect);
+			GUI.color = Color.white;
+			node.OnGUI();
+			GUILayout.EndArea();
+			GUI.DragWindow();
+			if (Event.current.GetTypeForControl(node.Id) == EventType.Used) Node.lastFocusedNodeId = node.Id;
+		}
+
+		private void DeleteNode(object nodeId)
+		{
+			graph.RemoveNode((int) nodeId);
+		}
+
 
 		public void DrawEdges()
 		{
@@ -139,8 +165,9 @@ namespace Assets.Editor.Bon
 			windowPosition.y -= (this.DrawArea.y);
 			return windowPosition;
 		}
-
 	}
+
+
 
 }
 
