@@ -31,7 +31,6 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public override void OnGUI()
 		{
-
 			if (errorMessage == null)
 			{
 				GUI.Label(textFieldArea, value.ToString());
@@ -40,7 +39,6 @@ namespace Assets.Code.Bon.Nodes.Math
 			{
 				GUI.Label(textFieldArea, errorMessage);
 			}
-
 		}
 
 		public override void OnSerialization(SerializableNode sNode)

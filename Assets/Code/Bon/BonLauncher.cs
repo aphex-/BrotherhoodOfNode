@@ -46,7 +46,7 @@ namespace Assets.Code.Bon
 				graph.AddNode(operator01);
 
 				var diplay01 = new MathDisplay(graph.GetUniqueId());
-				diplay01.X = 320;
+				diplay01.X = 330;
 				diplay01.Y = 80;
 				graph.AddNode(diplay01);
 
