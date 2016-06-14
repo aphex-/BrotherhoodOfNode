@@ -156,12 +156,6 @@ namespace Assets.Code.Bon
 			foreach (var socket in Sockets) socket.Draw();
 		}
 
-		/*public void GUIDrawWindow()
-		{
-			windowRect = GUI.Window(Id, windowRect, GUIDrawNodeWindow, nodeName + " (" + this.Id + ")");
-			GUIAlignSockets();
-		}*/
-
 		public void GUIDrawEdges()
 		{
 			foreach (var socket in Sockets)
@@ -196,20 +190,6 @@ namespace Assets.Code.Bon
 			return BonConfig.SocketOffsetTop + (socketTopIndex*BonConfig.SocketSize)
 				+ (socketTopIndex*BonConfig.SocketMargin);
 		}
-
-		/*void GUIDrawNodeWindow(int id)
-		{
-			// start custom node layout
-			contentRect.Set(0, BonConfig.SocketOffsetTop,
-				Width, Height - BonConfig.SocketOffsetTop);
-
-			GUILayout.BeginArea(contentRect);
-			GUI.color = Color.white;
-			OnGUI();
-			GUILayout.EndArea();
-			GUI.DragWindow();
-			if (Event.current.GetTypeForControl(id) == EventType.Used) lastFocusedNodeId = id;
-		}*/
 
 		public static string GetNodeName(Type nodeType)
 		{
