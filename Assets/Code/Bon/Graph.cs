@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using Assets.Code.Bon.Interface;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace Assets.Code.Bon
 		[SerializeField]
 		private List<SerializableNode> serializedNodes = new List<SerializableNode>();
 
-		[SerializeField] private int version = BonConfig.Version;
+		[SerializeField] public int Version = BonConfig.Version;
 
 		// be warned to allow circles.. if you parse the graph you can end up in
 		// an endless recursion this can crash unity.
@@ -261,7 +262,13 @@ namespace Assets.Code.Bon
 				var file = File.OpenText(fileName);
 				var json = file.ReadToEnd();
 				file.Close();
-				return FromJson(json, listener);
+				Graph deserializedGraph = FromJson(json, listener);
+				if (deserializedGraph.Version != BonConfig.Version)
+				{
+					Debug.LogWarning("You loading a graph with a different version number: " + deserializedGraph.Version +
+						" the current version is " + BonConfig.Version);
+				}
+				return deserializedGraph;
 			} else {
 				Debug.Log("Could not Open the file: " + fileName);
 				return null;

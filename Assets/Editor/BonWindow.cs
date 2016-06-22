@@ -24,7 +24,7 @@ namespace Assets.Editor
 		private const int TabCloseButtonSize = TopMenuHeight;
 
 		private const int WindowTitleHeight = 21; // Unity issue
-		private const float CanvasZoomMin = 0.01f;
+		private const float CanvasZoomMin = 0.1f;
 		private const float CanvasZoomMax = 1.0f;
 
 		private readonly Rect openButtonRect = new Rect(0, 0, 80, TopMenuHeight);

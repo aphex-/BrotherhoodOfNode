@@ -24,24 +24,51 @@ namespace Assets.Editor.Bon
 		private Vector2 _tmpVector01 = new Vector2();
 		private Vector2 _tmpVector02 = new Vector2();
 
+		private readonly Color _backgroundColor = new Color(0.18f, 0.18f, 0.18f, 1f);
+		private readonly Color _backgroundLineColor01 = new Color(0.14f, 0.14f, 0.14f, 1f);
+		private readonly Color _backgroundLineColor02 = new Color(0.10f, 0.10f, 0.10f, 1f);
+
 		public BonCanvas(Graph graph)
 		{
 			this.graph = graph;
-			Style.normal.background = Texture2D.whiteTexture;
+			Style.normal.background = CreateBackgroundTexture();
+			Style.normal.background.wrapMode = TextureWrapMode.Repeat;
+			Style.fixedHeight = CanvasSize;
+			Style.fixedWidth = CanvasSize;
+
+		}
+
+		private Texture2D CreateBackgroundTexture()
+		{
+			var texture = new Texture2D(100, 100, TextureFormat.ARGB32, false);
+			for (var x = 0; x < texture.width; x++)
+			{
+				for (var y = 0; y < texture.width; y++)
+				{
+					bool isVerticalLine = (x%11 == 0);
+					bool isHorizontalLine = (y % 11 == 0);
+					if (x == 0 || y == 0) texture.SetPixel(x, y, _backgroundLineColor02);
+					else if (isVerticalLine || isHorizontalLine) texture.SetPixel(x, y, _backgroundLineColor01);
+					else texture.SetPixel(x, y, _backgroundColor);
+				}
+			}
+			texture.filterMode = FilterMode.Trilinear;
+			texture.wrapMode = TextureWrapMode.Repeat;
+			texture.Apply();
+			return texture;
 		}
 
 		public void Draw(EditorWindow window, Rect region, Socket currentDragingSocket)
 		{
 			EditorZoomArea.Begin(Zoom, region);
+			GUI.DrawTextureWithTexCoords(this.DrawArea, this.Style.normal.background, new Rect(0, 0, 1000, 1000));
 			this.DrawArea.Set(this.Position.x, this.Position.y, CanvasSize, CanvasSize);
-			GUILayout.BeginArea(this.DrawArea, this.Style);
+			GUILayout.BeginArea(this.DrawArea);
 			this.DrawEdges();
-
 			window.BeginWindows();
 			this.DrawNodes();
 			window.EndWindows();
 			this.DrawDragEdge(currentDragingSocket);
-
 
 			for (var i = 0; i < graph.GetNodeCount(); i++)
 			{
