@@ -17,6 +17,7 @@ namespace Assets.Editor
 	{
 		private const string Name = "BrotherhoodOfNode";
 		public const int TopOffset = 32;
+		public const int BottomOffset = 20;
 		public const int TopMenuHeight = 20;
 
 		private const int TabButtonWidth = 200;
@@ -31,6 +32,8 @@ namespace Assets.Editor
 		private readonly Rect saveButtonRect = new Rect(80, 0, 80, TopMenuHeight);
 		private readonly Rect newButtonRect = new Rect(160, 0, 80, TopMenuHeight);
 		private readonly Rect helpButtonRect = new Rect(240, 0, 80, TopMenuHeight);
+
+		private Vector2 nextTranlationPosition = new Vector2();
 
 		private readonly Color TabColorUnselected = new Color(0.8f, 0.8f, 0.8f, 0.5f);
 		private readonly Color TabColorSelected = Color.white;
@@ -47,11 +50,17 @@ namespace Assets.Editor
 		private GenericMenu menu;
 		private Dictionary<string, Type> menuEntryToNodeType;
 
+		private Rect tmpRect = new Rect();
+
 		[MenuItem("Window/" + Name)]
 		public static void CreateEditor()
 		{
 			BonWindow window = EditorWindow.GetWindow<BonWindow>();
+			// BonWindow window = CreateInstance<BonWindow>(); // to create a new window
 			window.wantsMouseMove = true;
+			GUIContent c = new GUIContent();
+			c.text = "Graph";
+			window.titleContent = c;
 			window.Show();
 		}
 
@@ -92,6 +101,8 @@ namespace Assets.Editor
 		}
 
 
+
+
 		/// <summary>Draws the UI</summary>
 		void OnGUI()
 		{
@@ -108,9 +119,23 @@ namespace Assets.Editor
 
 			HandleTabButtons();
 
+			if (currentCanvas != null) {
+				float infoPanelY = Screen.height - TopOffset - 6;
+				tmpRect.Set(5, infoPanelY, 55, 20);
+				GUI.Label(tmpRect, "zoom: " + Math.Round(currentCanvas.Zoom, 1));
+				tmpRect.Set(60, infoPanelY, 70, 20);
+				GUI.Label(tmpRect, "x: " + Math.Round(currentCanvas.Position.x));			
+				tmpRect.Set(130, infoPanelY, 70, 20);
+				GUI.Label(tmpRect, "y: " + Math.Round(currentCanvas.Position.y));
+				tmpRect.Set(200, infoPanelY, 70, 20);
+				GUI.Label(tmpRect, "nodes: " + currentCanvas.graph.GetNodeCount());
+				tmpRect.Set(5, Screen.height - TopOffset - 6, 100, 20);
+				GUI.Label(tmpRect, "zoom: " + Math.Round(currentCanvas.Zoom, 1));
+			}
+
 			if (currentCanvas != null)
 			{
-				canvasRegion.Set(0, TopOffset, Screen.width, Screen.height);
+				canvasRegion.Set(0, TopOffset, Screen.width, Screen.height - 2 * TopOffset - BottomOffset);
 				currentCanvas.Draw((EditorWindow) this, canvasRegion, currentDragSocket);
 			}
 			lastMousePosition = Event.current.mousePosition;
@@ -249,8 +274,6 @@ namespace Assets.Editor
 				}
 			}*/
 		}
-
-		private Vector2 nextTranlationPosition = new Vector2();
 
 		private void HandleCanvasTranslation()
 		{
