@@ -250,6 +250,8 @@ namespace Assets.Editor
 			}*/
 		}
 
+		private Vector2 nextTranlationPosition = new Vector2();
+
 		private void HandleCanvasTranslation()
 		{
 			if (currentCanvas == null) return;
@@ -261,8 +263,13 @@ namespace Assets.Editor
 				float zoomDelta = -Event.current.delta.y/150.0f;
 				float oldZoom = currentCanvas.Zoom;
 				currentCanvas.Zoom = Mathf.Clamp(currentCanvas.Zoom + zoomDelta, CanvasZoomMin, CanvasZoomMax);
-				currentCanvas.Position += (zoomCoordsMousePos - currentCanvas.Position) -
+
+				nextTranlationPosition = currentCanvas.Position + (zoomCoordsMousePos - currentCanvas.Position) -
 					(oldZoom/currentCanvas.Zoom)*(zoomCoordsMousePos - currentCanvas.Position);
+
+				if (nextTranlationPosition.x >= 0) nextTranlationPosition.x = 0;
+				if (nextTranlationPosition.y >= 0) nextTranlationPosition.y = 0;
+				currentCanvas.Position = nextTranlationPosition;
 				Event.current.Use();
 				return;
 			}
@@ -274,8 +281,12 @@ namespace Assets.Editor
 			{
 				Vector2 delta = Event.current.delta;
 				delta /= currentCanvas.Zoom;
-				currentCanvas.Position += delta;
 
+				nextTranlationPosition = currentCanvas.Position + delta;
+				if (nextTranlationPosition.x >= 0) nextTranlationPosition.x = 0;
+				if (nextTranlationPosition.y >= 0) nextTranlationPosition.y = 0;
+
+				currentCanvas.Position = nextTranlationPosition;
 				Event.current.Use();
 				return;
 			}

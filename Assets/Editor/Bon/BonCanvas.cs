@@ -61,6 +61,8 @@ namespace Assets.Editor.Bon
 		public void Draw(EditorWindow window, Rect region, Socket currentDragingSocket)
 		{
 			EditorZoomArea.Begin(Zoom, region);
+
+			if (this.Style.normal.background == null) 	this.Style.normal.background = CreateBackgroundTexture();
 			GUI.DrawTextureWithTexCoords(this.DrawArea, this.Style.normal.background, new Rect(0, 0, 1000, 1000));
 			this.DrawArea.Set(this.Position.x, this.Position.y, CanvasSize, CanvasSize);
 			GUILayout.BeginArea(this.DrawArea);
