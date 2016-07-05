@@ -23,15 +23,6 @@ namespace Assets.Code.Bon.Nodes.Map
 			GUI.DrawTexture(new Rect(6, 0, _texture2D.width, _texture2D.height), _texture2D);
 		}
 
-		public override void OnSerialization(SerializableNode sNode)
-		{
-
-		}
-
-		public override void OnDeserialization(SerializableNode sNode)
-		{
-
-		}
 
 		public override object GetResultOf(Socket outSocket)
 		{

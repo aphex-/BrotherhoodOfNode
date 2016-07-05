@@ -34,16 +34,6 @@ namespace Assets.Code.Bon.Nodes.Math
 		}
 
 
-		public override void OnSerialization(SerializableNode sNode)
-		{
-
-		}
-
-		public override void OnDeserialization(SerializableNode sNode)
-		{
-
-		}
-
 		public override object GetResultOf(Socket outSocket)
 		{
 			return float.Parse(Number);

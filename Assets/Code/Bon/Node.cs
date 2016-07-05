@@ -27,11 +27,14 @@ namespace Assets.Code.Bon
 		[System.NonSerialized]
 		public bool VisitFlag = false;
 
-		 [System.NonSerialized]
+		[System.NonSerialized]
 		public Rect ContentRect;
 
 		[System.NonSerialized]
 		public static int LastFocusedNodeId;
+
+		public bool Resizable = true;
+		public Rect ResizeArea = new Rect();
 
 		protected Node(int id)
 		{
@@ -44,8 +47,14 @@ namespace Assets.Code.Bon
 
 		public abstract void OnGUI();
 
-		public abstract void OnSerialization(SerializableNode sNode);
-		public abstract void OnDeserialization(SerializableNode sNode);
+		public virtual void OnSerialization(SerializableNode sNode)
+		{
+
+		}
+
+		public virtual void OnDeserialization(SerializableNode sNode)
+		{
+		}
 
 		public abstract object GetResultOf(Socket outSocket);
 		public abstract bool CanGetResultOf(Socket outSocket);

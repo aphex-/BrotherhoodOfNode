@@ -44,15 +44,6 @@ namespace Assets.Code.Bon.Nodes.Map
 			if (NodeUtils.FloatTextField(_textFieldSeed, ref Seed)) TriggerChangeEvent();
 		}
 
-		public override void OnSerialization(SerializableNode sNode)
-		{
-
-		}
-
-		public override void OnDeserialization(SerializableNode sNode)
-		{
-
-		}
 
 		public override object GetResultOf(Socket outSocket)
 		{

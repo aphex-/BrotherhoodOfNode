@@ -49,15 +49,6 @@ namespace Assets.Code.Bon.Nodes.Math
 			GUILayout.EndHorizontal();
 		}
 
-		public override void OnSerialization(SerializableNode sNode)
-		{
-
-		}
-
-		public override void OnDeserialization(SerializableNode sNode)
-		{
-
-		}
 
 		public override object GetResultOf(Socket outSocket)
 		{
