@@ -30,13 +30,13 @@ namespace Assets.Code.Bon
 				var numberNode01 = new NumberNode(graph.GetUniqueId());
 				numberNode01.X = 20;
 				numberNode01.Y = 20;
-				numberNode01.Number = 355;
+				numberNode01.Number = "355";
 				graph.AddNode(numberNode01);
 
 				var numberNode02 = new NumberNode(graph.GetUniqueId());
 				numberNode02.X = 20;
 				numberNode02.Y = 80;
-				numberNode02.Number = 113;
+				numberNode02.Number = "113";
 				graph.AddNode(numberNode02);
 
 				var operator01 = new MathOperatorNode(graph.GetUniqueId());

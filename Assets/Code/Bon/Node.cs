@@ -19,7 +19,7 @@ namespace Assets.Code.Bon
 		private INodeListener _listener;
 
 		[System.NonSerialized]
-		public string NodeName;
+		public string Name;
 
 		// Editor related
 		[System.NonSerialized]
@@ -39,7 +39,7 @@ namespace Assets.Code.Bon
 			// default size
 			Width = 100;
 			Height = 100;
-			NodeName = GetNodeName(this.GetType());
+			Name = GetNodeName(this.GetType());
 		}
 
 		public abstract void OnGUI();

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using Assets.Code.Bon.Interface;
 using Assets.Code.Bon;
 using UnityEngine;
@@ -13,7 +15,7 @@ namespace Assets.Code.Bon.Nodes.Math
 		public static Color FloatType = new Color(0.32f, 0.58f, 0.86f);
 
 		[SerializeField]
-		public float Number;
+		public string Number;
 
 		private readonly Rect _textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
 
@@ -25,26 +27,12 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public override void OnGUI()
 		{
-			var textFieldValue = GUI.TextField(_textFieldArea, Number.ToString());
-			var newNumber = GetValidNumber(textFieldValue);
-			if (System.Math.Abs(newNumber - Number) > 0)
+			if (NodeUtils.FloatTextField(_textFieldArea, ref Number))
 			{
-				Number = newNumber;
 				TriggerChangeEvent();
 			}
 		}
 
-		private float GetValidNumber(string text)
-		{
-			float newNumber;
-			if (text.Equals("") || text.Length == 0) text = "0";
-			var isNumeric = float.TryParse(text, out newNumber);
-			if (isNumeric)
-			{
-				return newNumber;
-			}
-			return Number;
-		}
 
 		public override void OnSerialization(SerializableNode sNode)
 		{
@@ -58,7 +46,7 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public override object GetResultOf(Socket outSocket)
 		{
-			return Number;
+			return float.Parse(Number);
 		}
 
 		public override bool CanGetResultOf(Socket outSocket)

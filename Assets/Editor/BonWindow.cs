@@ -2,15 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Security;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
 using Assets.Code.Bon;
 using Assets.Editor.Bon;
 using System.Linq;
-using System.Net.Sockets;
-using UnityEditor.Graphs;
 
 
 namespace Assets.Editor
@@ -101,9 +97,6 @@ namespace Assets.Editor
 			if (path != null) return path + "/" + Node.GetNodeName(type);
 			return Node.GetNodeName(type);
 		}
-
-
-
 
 		/// <summary>Draws the UI</summary>
 		void OnGUI()

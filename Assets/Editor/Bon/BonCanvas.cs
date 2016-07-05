@@ -97,7 +97,7 @@ namespace Assets.Editor.Bon
 			for (var i = 0; i < Graph.GetNodeCount(); i++)
 			{
 				Node node = Graph.GetNodeAt(i);
-				node.windowRect = GUI.Window(node.Id, node.windowRect, GUIDrawNodeWindow, node.nodeName + " (" + node.Id + ")");
+				node.WindowRect = GUI.Window(node.Id, node.WindowRect, GUIDrawNodeWindow, node.Name + " (" + node.Id + ")");
 				node.GUIAlignSockets();
 			}
 		}
@@ -105,25 +105,25 @@ namespace Assets.Editor.Bon
 		void GUIDrawNodeWindow(int nodeId)
 		{
 			Node node = Graph.GetNode(nodeId);
-			node.contentRect.Set(0, BonConfig.SocketOffsetTop,
+			node.ContentRect.Set(0, BonConfig.SocketOffsetTop,
 				node.Width, node.Height - BonConfig.SocketOffsetTop);
 
 			if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
 			{
 				GenericMenu m = new GenericMenu();
-				m.AddDisabledItem(new GUIContent(node.nodeName + " (" + nodeId + ")"));
+				m.AddDisabledItem(new GUIContent(node.Name + " (" + nodeId + ")"));
 				m.AddSeparator("");
 				m.AddItem(new GUIContent("Delete"), false, DeleteNode, nodeId);
 				m.ShowAsContext();
 				Event.current.Use();
 			}
 
-			GUILayout.BeginArea(node.contentRect);
+			GUILayout.BeginArea(node.ContentRect);
 			GUI.color = Color.white;
 			node.OnGUI();
 			GUILayout.EndArea();
 			GUI.DragWindow();
-			if (Event.current.GetTypeForControl(node.Id) == EventType.Used) Node.lastFocusedNodeId = node.Id;
+			if (Event.current.GetTypeForControl(node.Id) == EventType.Used) Node.LastFocusedNodeId = node.Id;
 		}
 
 		private void DeleteNode(object nodeId)
