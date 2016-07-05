@@ -9,6 +9,8 @@ using UnityEngine;
 using Assets.Code.Bon;
 using Assets.Editor.Bon;
 using System.Linq;
+using System.Net.Sockets;
+using UnityEditor.Graphs;
 
 
 namespace Assets.Editor
@@ -28,29 +30,29 @@ namespace Assets.Editor
 		private const float CanvasZoomMin = 0.1f;
 		private const float CanvasZoomMax = 1.0f;
 
-		private readonly Rect openButtonRect = new Rect(0, 0, 80, TopMenuHeight);
-		private readonly Rect saveButtonRect = new Rect(80, 0, 80, TopMenuHeight);
-		private readonly Rect newButtonRect = new Rect(160, 0, 80, TopMenuHeight);
-		private readonly Rect helpButtonRect = new Rect(240, 0, 80, TopMenuHeight);
+		private readonly Rect _openButtonRect = new Rect(0, 0, 80, TopMenuHeight);
+		private readonly Rect _saveButtonRect = new Rect(80, 0, 80, TopMenuHeight);
+		private readonly Rect _newButtonRect = new Rect(160, 0, 80, TopMenuHeight);
+		private readonly Rect _helpButtonRect = new Rect(240, 0, 80, TopMenuHeight);
 
-		private Vector2 nextTranlationPosition = new Vector2();
+		private Vector2 _nextTranlationPosition = new Vector2();
 
-		private readonly Color TabColorUnselected = new Color(0.8f, 0.8f, 0.8f, 0.5f);
-		private readonly Color TabColorSelected = Color.white;
+		private readonly Color _tabColorUnselected = new Color(0.8f, 0.8f, 0.8f, 0.5f);
+		private readonly Color _tabColorSelected = Color.white;
 
 
-		private BonLauncher launcher;
-		private List<BonCanvas> canvasList = new List<BonCanvas>();
-		private BonCanvas currentCanvas = null;
-		private Rect canvasRegion = new Rect();
+		private readonly BonLauncher _launcher;
+		private readonly List<BonCanvas> _canvasList = new List<BonCanvas>();
+		private BonCanvas _currentCanvas = null;
+		private Rect _canvasRegion = new Rect();
 
-		private Socket currentDragSocket = null;
-		private Vector2 lastMousePosition = new Vector2();
+		private Socket _currentDragSocket = null;
+		private Vector2 _lastMousePosition = new Vector2();
 
-		private GenericMenu menu;
-		private Dictionary<string, Type> menuEntryToNodeType;
+		private readonly GenericMenu _menu;
+		private readonly Dictionary<string, Type> _menuEntryToNodeType;
 
-		private Rect tmpRect = new Rect();
+		private Rect _tmpRect = new Rect();
 
 		[MenuItem("Window/" + Name)]
 		public static void CreateEditor()
@@ -67,15 +69,15 @@ namespace Assets.Editor
 		public BonWindow()
 		{
 			titleContent = new GUIContent(Name);
-			launcher = new BonLauncher();
-			launcher.OnWindowOpen();
+			_launcher = new BonLauncher();
+			_launcher.OnWindowOpen();
 
 
-			menuEntryToNodeType = CreateMenuEntries();
-			Graph graph = launcher.LoadGraph(BonConfig.DefaultGraphName);
-			currentCanvas = new BonCanvas(graph);
-			canvasList.Add(currentCanvas);
-			menu = CreateGenericMenu();
+			_menuEntryToNodeType = CreateMenuEntries();
+			Graph graph = _launcher.LoadGraph(BonConfig.DefaultGraphName);
+			_currentCanvas = new BonCanvas(graph);
+			_canvasList.Add(_currentCanvas);
+			_menu = CreateGenericMenu();
 		}
 
 		/// <summary>Creates a dictonary that maps a menu entry string to a node type using reflection.</summary>
@@ -112,33 +114,33 @@ namespace Assets.Editor
 
 			if (Event.current.type == EventType.ContextClick)
 			{
-				menu.ShowAsContext();
+				_menu.ShowAsContext();
 				Event.current.Use();
 			}
 			HandleMenuButtons();
 
 			HandleTabButtons();
 
-			if (currentCanvas != null) {
+			if (_currentCanvas != null) {
 				float infoPanelY = Screen.height - TopOffset - 6;
-				tmpRect.Set(5, infoPanelY, 55, 20);
-				GUI.Label(tmpRect, "zoom: " + Math.Round(currentCanvas.Zoom, 1));
-				tmpRect.Set(60, infoPanelY, 70, 20);
-				GUI.Label(tmpRect, "x: " + Math.Round(currentCanvas.Position.x));			
-				tmpRect.Set(130, infoPanelY, 70, 20);
-				GUI.Label(tmpRect, "y: " + Math.Round(currentCanvas.Position.y));
-				tmpRect.Set(200, infoPanelY, 70, 20);
-				GUI.Label(tmpRect, "nodes: " + currentCanvas.graph.GetNodeCount());
-				tmpRect.Set(5, Screen.height - TopOffset - 6, 100, 20);
-				GUI.Label(tmpRect, "zoom: " + Math.Round(currentCanvas.Zoom, 1));
+				_tmpRect.Set(5, infoPanelY, 55, 20);
+				GUI.Label(_tmpRect, "zoom: " + Math.Round(_currentCanvas.Zoom, 1));
+				_tmpRect.Set(60, infoPanelY, 70, 20);
+				GUI.Label(_tmpRect, "x: " + Math.Round(_currentCanvas.Position.x));
+				_tmpRect.Set(130, infoPanelY, 70, 20);
+				GUI.Label(_tmpRect, "y: " + Math.Round(_currentCanvas.Position.y));
+				_tmpRect.Set(200, infoPanelY, 70, 20);
+				GUI.Label(_tmpRect, "nodes: " + _currentCanvas.Graph.GetNodeCount());
+				_tmpRect.Set(5, Screen.height - TopOffset - 6, 100, 20);
+				GUI.Label(_tmpRect, "zoom: " + Math.Round(_currentCanvas.Zoom, 1));
 			}
 
-			if (currentCanvas != null)
+			if (_currentCanvas != null)
 			{
-				canvasRegion.Set(0, TopOffset, Screen.width, Screen.height - 2 * TopOffset - BottomOffset);
-				currentCanvas.Draw((EditorWindow) this, canvasRegion, currentDragSocket);
+				_canvasRegion.Set(0, TopOffset, Screen.width, Screen.height - 2 * TopOffset - BottomOffset);
+				_currentCanvas.Draw((EditorWindow) this, _canvasRegion, _currentDragSocket);
 			}
-			lastMousePosition = Event.current.mousePosition;
+			_lastMousePosition = Event.current.mousePosition;
 		}
 
 		private void HandleTabButtons()
@@ -146,7 +148,7 @@ namespace Assets.Editor
 			Color standardBackgroundColor = GUI.backgroundColor;
 			int tabIndex = 0;
 			BonCanvas canvasToClose = null;
-			foreach (BonCanvas tmpCanvas in canvasList)
+			foreach (BonCanvas tmpCanvas in _canvasList)
 			{
 				int width = TabButtonWidth + TabButtonMargin + TabCloseButtonSize;
 				int xOffset = width*tabIndex;
@@ -155,14 +157,14 @@ namespace Assets.Editor
 				tmpCanvas.CloseTabButton.Set(xOffset + width - TabCloseButtonSize - TabButtonMargin -4,
 					TopMenuHeight + TabButtonMargin, TabCloseButtonSize, TabCloseButtonSize);
 
-				bool isSelected = (currentCanvas == tmpCanvas);
+				bool isSelected = (_currentCanvas == tmpCanvas);
 				string tabName;
 				if (tmpCanvas.FilePath == null) tabName = "untitled";
 				else tabName = Path.GetFileName(tmpCanvas.FilePath);
 
 
-				if (isSelected) GUI.backgroundColor = TabColorSelected;
-				else GUI.backgroundColor = TabColorUnselected;
+				if (isSelected) GUI.backgroundColor = _tabColorSelected;
+				else GUI.backgroundColor = _tabColorUnselected;
 
 				if (GUI.Button(tmpCanvas.TabButton, tabName))
 				{
@@ -185,7 +187,7 @@ namespace Assets.Editor
 
 		private void SetCurrentCanvas(BonCanvas canvas)
 		{
-			currentCanvas = canvas;
+			_currentCanvas = canvas;
 		}
 
 		private void CloseCanvas(BonCanvas canvas)
@@ -195,36 +197,36 @@ namespace Assets.Editor
 			if (doSave)
 			{
 				if (canvas.FilePath == null) OpenSaveDialog();
-				else launcher.SaveGraph(canvas.graph, canvas.FilePath);
+				else _launcher.SaveGraph(canvas.Graph, canvas.FilePath);
 			}
-			canvasList.Remove(canvas);
-			if (canvasList.Count > 0) currentCanvas = canvasList[0];
-			else currentCanvas = null;
+			_canvasList.Remove(canvas);
+			if (_canvasList.Count > 0) _currentCanvas = _canvasList[0];
+			else _currentCanvas = null;
 		}
 
 		private GenericMenu CreateGenericMenu()
 		{
 			GenericMenu m = new GenericMenu();
-			foreach(KeyValuePair<string, Type> entry in menuEntryToNodeType)
+			foreach(KeyValuePair<string, Type> entry in _menuEntryToNodeType)
 				m.AddItem(new GUIContent(entry.Key), false, OnGenericMenuClick, entry.Value);
 			return m;
 		}
 
 		private void OnGenericMenuClick(object item)
 		{
-			if (currentCanvas != null)
+			if (_currentCanvas != null)
 			{
-				currentCanvas.CreateNode((Type) item, lastMousePosition);
+				_currentCanvas.CreateNode((Type) item, _lastMousePosition);
 			}
 		}
 
 		private void CreateCanvas(string path)
 		{
 			BonCanvas canvas;
-			if (path != null) canvas = new BonCanvas(launcher.LoadGraph(path));
+			if (path != null) canvas = new BonCanvas(_launcher.LoadGraph(path));
 			else canvas = new BonCanvas(new Graph());
 			canvas.FilePath = path;
-			canvasList.Add(canvas);
+			_canvasList.Add(canvas);
 			SetCurrentCanvas(canvas);
 		}
 
@@ -233,33 +235,33 @@ namespace Assets.Editor
 			var path = EditorUtility.SaveFilePanel("save graph data", "", "graph", "json");
 			if (!path.Equals(""))
 			{
-				launcher.SaveGraph(currentCanvas.graph, path);
-				currentCanvas.FilePath = path;
+				_launcher.SaveGraph(_currentCanvas.Graph, path);
+				_currentCanvas.FilePath = path;
 			}
 		}
 
 		private void HandleMenuButtons()
 		{
-			if (GUI.Button(openButtonRect, "Open"))
+			if (GUI.Button(_openButtonRect, "Open"))
 			{
 				var path = EditorUtility.OpenFilePanel("load graph data", "", "json");
 				if (!path.Equals("")) CreateCanvas(path);
 			}
 
 			// Save Button
-			if (GUI.Button(saveButtonRect, "Save"))
+			if (GUI.Button(_saveButtonRect, "Save"))
 			{
 				OpenSaveDialog();
 			}
 
 			// New Button
-			if (GUI.Button(newButtonRect, "New"))
+			if (GUI.Button(_newButtonRect, "New"))
 			{
 				CreateCanvas(null);
 			}
 
 			// Help Button
-			GUI.Button(helpButtonRect, "Help");
+			GUI.Button(_helpButtonRect, "Help");
 		}
 
 		private void HandleNodeRemoving()
@@ -277,22 +279,22 @@ namespace Assets.Editor
 
 		private void HandleCanvasTranslation()
 		{
-			if (currentCanvas == null) return;
+			if (_currentCanvas == null) return;
 
 			// Zoom
 			if (Event.current.type == EventType.ScrollWheel)
 			{
 				Vector2 zoomCoordsMousePos = ConvertScreenCoordsToZoomCoords(Event.current.mousePosition);
 				float zoomDelta = -Event.current.delta.y/150.0f;
-				float oldZoom = currentCanvas.Zoom;
-				currentCanvas.Zoom = Mathf.Clamp(currentCanvas.Zoom + zoomDelta, CanvasZoomMin, CanvasZoomMax);
+				float oldZoom = _currentCanvas.Zoom;
+				_currentCanvas.Zoom = Mathf.Clamp(_currentCanvas.Zoom + zoomDelta, CanvasZoomMin, CanvasZoomMax);
 
-				nextTranlationPosition = currentCanvas.Position + (zoomCoordsMousePos - currentCanvas.Position) -
-					(oldZoom/currentCanvas.Zoom)*(zoomCoordsMousePos - currentCanvas.Position);
+				_nextTranlationPosition = _currentCanvas.Position + (zoomCoordsMousePos - _currentCanvas.Position) -
+					(oldZoom/_currentCanvas.Zoom)*(zoomCoordsMousePos - _currentCanvas.Position);
 
-				if (nextTranlationPosition.x >= 0) nextTranlationPosition.x = 0;
-				if (nextTranlationPosition.y >= 0) nextTranlationPosition.y = 0;
-				currentCanvas.Position = nextTranlationPosition;
+				if (_nextTranlationPosition.x >= 0) _nextTranlationPosition.x = 0;
+				if (_nextTranlationPosition.y >= 0) _nextTranlationPosition.y = 0;
+				_currentCanvas.Position = _nextTranlationPosition;
 				Event.current.Use();
 				return;
 			}
@@ -303,13 +305,13 @@ namespace Assets.Editor
 			    Event.current.button == 2)
 			{
 				Vector2 delta = Event.current.delta;
-				delta /= currentCanvas.Zoom;
+				delta /= _currentCanvas.Zoom;
 
-				nextTranlationPosition = currentCanvas.Position + delta;
-				if (nextTranlationPosition.x >= 0) nextTranlationPosition.x = 0;
-				if (nextTranlationPosition.y >= 0) nextTranlationPosition.y = 0;
+				_nextTranlationPosition = _currentCanvas.Position + delta;
+				if (_nextTranlationPosition.x >= 0) _nextTranlationPosition.x = 0;
+				if (_nextTranlationPosition.y >= 0) _nextTranlationPosition.y = 0;
 
-				currentCanvas.Position = nextTranlationPosition;
+				_currentCanvas.Position = _nextTranlationPosition;
 				Event.current.Use();
 				return;
 			}
@@ -317,21 +319,21 @@ namespace Assets.Editor
 
 		private void HandleDragAndDrop()
 		{
-			if (currentCanvas == null) return;
+			if (_currentCanvas == null) return;
 
 			if (Event.current.type == EventType.MouseDown)
 			{
-				Socket target = currentCanvas.GetSocketAt(Event.current.mousePosition);
-				if (target != null && currentDragSocket == null)
+				Socket target = _currentCanvas.GetSocketAt(Event.current.mousePosition);
+				if (target != null && _currentDragSocket == null)
 				{
 					if (target.Edge == null)
 					{
-						currentDragSocket = target;
+						_currentDragSocket = target;
 					}
 					else
 					{
-						currentDragSocket = target.Edge.GetOtherSocket(target);
-						currentCanvas.graph.UnLink(currentDragSocket, target);
+						_currentDragSocket = target.Edge.GetOtherSocket(target);
+						_currentCanvas.Graph.UnLink(_currentDragSocket, target);
 					}
 					Event.current.Use();
 				}
@@ -339,43 +341,43 @@ namespace Assets.Editor
 
 			if (Event.current.type == EventType.MouseUp)
 			{
-				if (currentDragSocket != null)
+				if (_currentDragSocket != null)
 				{
-					Socket target = currentCanvas.GetSocketAt(Event.current.mousePosition);
-					if (currentCanvas.graph.CanBeLinked(target, currentDragSocket))
+					Socket target = _currentCanvas.GetSocketAt(Event.current.mousePosition);
+					if (_currentCanvas.Graph.CanBeLinked(target, _currentDragSocket))
 					{
 						// drop edge event
 						if (target.Edge != null)
 						{
 							// replace edge
-							currentCanvas.graph.UnLink(target);
+							_currentCanvas.Graph.UnLink(target);
 						}
 
-						if (currentDragSocket.Direction == SocketDirection.Input)
+						if (_currentDragSocket.Direction == SocketDirection.Input)
 						{
-							currentCanvas.graph.Link(currentDragSocket, target);
+							_currentCanvas.Graph.Link(_currentDragSocket, target);
 						}
 						else
 						{
-							currentCanvas.graph.Link(target, currentDragSocket);
+							_currentCanvas.Graph.Link(target, _currentDragSocket);
 						}
 
 						Event.current.Use();
 					}
-					currentDragSocket = null;
+					_currentDragSocket = null;
 					Repaint();
 				}
 			}
 
 			if (Event.current.type == EventType.MouseDrag)
 			{
-				if (currentDragSocket != null) Event.current.Use();
+				if (_currentDragSocket != null) Event.current.Use();
 			}
 		}
 
 		private Vector2 ConvertScreenCoordsToZoomCoords(Vector2 screenCoords)
 		{
-			return (screenCoords - canvasRegion.TopLeft())/currentCanvas.Zoom + currentCanvas.Position;
+			return (screenCoords - _canvasRegion.TopLeft())/_currentCanvas.Zoom + _currentCanvas.Position;
 		}
 
 	}

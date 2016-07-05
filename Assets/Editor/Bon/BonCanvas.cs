@@ -16,7 +16,7 @@ namespace Assets.Editor.Bon
 		public Rect DrawArea = new Rect();
 		public float Zoom = 1;
 		public Vector2 Position = new Vector2();
-		public Graph graph;
+		public Graph Graph;
 
 		public Rect TabButton = new Rect();
 		public Rect CloseTabButton = new Rect();
@@ -30,7 +30,7 @@ namespace Assets.Editor.Bon
 
 		public BonCanvas(Graph graph)
 		{
-			this.graph = graph;
+			this.Graph = graph;
 			Style.normal.background = CreateBackgroundTexture();
 			Style.normal.background.wrapMode = TextureWrapMode.Repeat;
 			Style.fixedHeight = CanvasSize;
@@ -72,9 +72,9 @@ namespace Assets.Editor.Bon
 			window.EndWindows();
 			this.DrawDragEdge(currentDragingSocket);
 
-			for (var i = 0; i < graph.GetNodeCount(); i++)
+			for (var i = 0; i < Graph.GetNodeCount(); i++)
 			{
-				graph.GetNodeAt(i).GUIDrawSockets();
+				Graph.GetNodeAt(i).GUIDrawSockets();
 			}
 
 			GUILayout.EndArea();
@@ -94,9 +94,9 @@ namespace Assets.Editor.Bon
 
 		public void DrawNodes()
 		{
-			for (var i = 0; i < graph.GetNodeCount(); i++)
+			for (var i = 0; i < Graph.GetNodeCount(); i++)
 			{
-				Node node = graph.GetNodeAt(i);
+				Node node = Graph.GetNodeAt(i);
 				node.windowRect = GUI.Window(node.Id, node.windowRect, GUIDrawNodeWindow, node.nodeName + " (" + node.Id + ")");
 				node.GUIAlignSockets();
 			}
@@ -104,7 +104,7 @@ namespace Assets.Editor.Bon
 
 		void GUIDrawNodeWindow(int nodeId)
 		{
-			Node node = graph.GetNode(nodeId);
+			Node node = Graph.GetNode(nodeId);
 			node.contentRect.Set(0, BonConfig.SocketOffsetTop,
 				node.Width, node.Height - BonConfig.SocketOffsetTop);
 
@@ -128,23 +128,23 @@ namespace Assets.Editor.Bon
 
 		private void DeleteNode(object nodeId)
 		{
-			graph.RemoveNode((int) nodeId);
+			Graph.RemoveNode((int) nodeId);
 		}
 
 
 		public void DrawEdges()
 		{
-			for (var i = 0; i < graph.GetNodeCount(); i++)
+			for (var i = 0; i < Graph.GetNodeCount(); i++)
 			{
-				graph.GetNodeAt(i).GUIDrawEdges();
+				Graph.GetNodeAt(i).GUIDrawEdges();
 			}
 		}
 
 		public Node GetFocusedNode()
 		{
-			for (var i = 0; i < graph.GetNodeCount(); i++)
+			for (var i = 0; i < Graph.GetNodeCount(); i++)
 			{
-				Node node = graph.GetNodeAt(i);
+				Node node = Graph.GetNodeAt(i);
 				if (node.HasFocus()) return node;
 			}
 			return null;
@@ -157,9 +157,9 @@ namespace Assets.Editor.Bon
 		{
 			Vector2 projectedPosition = ProjectToCanvas(windowPosition);
 
-			for (var i = 0; i < graph.GetNodeCount(); i++)
+			for (var i = 0; i < Graph.GetNodeCount(); i++)
 			{
-				Node node = graph.GetNodeAt(i);
+				Node node = Graph.GetNodeAt(i);
 				Socket socket = node.SearchSocketAt(projectedPosition);
 				if (socket != null)
 				{
@@ -171,11 +171,11 @@ namespace Assets.Editor.Bon
 
 		public Node CreateNode(Type nodeType, Vector2 windowPosition)
 		{
-			Node node = (Node) graph.CreateNode(nodeType);
+			Node node = (Node) Graph.CreateNode(nodeType);
 			var position = ProjectToCanvas(windowPosition);
 			node.X = position.x;
 			node.Y = position.y;
-			graph.AddNode(node);
+			Graph.AddNode(node);
 			return node;
 		}
 
@@ -183,7 +183,7 @@ namespace Assets.Editor.Bon
 		{
 
 			Node node = GetFocusedNode();
-			if (node != null) graph.RemoveNode(node);
+			if (node != null) Graph.RemoveNode(node);
 		}
 
 		public Vector2 ProjectToCanvas(Vector2 windowPosition)

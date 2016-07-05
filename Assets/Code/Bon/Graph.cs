@@ -222,6 +222,31 @@ namespace Assets.Code.Bon
 			return false;
 		}
 
+		public List<Node> CreateUpperNodesList(Node node)
+		{
+			if (HasCicle())
+			{
+				LogCircleError();
+				return null;
+			}
+			List<Node> upperNodes = new List<Node>();
+			AddUpperNodes(node, ref upperNodes);
+			return upperNodes;
+		}
+
+		private void AddUpperNodes(Node node, ref List<Node> upperNodesList)
+		{
+			foreach (Socket s in node.Sockets)
+			{
+				if (s.Direction == SocketDirection.Input && s.Edge != null)
+				{
+					Socket connected = s.GetConnectedSocket();
+					upperNodesList.Add(connected.Parent);
+					AddUpperNodes(connected.Parent, ref upperNodesList);
+				}
+			}
+		}
+
 		/// <summary> Returns true if the sockets can be linked.</summary>
 		/// <param name="socket01"> The first socket</param>
 		/// <param name="socket02"> The second socket</param>
@@ -232,6 +257,10 @@ namespace Assets.Code.Bon
 				   && socket01 != socket02 && socket01.Direction != socket02.Direction;
 		}
 
+		public void LogCircleError()
+		{
+			Debug.LogError("The graph contains ciclyes.");
+		}
 
 		// === SERIALIZATION ===
 

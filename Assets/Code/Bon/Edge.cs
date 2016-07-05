@@ -11,10 +11,10 @@ namespace Assets.Code.Bon
 		public Socket Output;
 
 		// cached vectors for drawing
-		private Vector2 tmpStartPos;
-		private Vector2 tmpEndPos;
-		private Vector2 tmpTangent01;
-		private Vector2 tmpTangent02;
+		private Vector2 _tmpStartPos;
+		private Vector2 _tmpEndPos;
+		private Vector2 _tmpTangent01;
+		private Vector2 _tmpTangent02;
 
 		public Edge(Socket socket01, Socket socket02)
 		{
@@ -40,17 +40,17 @@ namespace Assets.Code.Bon
 		{
 			if (Input != null && Output != null)
 			{
-				tmpStartPos = GetEdgePosition(Output, tmpStartPos);
-				tmpEndPos = GetEdgePosition(Input, tmpEndPos);
-				tmpTangent01 = GetTangentPosition(Output, tmpStartPos);
-				tmpTangent02 = GetTangentPosition(Input, tmpEndPos);
-				DrawEdge(tmpStartPos, tmpTangent01, tmpEndPos, tmpTangent02, Output.Type);
+				_tmpStartPos = GetEdgePosition(Output, _tmpStartPos);
+				_tmpEndPos = GetEdgePosition(Input, _tmpEndPos);
+				_tmpTangent01 = GetTangentPosition(Output, _tmpStartPos);
+				_tmpTangent02 = GetTangentPosition(Input, _tmpEndPos);
+				DrawEdge(_tmpStartPos, _tmpTangent01, _tmpEndPos, _tmpTangent02, Output.Type);
 
 				Handles.color = Color.black;
-				tmpStartPos.Set(tmpEndPos.x - 5, tmpEndPos.y - 5);
-				Handles.DrawLine(tmpEndPos, tmpStartPos);
-				tmpStartPos.Set(tmpEndPos.x - 5, tmpEndPos.y + 5);
-				Handles.DrawLine(tmpEndPos, tmpStartPos);
+				_tmpStartPos.Set(_tmpEndPos.x - 5, _tmpEndPos.y - 5);
+				Handles.DrawLine(_tmpEndPos, _tmpStartPos);
+				_tmpStartPos.Set(_tmpEndPos.x - 5, _tmpEndPos.y + 5);
+				Handles.DrawLine(_tmpEndPos, _tmpStartPos);
 			}
 		}
 

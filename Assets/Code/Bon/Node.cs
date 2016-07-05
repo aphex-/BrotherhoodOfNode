@@ -16,22 +16,22 @@ namespace Assets.Code.Bon
 		public readonly int Id;
 
 		[System.NonSerialized]
-		private INodeListener listener;
+		private INodeListener _listener;
 
 		[System.NonSerialized]
-		public string nodeName;
+		public string NodeName;
 
 		// Editor related
 		[System.NonSerialized]
-		public Rect windowRect;
+		public Rect WindowRect;
 		[System.NonSerialized]
 		public bool VisitFlag = false;
 
 		 [System.NonSerialized]
-		public Rect contentRect;
+		public Rect ContentRect;
 
 		[System.NonSerialized]
-		public static int lastFocusedNodeId;
+		public static int LastFocusedNodeId;
 
 		protected Node(int id)
 		{
@@ -39,7 +39,7 @@ namespace Assets.Code.Bon
 			// default size
 			Width = 100;
 			Height = 100;
-			nodeName = GetNodeName(this.GetType());
+			NodeName = GetNodeName(this.GetType());
 		}
 
 		public abstract void OnGUI();
@@ -53,36 +53,36 @@ namespace Assets.Code.Bon
 		/// The x position of the node
 		public float X
 		{
-			get { return windowRect.x; }
-			set { windowRect.x = value; }
+			get { return WindowRect.x; }
+			set { WindowRect.x = value; }
 		}
 
 		/// The y position of the node
 		public float Y
 		{
-			get { return windowRect.y; }
-			set { windowRect.y = value; }
+			get { return WindowRect.y; }
+			set { WindowRect.y = value; }
 		}
 
 		/// The width of the node
 		public float Width
 		{
-			get { return windowRect.width; }
-			set { windowRect.width = value; }
+			get { return WindowRect.width; }
+			set { WindowRect.width = value; }
 		}
 
 		/// The height of the node
 		public float Height
 		{
-			get { return windowRect.height; }
-			set { windowRect.height = value; }
+			get { return WindowRect.height; }
+			set { WindowRect.height = value; }
 		}
 
 		/// <summary>Returns true if the node is focused.</summary>
 		/// <returns>True if the node is focused.</returns>
 		public bool HasFocus()
 		{
-			return lastFocusedNodeId == Id;
+			return LastFocusedNodeId == Id;
 		}
 
 		/// <summary>Returns true if this assigned position intersects the node.</summary>
@@ -90,7 +90,7 @@ namespace Assets.Code.Bon
 		/// <returns>True if this assigned position intersects the node.</returns>
 		public bool Intersects(Vector2 canvasPosition)
 		{
-			return windowRect.Contains(canvasPosition);
+			return WindowRect.Contains(canvasPosition);
 		}
 
 		/// <summary> Returns true if this node contains the assigned socket.</summary>
@@ -126,7 +126,7 @@ namespace Assets.Code.Bon
 		/// <returns>The position in node coordinates</returns>
 		public Vector2 ProjectToNode(Vector2 canvasPosition)
 		{
-			canvasPosition.Set(canvasPosition.x - windowRect.x, canvasPosition.y - windowRect.y);
+			canvasPosition.Set(canvasPosition.x - WindowRect.x, canvasPosition.y - WindowRect.y);
 			return canvasPosition;
 		}
 
@@ -145,12 +145,12 @@ namespace Assets.Code.Bon
 
 		public void RegisterListener(INodeListener l)
 		{
-			this.listener = l;
+			this._listener = l;
 		}
 
 		protected void TriggerChangeEvent() // call this method if your nodes content has changed
 		{
-			if (this.listener != null) this.listener.OnNodeChanged(this);
+			if (this._listener != null) this._listener.OnNodeChanged(this);
 		}
 
 		public bool AllInputSocketsConnected()
@@ -183,14 +183,14 @@ namespace Assets.Code.Bon
 			{
 				if (socket.Direction == SocketDirection.Input)
 				{
-					socket.X = - BonConfig.SocketSize + windowRect.x;
-					socket.Y = GUICalcSocketTopOffset(leftCount) + windowRect.y;
+					socket.X = - BonConfig.SocketSize + WindowRect.x;
+					socket.Y = GUICalcSocketTopOffset(leftCount) + WindowRect.y;
 					leftCount++;
 				}
 				else
 				{
-					socket.X = windowRect.width + windowRect.x;
-					socket.Y = GUICalcSocketTopOffset(rightCount) + windowRect.y;
+					socket.X = WindowRect.width + WindowRect.x;
+					socket.Y = GUICalcSocketTopOffset(rightCount) + WindowRect.y;
 					rightCount++;
 				}
 			}
@@ -221,8 +221,8 @@ namespace Assets.Code.Bon
 			SerializableNode n = new SerializableNode();
 			n.type = this.GetType().FullName;
 			n.id = Id;
-			n.X = windowRect.xMin;
-			n.Y = windowRect.yMin;
+			n.X = WindowRect.xMin;
+			n.Y = WindowRect.yMin;
 			n.data = JsonUtility.ToJson(this);
 			OnSerialization(n);
 			return n;
@@ -243,11 +243,11 @@ namespace Assets.Code.Bon
 	[AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
 	public sealed class GraphContextMenuItem : Attribute
 	{
-		private readonly string menuPath;
-		public string Path { get { return menuPath; } }
+		private readonly string _menuPath;
+		public string Path { get { return _menuPath; } }
 
-		private readonly string itemName;
-		public string Name { get { return itemName; } }
+		private readonly string _itemName;
+		public string Name { get { return _itemName; } }
 
 		public GraphContextMenuItem(string menuPath) : this(menuPath, null)
 		{
@@ -255,8 +255,8 @@ namespace Assets.Code.Bon
 
 		public GraphContextMenuItem(string menuPath, string itemName)
 		{
-			this.menuPath = menuPath;
-			this.itemName = itemName;
+			this._menuPath = menuPath;
+			this._itemName = itemName;
 		}
 
 	}

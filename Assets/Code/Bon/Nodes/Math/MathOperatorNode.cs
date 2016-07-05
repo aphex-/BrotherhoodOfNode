@@ -12,23 +12,23 @@ namespace Assets.Code.Bon.Nodes.Math
 	{
 
 		[SerializeField]
-		private int selectedMode = 0;
+		private int _selectedMode = 0;
 
 		public static readonly string[] Operations = { "add", "sub", "mul", "div" };
 
 		[System.NonSerialized]
-		private Socket inputSocket01;
+		private readonly Socket _inputSocket01;
 
 		 [System.NonSerialized]
-		private Socket inputSocket02;
+		private readonly Socket _inputSocket02;
 
 		public MathOperatorNode(int id) : base(id)
 		{
 
-			inputSocket01 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
-			Sockets.Add(inputSocket01);
-			inputSocket02 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
-			Sockets.Add(inputSocket02);
+			_inputSocket01 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
+			Sockets.Add(_inputSocket01);
+			_inputSocket02 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
+			Sockets.Add(_inputSocket02);
 			Sockets.Add(new Socket(this, NumberNode.FloatType, SocketDirection.Output));
 			Height = 95;
 			Width = 80;
@@ -39,10 +39,10 @@ namespace Assets.Code.Bon.Nodes.Math
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			int newMode = GUILayout.SelectionGrid(selectedMode,Operations,1,"toggle");
-			if (newMode != selectedMode)
+			int newMode = GUILayout.SelectionGrid(_selectedMode,Operations,1,"toggle");
+			if (newMode != _selectedMode)
 			{
-				selectedMode = newMode;
+				_selectedMode = newMode;
 				TriggerChangeEvent();
 			}
 			GUILayout.FlexibleSpace();
@@ -63,8 +63,8 @@ namespace Assets.Code.Bon.Nodes.Math
 		{
 			if (!CanGetResultOf(outSocket)) return float.NaN;
 
-			Socket connectedSocket01 = inputSocket01.GetConnectedSocket();
-			Socket connectedSocket02 = inputSocket02.GetConnectedSocket();
+			Socket connectedSocket01 = _inputSocket01.GetConnectedSocket();
+			Socket connectedSocket02 = _inputSocket02.GetConnectedSocket();
 			Node connectedNode01 = connectedSocket01.Parent;
 			Node connectedNode02 = connectedSocket02.Parent;
 
@@ -86,19 +86,19 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public float Calculate(float value01, float value02)
 		{
-			if (selectedMode == 0)
+			if (_selectedMode == 0)
 			{
 				return value01 + value02;
 			}
-			if (selectedMode == 1)
+			if (_selectedMode == 1)
 			{
 				return value01 - value02;
 			}
-			if (selectedMode == 2)
+			if (_selectedMode == 2)
 			{
 				return value01 * value02;
 			}
-			if (selectedMode == 3)
+			if (_selectedMode == 3)
 			{
 				if (value02.Equals(0)) return float.NaN;
 				return value01 / value02;
@@ -108,10 +108,10 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public void SetMode(Operator o)
 		{
-			if (o == Operator.Add) selectedMode = 0;
-			if (o == Operator.Substract) selectedMode = 1;
-			if (o == Operator.Multiply) selectedMode = 2;
-			if (o == Operator.Divide) selectedMode = 3;
+			if (o == Operator.Add) _selectedMode = 0;
+			if (o == Operator.Substract) _selectedMode = 1;
+			if (o == Operator.Multiply) _selectedMode = 2;
+			if (o == Operator.Divide) _selectedMode = 3;
 		}
 	}
 

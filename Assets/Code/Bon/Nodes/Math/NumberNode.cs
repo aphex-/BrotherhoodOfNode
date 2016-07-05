@@ -15,7 +15,7 @@ namespace Assets.Code.Bon.Nodes.Math
 		[SerializeField]
 		public float Number;
 
-		private readonly Rect textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
+		private readonly Rect _textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
 
 		public NumberNode(int id) : base(id)
 		{
@@ -25,7 +25,7 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public override void OnGUI()
 		{
-			var textFieldValue = GUI.TextField(textFieldArea, Number.ToString());
+			var textFieldValue = GUI.TextField(_textFieldArea, Number.ToString());
 			var newNumber = GetValidNumber(textFieldValue);
 			if (System.Math.Abs(newNumber - Number) > 0)
 			{

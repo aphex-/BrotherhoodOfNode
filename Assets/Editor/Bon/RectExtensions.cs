@@ -9,12 +9,12 @@ namespace Assets.Editor.Bon
 	public static class RectExtensions
 	{
 
-		private static Vector2 tmpTopLeft = new Vector2();
+		private static Vector2 _tmpTopLeft = new Vector2();
 
 		public static Vector2 TopLeft(this Rect rect)
 		{
-			tmpTopLeft.Set(rect.xMin, rect.yMin);
-			return tmpTopLeft;
+			_tmpTopLeft.Set(rect.xMin, rect.yMin);
+			return _tmpTopLeft;
 		}
 
 		public static Rect ScaleSizeBy(this Rect rect, float scale)

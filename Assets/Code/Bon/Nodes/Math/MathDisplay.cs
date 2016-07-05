@@ -8,41 +8,40 @@ namespace Assets.Code.Bon.Nodes.Math
 
 	[Serializable]
 	[GraphContextMenuItem("Math", "Display")]
-	public class MathDisplay : Node
+	public class MathDisplay : Node, IUpdateable
 	{
 
 		[System.NonSerialized]
-		public float value;
+		public float Value;
 
 		[System.NonSerialized]
-		private string errorMessage;
+		private string _errorMessage;
 
 		private const string NotConnectedMessage = "not connected";
 
 		[System.NonSerialized]
-		private Rect textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
+		private readonly Rect _textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
 
 		[System.NonSerialized]
-		private Socket inSocket;
+		private readonly Socket _inSocket;
 
 		public MathDisplay(int id) : base(id)
 		{
-			inSocket = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
-			Sockets.Add(inSocket);
+			_inSocket = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
+			Sockets.Add(_inSocket);
 			Sockets.Add(new Socket(this, NumberNode.FloatType, SocketDirection.Output));
 			Height = 20 + BonConfig.SocketOffsetTop;
-			//errorMessage = NotConnectedMessage;
 		}
 
 		public override void OnGUI()
 		{
-			if (errorMessage == null)
+			if (_errorMessage == null)
 			{
-				GUI.Label(textFieldArea, value.ToString());
+				GUI.Label(_textFieldArea, Value.ToString());
 			}
 			else
 			{
-				GUI.Label(textFieldArea, errorMessage);
+				GUI.Label(_textFieldArea, _errorMessage);
 			}
 		}
 
@@ -70,24 +69,29 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public override bool CanGetResultOf(Socket outSocket)
 		{
+			return AllInputSocketsConnected();
+		}
+
+		private float UpdateValue()
+		{
+			Socket connectedSocket = _inSocket.GetConnectedSocket();
+			Node connectedNode = connectedSocket.Parent;
+			Value = (float) connectedNode.GetResultOf(connectedSocket);
+			Debug.Log("UpdateValue " + Value);
+			return Value;
+		}
+
+		public void Update()
+		{
 			if (AllInputSocketsConnected())
 			{
-				errorMessage = null;
-				return true;
+				_errorMessage = null;
+				UpdateValue();
 			}
 			else
 			{
-				errorMessage = NotConnectedMessage;
-				return false;
+				_errorMessage = NotConnectedMessage;
 			}
-		}
-
-		public float UpdateValue()
-		{
-			Socket connectedSocket = inSocket.GetConnectedSocket();
-			Node connectedNode = connectedSocket.Parent;
-			value = (float) connectedNode.GetResultOf(connectedSocket);
-			return value;
 		}
 	}
 }

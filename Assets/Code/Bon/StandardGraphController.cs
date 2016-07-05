@@ -1,5 +1,7 @@
-﻿using Assets.Code.Bon;
+﻿using System.Collections.Generic;
+using Assets.Code.Bon;
 using Assets.Code.Bon.Interface;
+using Assets.Code.Bon.Nodes;
 using Assets.Code.Bon.Nodes.Math;
 using UnityEngine;
 
@@ -8,65 +10,66 @@ namespace Assets.Code.Bon
 	public class StandardGraphController : IGraphListener
 	{
 
-		private Graph graph;
+		private Graph _graph;
 
 		public void OnCreate(Graph graph)
 		{
-			this.graph = graph;
-			UpdateDisplayNodes();
+			this._graph = graph;
+			UpdateNodes();
 		}
 
 		// ======= Events =======
 		public void OnLink(Edge edge)
 		{
-			Debug.Log("OnLink: Node " + edge.Output.Parent.Id + " with Node " + edge.Input.Parent.Id);
-			UpdateDisplayNodes();
+			//Debug.Log("OnLink: Node " + edge.Output.Parent.Id + " with Node " + edge.Input.Parent.Id);
+			UpdateNodes();
 		}
 
 		public void OnUnLink(Socket s01, Socket s02)
 		{
-			Debug.Log("OnUnLink: Node " + s01.Edge.Output.Parent.Id + " from Node " + s02.Edge.Input.Parent.Id);
-			UpdateDisplayNodes();
+			//Debug.Log("OnUnLink: Node " + s01.Edge.Output.Parent.Id + " from Node " + s02.Edge.Input.Parent.Id);
+			UpdateNodes();
 		}
 
 		public void OnUnLinked(Socket s01, Socket s02)
 		{
-			Debug.Log("OnUnLinked: Socket " + s02 + " and Socket " + s02);
-			UpdateDisplayNodes();
+			//Debug.Log("OnUnLinked: Socket " + s02 + " and Socket " + s02);
+			UpdateNodes();
 		}
 
 		public void OnNodeAdded(Node node)
 		{
-			Debug.Log("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
-			UpdateDisplayNodes();
+			//Debug.Log("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
+			UpdateNodes();
 		}
 
 		public void OnNodeRemoved(Node node)
 		{
-			Debug.Log("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
-			UpdateDisplayNodes();
+			//Debug.Log("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
+			UpdateNodes();
 		}
 
 		public void OnNodeChanged(Node node)
 		{
-			Debug.Log("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
-			UpdateDisplayNodes();
+			//Debug.Log("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
+			UpdateNodes();
 		}
 
-		private void UpdateDisplayNodes()
+		private void UpdateNodes()
 		{
-			if (graph.HasCicle())
+			if (_graph.HasCicle())
 			{
-				Debug.Log("This parser is not made for graphs that contain circles.");
+				_graph.LogCircleError();
 				return;
 			}
 
-			for (var i = 0; i < graph.GetNodeCount(); i++)
+			for (var i = 0; i < _graph.GetNodeCount(); i++)
 			{
-				Node n = graph.GetNodeAt(i);
-				if (typeof(MathDisplay) == n.GetType())
+				Node n = _graph.GetNodeAt(i);
+				var updateable = n as IUpdateable;
+				if (updateable != null)
 				{
-					n.GetResultOf(n.GetSocket(NumberNode.FloatType, SocketDirection.Input, 0));
+					updateable.Update();
 				}
 			}
 		}
