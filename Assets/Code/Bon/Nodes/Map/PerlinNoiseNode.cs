@@ -37,7 +37,7 @@ namespace Assets.Code.Bon.Nodes.Map
 
 		public override void OnGUI()
 		{
-			GUI.DrawTexture(new Rect(6, 0, _texture2D.width, _texture2D.height), _texture2D);
+			if (_texture2D != null) GUI.DrawTexture(new Rect(6, 0, _texture2D.width, _texture2D.height), _texture2D);
 			GUI.Label(_labelScale, "scale");
 			if (NodeUtils.FloatTextField(_textFieldScale, ref Scale)) TriggerChangeEvent();
 			GUI.Label(_labelSeed, "seed");
