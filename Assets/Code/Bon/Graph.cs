@@ -27,7 +27,7 @@ namespace Assets.Code.Bon
 
 		private IGraphListener listener;
 
-		public bool TriggerEvents = true;
+		[System.NonSerialized] public bool TriggerEvents = true;
 
 		public void RegisterListener(IGraphListener listener)
 		{
@@ -222,19 +222,14 @@ namespace Assets.Code.Bon
 			return false;
 		}
 
-		public List<Node> CreateUpperNodesList(Node node)
+		public static List<Node> CreateUpperNodesList(Node node)
 		{
-			if (HasCicle())
-			{
-				LogCircleError();
-				return null;
-			}
 			List<Node> upperNodes = new List<Node>();
 			AddUpperNodes(node, ref upperNodes);
 			return upperNodes;
 		}
 
-		private void AddUpperNodes(Node node, ref List<Node> upperNodesList)
+		private static void AddUpperNodes(Node node, ref List<Node> upperNodesList)
 		{
 			foreach (Socket s in node.Sockets)
 			{

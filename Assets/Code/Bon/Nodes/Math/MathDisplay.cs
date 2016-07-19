@@ -17,8 +17,6 @@ namespace Assets.Code.Bon.Nodes.Math
 		[System.NonSerialized]
 		private string _errorMessage;
 
-		private const string NotConnectedMessage = "not connected";
-
 		[System.NonSerialized]
 		private readonly Rect _textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
 
@@ -68,7 +66,6 @@ namespace Assets.Code.Bon.Nodes.Math
 			Socket connectedSocket = _inSocket.GetConnectedSocket();
 			Node connectedNode = connectedSocket.Parent;
 			Value = (float) connectedNode.GetResultOf(connectedSocket);
-			Debug.Log("UpdateValue " + Value);
 			return Value;
 		}
 
@@ -81,7 +78,7 @@ namespace Assets.Code.Bon.Nodes.Math
 			}
 			else
 			{
-				_errorMessage = NotConnectedMessage;
+				_errorMessage = NodeUtils.NotConnectedMessage;
 			}
 		}
 	}

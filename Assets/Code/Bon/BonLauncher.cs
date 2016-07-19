@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Reflection;
 using System.Text;
 using System.Linq;
+using Assets.Code.Bon.Nodes.Map;
 using Assets.Code.Bon.Nodes.Math;
 
 namespace Assets.Code.Bon
@@ -61,6 +62,20 @@ namespace Assets.Code.Bon
 				graph.Link(
 					operator01.GetSocket(NumberNode.FloatType, SocketDirection.Output, 0),
 					diplay01.GetSocket(NumberNode.FloatType, SocketDirection.Input, 0));
+
+
+				var perlinNoise = new PerlinNoiseNode(graph.GetUniqueId());
+				perlinNoise.X = 80;
+				perlinNoise.Y = 250;
+				graph.AddNode(perlinNoise);
+
+				var displayMap = new MapDisplayNode(graph.GetUniqueId());
+				displayMap.X = 300;
+				displayMap.Y = 280;
+				graph.AddNode(displayMap);
+
+				graph.Link(perlinNoise.GetSocket(NumberNode.FloatType, SocketDirection.Output, 0),
+					displayMap.GetSocket(NumberNode.FloatType, SocketDirection.Input, 0));
 
 				// == test serialization an deserialization ==
 				var serializedJSON = graph.ToJson();

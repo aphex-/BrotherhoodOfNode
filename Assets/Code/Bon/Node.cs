@@ -33,7 +33,10 @@ namespace Assets.Code.Bon
 		[System.NonSerialized]
 		public static int LastFocusedNodeId;
 
+		[System.NonSerialized]
 		public bool Resizable = true;
+
+		[System.NonSerialized]
 		public Rect ResizeArea = new Rect();
 
 		protected Node(int id)
@@ -49,11 +52,12 @@ namespace Assets.Code.Bon
 
 		public virtual void OnSerialization(SerializableNode sNode)
 		{
-
+			// for overriding: gets called before this Node gets serialized
 		}
 
 		public virtual void OnDeserialization(SerializableNode sNode)
 		{
+			// for overriding: gets called after this Node has been deserialized
 		}
 
 		public abstract object GetResultOf(Socket outSocket);
@@ -184,6 +188,7 @@ namespace Assets.Code.Bon
 			}
 		}
 
+		/// <summary> Aligns the position of the sockets of this node </summary>
 		public void GUIAlignSockets()
 		{
 			var leftCount = 0;
@@ -205,12 +210,14 @@ namespace Assets.Code.Bon
 			}
 		}
 
+		/// <summary> Calculates the offset of a socket from the top of this node </summary>
 		private int GUICalcSocketTopOffset(int socketTopIndex)
 		{
 			return BonConfig.SocketOffsetTop + (socketTopIndex*BonConfig.SocketSize)
 				+ (socketTopIndex*BonConfig.SocketMargin);
 		}
 
+		/// <summary> Gets the menu entry name of this node </summary>
 		public static string GetNodeName(Type nodeType)
 		{
 			object[] attrs = nodeType.GetCustomAttributes(typeof(GraphContextMenuItem), true);
@@ -218,6 +225,7 @@ namespace Assets.Code.Bon
 			return string.IsNullOrEmpty(attr.Name) ? nodeType.Name : attr.Name;
 		}
 
+		/// <summary> Gets the menu entry path of this node </summary>
 		public static string GetNodePath(Type nodeType)
 		{
 			object[] attrs = nodeType.GetCustomAttributes(typeof(GraphContextMenuItem), true);
@@ -225,6 +233,7 @@ namespace Assets.Code.Bon
 			return string.IsNullOrEmpty(attr.Path) ? null : attr.Path;
 		}
 
+		/// <summary> Converts this node to a SerializableNode </summary>
 		public SerializableNode ToSerializedNode()
 		{
 			SerializableNode n = new SerializableNode();
@@ -232,7 +241,7 @@ namespace Assets.Code.Bon
 			n.id = Id;
 			n.X = WindowRect.xMin;
 			n.Y = WindowRect.yMin;
-			n.data = JsonUtility.ToJson(this);
+			n.data = JsonUtility.ToJson(this); // custom node data can be used
 			OnSerialization(n);
 			return n;
 		}

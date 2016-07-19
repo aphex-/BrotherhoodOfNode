@@ -3,7 +3,7 @@ using System.Collections;
 using System.Text.RegularExpressions;
 
 public class NodeUtils {
-
+	public const string NotConnectedMessage = "not connected";
 
 	/** Draws a textfield that accepts float inputs only.
 		Returns true if the value has changed.
