@@ -1,7 +1,9 @@
 # BrotherhoodOfNode
 A visual graph editor for Unity3D
 
-![alt text](https://github.com/aphex-/BrotherhoodOfNode/blob/master/preview.png "preview")
+![alt text](https://github.com/aphex-/BrotherhoodOfNode/blob/master/preview.png "math Nodes preview")
+
+![alt text](https://github.com/aphex-/BrotherhoodOfNode/blob/master/noise_preview.png "noise Nodes preview")
 
 ### Install
 
@@ -19,7 +21,7 @@ A visual graph editor for Unity3D
 * tab pages for multiple graphs
 
 ### Non-Features
-* nothing but a tool to create graphs and make them persitent (ok.. there are some math related Nodes now)
+* nothing but a tool to create graphs and make them persitent (ok.. there are some math related Nodes now..)
 
 
 ### Usage
