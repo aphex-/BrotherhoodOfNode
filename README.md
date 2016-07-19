@@ -161,6 +161,7 @@ The default implementation that inherits from **IGraphListener** is the
 
 ### Next Up..
 * fix socket color issue (currently the socket is very transparent)
+* improve performacne with noise Nodes
 * Remove the tab-pages and implement the possibility of multiple editor windows
 * Check for recursion in the graph.
 * Unit tests
