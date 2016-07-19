@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Code.Bon.Nodes.Math;
 using UnityEngine;
 
@@ -49,7 +50,7 @@ namespace Assets.Code.Bon.Nodes.Map
 				//GUI.Label(new Rect(0, 20, 40, 15), "zoom");
 				//GUI.Button(new Rect(40, 20, 20, 20), "+");
 				//GUI.Button(new Rect(60, 20, 20, 20), "-");
-				GUI.DrawTexture(new Rect(6, 40, _texture2D.width, _texture2D.height), _texture2D);
+				GUI.DrawTexture(new Rect(6, 24, _texture2D.width, _texture2D.height), _texture2D);
 			}
 			else
 			{
@@ -94,19 +95,14 @@ namespace Assets.Code.Bon.Nodes.Map
 
 			_errorMessage = null;
 
-			var foundSampler = false;
-			List<Node> nodes = Graph.CreateUpperNodesList(this);
-			foreach (Node n in nodes)
+			IList<ISampler2D> samplers = Graph.CreateUpperNodesList(this).OfType<ISampler2D>().ToList();
+			if ( samplers.Count > 0)
 			{
-				var sampler = n as ISampler2D;
-
-
-				if (sampler != null)
+				for (int x = 0; x < _texture2D.width; x++)
 				{
-					foundSampler = true;
-					for (int x = 0; x < _texture2D.width; x++)
+					for (int y = 0; y < _texture2D.height; y++)
 					{
-						for (int y = 0; y < _texture2D.height; y++)
+						foreach (ISampler2D sampler in samplers)
 						{
 							sampler.SampleFrom(x, y);
 							float value = (float) _inputSocket.GetConnectedSocket().Parent.GetResultOf(_inputSocket.GetConnectedSocket());
@@ -116,9 +112,10 @@ namespace Assets.Code.Bon.Nodes.Map
 				}
 			}
 
-			if (!foundSampler) _errorMessage = "no sample data";
-			_samplerConnected = foundSampler;
+			if (samplers.Count == 0) _errorMessage = "no sample data";
+			_samplerConnected = samplers.Count > 0;
 			_texture2D.Apply();
 		}
 	}
 }
+

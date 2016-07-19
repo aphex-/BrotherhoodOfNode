@@ -10,6 +10,7 @@ public class NodeUtils {
 	**/
 	public static bool FloatTextField(Rect area, ref string number)
 	{
+		if (number == null) return false;
 		var textFieldValue = GUI.TextField(area, number);
 		var newTextFieldValue = GetValidNumberString(textFieldValue, number);
 		var numberChanged = !IsEqualFloatValue(newTextFieldValue, number);

@@ -15,7 +15,8 @@ namespace Assets.Code.Bon.Nodes.Math
 		public static Color FloatType = new Color(0.32f, 0.58f, 0.86f);
 
 		[SerializeField]
-		public string Number;
+		public string Number = "0";
+
 
 		private readonly Rect _textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
 

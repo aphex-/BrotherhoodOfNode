@@ -1,20 +1,14 @@
 ﻿using System;
-using Assets.Code.Bon;
-using Assets.Code.Bon.Interface;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.Math
 {
-
 	[Serializable]
-	[GraphContextMenuItem("Math", "Operator")]
-	public class MathOperatorNode : Node
-	{
+	[GraphContextMenuItem("Math", "MinMax")]
+	public class MinMaxNode : Node {
 
 		[SerializeField]
 		private int _selectedMode = 0;
-
-		public static readonly string[] Operations = { "add", "sub", "mul", "div" };
 
 		[System.NonSerialized]
 		private readonly Socket _inputSocket01;
@@ -22,24 +16,26 @@ namespace Assets.Code.Bon.Nodes.Math
 		[System.NonSerialized]
 		private readonly Socket _inputSocket02;
 
-		public MathOperatorNode(int id) : base(id)
-		{
+		public static readonly string[] Options = { "min", "max"};
 
+		public MinMaxNode(int id) : base(id)
+		{
 			_inputSocket01 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
 			Sockets.Add(_inputSocket01);
 			_inputSocket02 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
 			Sockets.Add(_inputSocket02);
 			Sockets.Add(new Socket(this, NumberNode.FloatType, SocketDirection.Output));
-			Height = 95;
+			Height = 60;
 			Width = 80;
 		}
+
 
 		public override void OnGUI()
 		{
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			int newMode = GUILayout.SelectionGrid(_selectedMode,Operations,1,"toggle");
+			int newMode = GUILayout.SelectionGrid(_selectedMode,Options,1,"toggle");
 			if (newMode != _selectedMode)
 			{
 				_selectedMode = newMode;
@@ -48,6 +44,7 @@ namespace Assets.Code.Bon.Nodes.Math
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
+
 
 
 		public override object GetResultOf(Socket outSocket)
@@ -70,47 +67,22 @@ namespace Assets.Code.Bon.Nodes.Math
 			return float.NaN;
 		}
 
-		public override bool CanGetResultOf(Socket outSocket)
-		{
-			return AllInputSocketsConnected();
-		}
-
 		public float Calculate(float value01, float value02)
 		{
 			if (_selectedMode == 0)
 			{
-				return value01 + value02;
+				return System.Math.Min(value01, value02);
 			}
 			if (_selectedMode == 1)
 			{
-				return value01 - value02;
-			}
-			if (_selectedMode == 2)
-			{
-				return value01 * value02;
-			}
-			if (_selectedMode == 3)
-			{
-				if (value02.Equals(0)) return float.NaN;
-				return value01 / value02;
+				return System.Math.Max(value01, value02);
 			}
 			return float.NaN;
 		}
 
-		public void SetMode(Operator o)
+		public override bool CanGetResultOf(Socket outSocket)
 		{
-			if (o == Operator.Add) _selectedMode = 0;
-			if (o == Operator.Substract) _selectedMode = 1;
-			if (o == Operator.Multiply) _selectedMode = 2;
-			if (o == Operator.Divide) _selectedMode = 3;
+			return AllInputSocketsConnected();
 		}
-	}
-
-	public enum Operator
-	{
-		Add,
-		Substract,
-		Multiply,
-		Divide
 	}
 }
