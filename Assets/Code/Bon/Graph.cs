@@ -11,13 +11,13 @@ namespace Assets.Code.Bon
 	[Serializable]
 	public class Graph : ISerializationCallbackReceiver
 	{
-		private List<Node> nodes = new List<Node>();
+		private List<Node> _nodes = new List<Node>();
 
 		[SerializeField]
-		private List<SerializableEdge> serializedEdges = new List<SerializableEdge>();
+		private List<SerializableEdge> _serializedEdges = new List<SerializableEdge>();
 
 		[SerializeField]
-		private List<SerializableNode> serializedNodes = new List<SerializableNode>();
+		private List<SerializableNode> _serializedNodes = new List<SerializableNode>();
 
 		[SerializeField] public int Version = BonConfig.Version;
 
@@ -25,14 +25,14 @@ namespace Assets.Code.Bon
 		// an endless recursion this can crash unity.
 		[SerializeField] public bool AllowCicles = false;
 
-		private IGraphListener listener;
+		private IGraphListener _listener;
 
 		[System.NonSerialized] public bool TriggerEvents = true;
 
 		public void RegisterListener(IGraphListener listener)
 		{
-			this.listener = listener;
-			foreach (var node in nodes)
+			this._listener = listener;
+			foreach (var node in _nodes)
 			{
 				node.RegisterListener(listener);
 			}
@@ -68,8 +68,8 @@ namespace Assets.Code.Bon
 
 		public Node GetNode(int nodeId)
 		{
-			if (nodes == null) return null;
-			foreach (var node in nodes)
+			if (_nodes == null) return null;
+			foreach (var node in _nodes)
 			{
 				if (node.Id == nodeId)
 				{
@@ -81,22 +81,22 @@ namespace Assets.Code.Bon
 
 		public int GetNodeCount()
 		{
-			return nodes.Count;
+			return _nodes.Count;
 		}
 
 		public Node GetNodeAt(int index)
 		{
 
-			return nodes[index];
+			return _nodes[index];
 		}
 
 		public void AddNode(Node node)
 		{
-			nodes.Add(node);
-			if (listener != null && TriggerEvents)
+			_nodes.Add(node);
+			if (_listener != null && TriggerEvents)
 			{
-				node.RegisterListener(listener);
-				listener.OnNodeAdded(node);
+				node.RegisterListener(_listener);
+				_listener.OnNodeAdded(node);
 			}
 		}
 
@@ -112,10 +112,10 @@ namespace Assets.Code.Bon
 				}
 			}
 
-			nodes.Remove(node);
-			if (listener != null && TriggerEvents)
+			_nodes.Remove(node);
+			if (_listener != null && TriggerEvents)
 			{
-				listener.OnNodeRemoved(node);
+				_listener.OnNodeRemoved(node);
 			}
 			node.RegisterListener(null);
 		}
@@ -127,9 +127,9 @@ namespace Assets.Code.Bon
 
 		public void UnLink(Socket s01, Socket s02)
 		{
-			if (listener != null && TriggerEvents)
+			if (_listener != null && TriggerEvents)
 			{
-				listener.OnUnLink(s01, s02);
+				_listener.OnUnLink(s01, s02);
 			}
 			if (s01 != null && s01.Edge != null)
 			{
@@ -143,9 +143,9 @@ namespace Assets.Code.Bon
 				s02.Edge.Output = null;
 				s02.Edge = null;
 			}
-			if (listener != null && TriggerEvents)
+			if (_listener != null && TriggerEvents)
 			{
-				listener.OnUnLinked(s01, s02);
+				_listener.OnUnLinked(s01, s02);
 			}
 		}
 
@@ -180,9 +180,9 @@ namespace Assets.Code.Bon
 					return false;
 				}
 
-				if (listener != null && TriggerEvents)
+				if (_listener != null && TriggerEvents)
 				{
-					listener.OnLink(edge);
+					_listener.OnLink(edge);
 				}
 			}
 			return true;
@@ -191,7 +191,7 @@ namespace Assets.Code.Bon
 
 		public bool HasCicle()
 		{
-			foreach (var node in nodes)
+			foreach (var node in _nodes)
 			{
 				if (HasCicle(node))
 				{
@@ -205,7 +205,7 @@ namespace Assets.Code.Bon
 
 		private void ResetVisitFlags()
 		{
-			foreach (var node in nodes) node.VisitFlag = false;
+			foreach (var node in _nodes) node.VisitFlag = false;
 		}
 
 		private bool HasCicle(Node node)
@@ -302,16 +302,16 @@ namespace Assets.Code.Bon
 		/// <summary>Unity serialization callback.</summary>
 		public void OnBeforeSerialize()
 		{
-			if (nodes.Count == 0) return; // nothing to serialize
+			if (_nodes.Count == 0) return; // nothing to serialize
 			bool wasTriggering = TriggerEvents;
 			TriggerEvents = false;
 
-			serializedEdges.Clear();
-			serializedNodes.Clear();
+			_serializedEdges.Clear();
+			_serializedNodes.Clear();
 			// serialize data
-			foreach (var node in nodes)
+			foreach (var node in _nodes)
 			{
-				serializedNodes.Add(node.ToSerializedNode());
+				_serializedNodes.Add(node.ToSerializedNode());
 				foreach (var socket in node.Sockets)
 				{
 					if (socket.Edge != null)
@@ -319,7 +319,7 @@ namespace Assets.Code.Bon
 						// serialize only the edge of the source (to avoid doubled edges)
 						if (socket.Edge.Output.Parent == node)
 						{
-							serializedEdges.Add(socket.Edge.ToSerializedEgde());
+							_serializedEdges.Add(socket.Edge.ToSerializedEgde());
 						}
 					}
 				}
@@ -330,14 +330,14 @@ namespace Assets.Code.Bon
 		/// <summary>Unity serialization callback.</summary>
 		public void OnAfterDeserialize()
 		{
-			if (serializedNodes.Count == 0) return;	// Nothing to deserialize.
+			if (_serializedNodes.Count == 0) return;	// Nothing to deserialize.
 			bool wasTriggering = TriggerEvents;
 			TriggerEvents = false;
 
-			nodes.Clear(); // clear original data.
+			_nodes.Clear(); // clear original data.
 
 			// deserialize nodes
-			foreach (var sNode in serializedNodes)
+			foreach (var sNode in _serializedNodes)
 			{
 				Node n = CreateNode(Type.GetType(sNode.type), sNode.id);
 				if (n != null)
@@ -351,7 +351,7 @@ namespace Assets.Code.Bon
 			}
 
 			// deserialize edges
-			foreach (var sEdge in serializedEdges)
+			foreach (var sEdge in _serializedEdges)
 			{
 				Node inputNode = GetNode(sEdge.InputNodeId);
 				Node outputNode = GetNode(sEdge.OutputNodeId);

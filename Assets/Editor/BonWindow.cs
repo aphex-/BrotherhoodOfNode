@@ -192,6 +192,7 @@ namespace Assets.Editor
 				if (canvas.FilePath == null) OpenSaveDialog();
 				else _launcher.SaveGraph(canvas.Graph, canvas.FilePath);
 			}
+			_launcher.CloseGraph(canvas.Graph);
 			_canvasList.Remove(canvas);
 			if (_canvasList.Count > 0) _currentCanvas = _canvasList[0];
 			else _currentCanvas = null;
@@ -217,7 +218,7 @@ namespace Assets.Editor
 		{
 			BonCanvas canvas;
 			if (path != null) canvas = new BonCanvas(_launcher.LoadGraph(path));
-			else canvas = new BonCanvas(new Graph());
+			else canvas = new BonCanvas(_launcher.LoadGraph(BonConfig.DefaultGraphName));
 			canvas.FilePath = path;
 			_canvasList.Add(canvas);
 			SetCurrentCanvas(canvas);
