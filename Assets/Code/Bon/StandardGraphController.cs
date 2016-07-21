@@ -15,64 +15,58 @@ namespace Assets.Code.Bon
 		public void OnCreate(Graph graph)
 		{
 			this._graph = graph;
-			UpdateNodes();
+			_graph.UpdateNodes();
+		}
+
+		public void OnFocus(Graph graph)
+		{
+			Debug.Log("OnFocus " + graph);
+		}
+
+		public void OnClose(Graph graph)
+		{
+			Debug.Log("OnClose " + graph);
 		}
 
 		// ======= Events =======
 		public void OnLink(Edge edge)
 		{
-			//Debug.Log("OnLink: Node " + edge.Output.Parent.Id + " with Node " + edge.Input.Parent.Id);
-			UpdateNodes();
+			Debug.Log("OnLink: Node " + edge.Output.Parent.Id + " with Node " + edge.Input.Parent.Id);
+			_graph.UpdateNodes();
 		}
 
 		public void OnUnLink(Socket s01, Socket s02)
 		{
-			//Debug.Log("OnUnLink: Node " + s01.Edge.Output.Parent.Id + " from Node " + s02.Edge.Input.Parent.Id);
-			UpdateNodes();
+			Debug.Log("OnUnLink: Node " + s01.Edge.Output.Parent.Id + " from Node " + s02.Edge.Input.Parent.Id);
 		}
 
 		public void OnUnLinked(Socket s01, Socket s02)
 		{
-			//Debug.Log("OnUnLinked: Socket " + s02 + " and Socket " + s02);
-			UpdateNodes();
+			Debug.Log("OnUnLinked: Socket " + s02 + " and Socket " + s02);
+			_graph.ForceUpdateNodes();
 		}
 
 		public void OnNodeAdded(Node node)
 		{
-			//Debug.Log("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
-			UpdateNodes();
+			Debug.Log("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
+			_graph.UpdateNodes();
 		}
 
 		public void OnNodeRemoved(Node node)
 		{
-			//Debug.Log("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
-			UpdateNodes();
+			Debug.Log("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
+			_graph.UpdateNodes();
 		}
 
 		public void OnNodeChanged(Node node)
 		{
-			//Debug.Log("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
-			UpdateNodes();
+			Debug.Log("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
+			_graph.ForceUpdateNodes();
 		}
 
-		private void UpdateNodes()
+		public void OnFocus(Node node)
 		{
-			if (_graph.HasCicle())
-			{
-				_graph.LogCircleError();
-				return;
-			}
-
-			for (var i = 0; i < _graph.GetNodeCount(); i++)
-			{
-				Node n = _graph.GetNodeAt(i);
-				var updateable = n as IUpdateable;
-				if (updateable != null)
-				{
-					updateable.Update();
-				}
-			}
+			Debug.Log("OnFocus: " + node.Id);
 		}
-
 	}
 }

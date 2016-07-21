@@ -8,6 +8,7 @@ using Assets.Code.Bon.Interface;
 using Assets.Code.Bon.Nodes.Map;
 using Assets.Code.Bon.Nodes.Math;
 
+
 namespace Assets.Code.Bon
 {
 	[ExecuteInEditMode]
@@ -17,7 +18,7 @@ namespace Assets.Code.Bon
 		private IGraphListener _controller;
 		private List<Graph> _graphs;
 
-		public BonLauncher()
+		void Awake()
 		{
 			_controller = new StandardGraphController();
 			_graphs = new List<Graph>();
@@ -49,6 +50,7 @@ namespace Assets.Code.Bon
 		public void CloseGraph(Graph g)
 		{
 			_graphs.Remove(g);
+			_controller.OnClose(g);
 		}
 
 		// <summary> Gets the graph at the index </summary>
@@ -57,30 +59,35 @@ namespace Assets.Code.Bon
 			return _graphs[index];
 		}
 
+		public void OnFocus(Graph graph)
+		{
+			_controller.OnFocus(graph);
+		}
+
 		// <summary> Creates a default Graph. Could also be an empty Graph </summary>
 		public Graph CreateDefaultGraph()
 		{
 			Graph graph = new Graph();
 
-			var numberNode01 = new NumberNode(graph.GetUniqueId());
+			var numberNode01 = new NumberNode(graph.ObtainUniqueNodeId());
 			numberNode01.X = 20;
 			numberNode01.Y = 20;
 			numberNode01.Number = "355";
 			graph.AddNode(numberNode01);
 
-			var numberNode02 = new NumberNode(graph.GetUniqueId());
+			var numberNode02 = new NumberNode(graph.ObtainUniqueNodeId());
 			numberNode02.X = 20;
 			numberNode02.Y = 80;
 			numberNode02.Number = "113";
 			graph.AddNode(numberNode02);
 
-			var operator01 = new MathOperatorNode(graph.GetUniqueId());
+			var operator01 = new MathOperatorNode(graph.ObtainUniqueNodeId());
 			operator01.X = 200;
 			operator01.Y = 40;
 			operator01.SetMode(Operator.Divide);
 			graph.AddNode(operator01);
 
-			var diplay01 = new MathDisplay(graph.GetUniqueId());
+			var diplay01 = new MathDisplay(graph.ObtainUniqueNodeId());
 			diplay01.X = 330;
 			diplay01.Y = 80;
 			graph.AddNode(diplay01);
@@ -97,12 +104,12 @@ namespace Assets.Code.Bon
 				operator01.GetSocket(NumberNode.FloatType, SocketDirection.Output, 0),
 				diplay01.GetSocket(NumberNode.FloatType, SocketDirection.Input, 0));
 
-			var perlinNoise = new PerlinNoiseNode(graph.GetUniqueId());
+			var perlinNoise = new PerlinNoiseNode(graph.ObtainUniqueNodeId());
 			perlinNoise.X = 80;
 			perlinNoise.Y = 250;
 			graph.AddNode(perlinNoise);
 
-			var displayMap = new MapDisplayNode(graph.GetUniqueId());
+			var displayMap = new MapDisplayNode(graph.ObtainUniqueNodeId());
 			displayMap.X = 300;
 			displayMap.Y = 280;
 			graph.AddNode(displayMap);

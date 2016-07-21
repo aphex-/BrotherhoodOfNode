@@ -123,7 +123,11 @@ namespace Assets.Editor.Bon
 			node.OnGUI();
 			GUILayout.EndArea();
 			GUI.DragWindow();
-			if (Event.current.GetTypeForControl(node.Id) == EventType.Used) Node.LastFocusedNodeId = node.Id;
+			if (Event.current.GetTypeForControl(node.Id) == EventType.Used)
+			{
+				if (Node.LastFocusedNodeId != node.Id) node.OnFocus();
+				Node.LastFocusedNodeId = node.Id;
+			}
 		}
 
 		private void DeleteNode(object nodeId)

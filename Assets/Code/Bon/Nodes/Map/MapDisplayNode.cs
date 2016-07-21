@@ -23,11 +23,13 @@ namespace Assets.Code.Bon.Nodes.Map
 			_inputSocket = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
 			Sockets.Add(_inputSocket);
 			Sockets.Add(new Socket(this, NumberNode.FloatType, SocketDirection.Output));
+			InitTexture(GUISize);
+			Update();
 		}
 
 		public override void OnDeserialization(SerializableNode sNode)
 		{
-			SetSize(GUISize);
+			InitTexture(GUISize);
 			Update();
 		}
 
@@ -38,19 +40,19 @@ namespace Assets.Code.Bon.Nodes.Map
 				GUI.Label(new Rect(0, 0, 25, 15), "size");
 				if (GUI.Button(new Rect(25, 0, 18, 18), "+"))
 				{
-					SetSize(GUISize + 50);
+					InitTexture(GUISize + 50);
 					Update();
 				}
 				if (GUI.Button(new Rect(43, 0, 18, 18), "-"))
 				{
-					SetSize(GUISize - 50);
+					InitTexture(GUISize - 50);
 					Update();
 				}
 
 				//GUI.Label(new Rect(0, 20, 40, 15), "zoom");
 				//GUI.Button(new Rect(40, 20, 20, 20), "+");
 				//GUI.Button(new Rect(60, 20, 20, 20), "-");
-				GUI.DrawTexture(new Rect(6, 24, _texture2D.width, _texture2D.height), _texture2D);
+				if (_texture2D != null) GUI.DrawTexture(new Rect(6, 24, _texture2D.width, _texture2D.height), _texture2D);
 			}
 			else
 			{
@@ -58,10 +60,12 @@ namespace Assets.Code.Bon.Nodes.Map
 			}
 		}
 
-		private void SetSize(int size)
+		private void InitTexture(int size)
 		{
+			Debug.Log("InitTexture " + size);
 			if (size <= 99) return;
 			GUISize = size;
+			if (_texture2D != null) Texture2D.DestroyImmediate(_texture2D);
 			_texture2D = new Texture2D(GUISize, GUISize, TextureFormat.ARGB32, false);
 			Width = size + 12;
 			Height = size + 50;
@@ -87,16 +91,21 @@ namespace Assets.Code.Bon.Nodes.Map
 
 		public void Update()
 		{
+			UpdateTexture();
+		}
+
+		public Texture2D UpdateTexture()
+		{
 			if (!AllInputSocketsConnected())
 			{
 				_errorMessage = NodeUtils.NotConnectedMessage;
-				return;
+				return null;
 			}
 
 			_errorMessage = null;
 
 			IList<ISampler2D> samplers = Graph.CreateUpperNodesList(this).OfType<ISampler2D>().ToList();
-			if ( samplers.Count > 0)
+			if (samplers.Count > 0 && _texture2D != null)
 			{
 				for (int x = 0; x < _texture2D.width; x++)
 				{
@@ -114,7 +123,19 @@ namespace Assets.Code.Bon.Nodes.Map
 
 			if (samplers.Count == 0) _errorMessage = "no sample data";
 			_samplerConnected = samplers.Count > 0;
-			_texture2D.Apply();
+			if (_texture2D != null) _texture2D.Apply();
+			return _texture2D;
+		}
+
+		public override void OnFocus()
+		{
+			base.OnFocus();
+			// this is a fix to reload textures that did not load during startup (if unity starts with an open EditorWindow)
+			if (_texture2D == null)
+			{
+				InitTexture(GUISize);
+				UpdateTexture();
+			}
 		}
 	}
 }

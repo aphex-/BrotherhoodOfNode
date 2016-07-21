@@ -98,6 +98,11 @@ namespace Assets.Code.Bon
 			return LastFocusedNodeId == Id;
 		}
 
+		public virtual void OnFocus()
+		{
+			_listener.OnFocus(this);
+		}
+
 		/// <summary>Returns true if this assigned position intersects the node.</summary>
 		/// <param name="canvasPosition">The position in canvas coordinates.</param>
 		/// <returns>True if this assigned position intersects the node.</returns>

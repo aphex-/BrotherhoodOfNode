@@ -72,7 +72,7 @@ namespace Assets.Code.Bon.Nodes.Map
 		{
 			if (_lastUpdateScale == Scale && _lastUpdateSeed == Seed) return;
 			for (int x = 0; x < _texture2D.width; x++)
-		{
+			{
 				for (int y = 0; y < _texture2D.height; y++)
 				{
 					float value = GetSampleAt(x, y);

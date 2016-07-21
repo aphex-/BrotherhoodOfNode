@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Assets.Code.Bon.Interface;
+using Assets.Code.Bon.Nodes;
 using UnityEngine;
 
 namespace Assets.Code.Bon
@@ -27,6 +28,8 @@ namespace Assets.Code.Bon
 
 		private IGraphListener _listener;
 
+		private bool _needsUpdate = true;
+
 		[System.NonSerialized] public bool TriggerEvents = true;
 
 		public void RegisterListener(IGraphListener listener)
@@ -38,7 +41,7 @@ namespace Assets.Code.Bon
 			}
 		}
 
-		public int GetUniqueId()
+		public int ObtainUniqueNodeId()
 		{
 			var tmpId = 0;
 			while (GetNode(tmpId) != null)
@@ -50,11 +53,12 @@ namespace Assets.Code.Bon
 
 		public Node CreateNode(Type nodeType)
 		{
-			return CreateNode(nodeType, GetUniqueId());
+			return CreateNode(nodeType, ObtainUniqueNodeId());
 		}
 
 		public Node CreateNode(Type nodeType, int id)
 		{
+			_needsUpdate = true;
 			try
 			{
 				return (Node) Activator.CreateInstance(nodeType, id); ;
@@ -92,6 +96,7 @@ namespace Assets.Code.Bon
 
 		public void AddNode(Node node)
 		{
+			_needsUpdate = true;
 			_nodes.Add(node);
 			if (_listener != null && TriggerEvents)
 			{
@@ -102,6 +107,7 @@ namespace Assets.Code.Bon
 
 		public void RemoveNode(Node node)
 		{
+			_needsUpdate = true;
 			if (node == null) return;
 
 			foreach (var socket in node.Sockets)
@@ -127,6 +133,7 @@ namespace Assets.Code.Bon
 
 		public void UnLink(Socket s01, Socket s02)
 		{
+			_needsUpdate = true;
 			if (_listener != null && TriggerEvents)
 			{
 				_listener.OnUnLink(s01, s02);
@@ -151,6 +158,7 @@ namespace Assets.Code.Bon
 
 		public void UnLink(Socket socket)
 		{
+			_needsUpdate = true;
 			Socket socket2 = null;
 			if (socket.Edge != null)
 			{
@@ -166,6 +174,7 @@ namespace Assets.Code.Bon
 				Debug.LogWarning("Sockets can not be linked.");
 				return false;
 			}
+			_needsUpdate = true;
 
 			if (inputSocket.Type == sourceSocket.Type)
 			{
@@ -297,6 +306,34 @@ namespace Assets.Code.Bon
 				Debug.Log("Could not Open the file: " + fileName);
 				return null;
 			}
+		}
+
+		public void UpdateNodes()
+		{
+			if (!_needsUpdate) return;
+
+			if (HasCicle())
+			{
+				LogCircleError();
+				return;
+			}
+
+			for (var i = 0; i < GetNodeCount(); i++)
+			{
+				Node n = GetNodeAt(i);
+				var updateable = n as IUpdateable;
+				if (updateable != null)
+				{
+					updateable.Update();
+				}
+			}
+			_needsUpdate = false;
+		}
+
+		public void ForceUpdateNodes()
+		{
+			_needsUpdate = true;
+			UpdateNodes();
 		}
 
 		/// <summary>Unity serialization callback.</summary>

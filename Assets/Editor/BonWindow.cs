@@ -7,6 +7,7 @@ using UnityEngine;
 using Assets.Code.Bon;
 using Assets.Editor.Bon;
 using System.Linq;
+using System.Xml.Xsl;
 
 
 namespace Assets.Editor
@@ -33,11 +34,11 @@ namespace Assets.Editor
 
 		private Vector2 _nextTranlationPosition = new Vector2();
 
-		private readonly Color _tabColorUnselected = new Color(0.8f, 0.8f, 0.8f, 0.5f);
-		private readonly Color _tabColorSelected = Color.white;
+		private Color _tabColorUnselected = new Color(0.8f, 0.8f, 0.8f, 0.5f);
+		private Color _tabColorSelected = Color.white;
 
 
-		private readonly BonLauncher _launcher;
+		private BonLauncher _launcher;
 		private readonly List<BonCanvas> _canvasList = new List<BonCanvas>();
 		private BonCanvas _currentCanvas = null;
 		private Rect _canvasRegion = new Rect();
@@ -45,13 +46,14 @@ namespace Assets.Editor
 		private Socket _currentDragSocket = null;
 		private Vector2 _lastMousePosition = new Vector2();
 
-		private readonly GenericMenu _menu;
-		private readonly Dictionary<string, Type> _menuEntryToNodeType;
+		private GenericMenu _menu;
+		private Dictionary<string, Type> _menuEntryToNodeType;
 
 		private Rect _tmpRect = new Rect();
+		private bool _initialized = false;
 
 		[MenuItem("Window/" + Name)]
-		public static void CreateEditor()
+		static void Init()
 		{
 			BonWindow window = EditorWindow.GetWindow<BonWindow>();
 			// BonWindow window = CreateInstance<BonWindow>(); // to create a new window
@@ -60,20 +62,44 @@ namespace Assets.Editor
 			c.text = "Graph";
 			window.titleContent = c;
 			window.Show();
+			window.InitializeInstance();
 		}
 
-		public BonWindow()
+		public void Awake()
 		{
-			titleContent = new GUIContent(Name);
-			_launcher = new BonLauncher();
-			_launcher.OnWindowOpen();
+			InitializeInstance(); // this is needed if unity is loaded with an open EditorWindow
+		}
 
+		public void InitializeInstance()
+		{
+
+			// create GameObject and the Component if it is not added to the scene
+			if (GameObject.Find(BonConfig.GameObjectName) == null)
+			{
+				var b = new GameObject(BonConfig.GameObjectName);
+				Debug.Log("Created GameObject '" + BonConfig.GameObjectName + "'");
+			}
+			if (GameObject.Find(BonConfig.GameObjectName).GetComponent<BonLauncher>() == null)
+			{
+				Debug.Log("Added BonLauncher component to the GameObject '" + BonConfig.GameObjectName + "'");
+				GameObject.Find(BonConfig.GameObjectName).AddComponent<BonLauncher>();
+			}
+
+			// get the launcher as an 'interface' to the non editor assembly
+			_launcher = GameObject.Find("Bon").GetComponent<BonLauncher>();
+
+			if (_initialized) return;
+			_initialized = true;
+
+			titleContent = new GUIContent(Name);
+			_launcher.OnWindowOpen();
 
 			_menuEntryToNodeType = CreateMenuEntries();
 			Graph graph = _launcher.LoadGraph(BonConfig.DefaultGraphName);
 			_currentCanvas = new BonCanvas(graph);
 			_canvasList.Add(_currentCanvas);
 			_menu = CreateGenericMenu();
+			Repaint();
 		}
 
 		/// <summary>Creates a dictonary that maps a menu entry string to a node type using reflection.</summary>
@@ -180,6 +206,7 @@ namespace Assets.Editor
 
 		private void SetCurrentCanvas(BonCanvas canvas)
 		{
+			if (canvas != null) _launcher.OnFocus(canvas.Graph);
 			_currentCanvas = canvas;
 		}
 
@@ -194,8 +221,8 @@ namespace Assets.Editor
 			}
 			_launcher.CloseGraph(canvas.Graph);
 			_canvasList.Remove(canvas);
-			if (_canvasList.Count > 0) _currentCanvas = _canvasList[0];
-			else _currentCanvas = null;
+			if (_canvasList.Count > 0) SetCurrentCanvas(_canvasList[0]);
+			else SetCurrentCanvas(null);
 		}
 
 		private GenericMenu CreateGenericMenu()
