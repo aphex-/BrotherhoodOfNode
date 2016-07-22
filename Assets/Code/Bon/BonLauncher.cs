@@ -18,16 +18,10 @@ namespace Assets.Code.Bon
 		private IGraphListener _controller;
 		private List<Graph> _graphs;
 
-		void Awake()
-		{
-			_controller = new StandardGraphController();
-			_graphs = new List<Graph>();
-		}
-
-
 		public void OnWindowOpen()
 		{
-
+			if (_controller == null) _controller = new StandardGraphController();
+			if (_graphs == null) _graphs = new List<Graph>();
 		}
 
 		// <summary> Gets called if the editor opens a new Graph </summary>

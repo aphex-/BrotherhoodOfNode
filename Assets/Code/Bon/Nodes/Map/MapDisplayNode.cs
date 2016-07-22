@@ -15,6 +15,12 @@ namespace Assets.Code.Bon.Nodes.Map
 		private string _errorMessage = "";
 		private bool _samplerConnected = false;
 
+		private Rect _sizeLabel = 			new Rect(0, 0, 25, 15);
+		private Rect _sizePlusButton =		new Rect(25, 0, 18, 18);
+		private Rect _sizeMinusButton = 	new Rect(43, 0, 18, 18);
+		private Rect _textureArea = 		new Rect();
+		private Rect _errorMessageLabel = 	new Rect(0, 0, 100, 15);
+
 		[SerializeField]
 		public int GUISize = 100;
 
@@ -37,13 +43,13 @@ namespace Assets.Code.Bon.Nodes.Map
 		{
 			if (_errorMessage == null)
 			{
-				GUI.Label(new Rect(0, 0, 25, 15), "size");
-				if (GUI.Button(new Rect(25, 0, 18, 18), "+"))
+				GUI.Label(_sizeLabel, "size");
+				if (GUI.Button(_sizePlusButton, "+"))
 				{
 					InitTexture(GUISize + 50);
 					Update();
 				}
-				if (GUI.Button(new Rect(43, 0, 18, 18), "-"))
+				if (GUI.Button(_sizeMinusButton, "-"))
 				{
 					InitTexture(GUISize - 50);
 					Update();
@@ -52,11 +58,12 @@ namespace Assets.Code.Bon.Nodes.Map
 				//GUI.Label(new Rect(0, 20, 40, 15), "zoom");
 				//GUI.Button(new Rect(40, 20, 20, 20), "+");
 				//GUI.Button(new Rect(60, 20, 20, 20), "-");
-				if (_texture2D != null) GUI.DrawTexture(new Rect(6, 24, _texture2D.width, _texture2D.height), _texture2D);
+				_textureArea.Set(6, 24, _texture2D.width, _texture2D.height);
+				if (_texture2D != null) GUI.DrawTexture(_textureArea, _texture2D);
 			}
 			else
 			{
-				GUI.Label(new Rect(0, 0, 100, 15), _errorMessage);
+				GUI.Label(_errorMessageLabel, _errorMessage);
 			}
 		}
 
@@ -80,7 +87,6 @@ namespace Assets.Code.Bon.Nodes.Map
 			{
 				return _inputSocket.GetConnectedSocket().Parent.GetResultOf(_inputSocket.GetConnectedSocket());
 			}
-
 	}
 
 		public override bool CanGetResultOf(Socket outSocket)

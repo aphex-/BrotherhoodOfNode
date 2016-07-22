@@ -13,13 +13,17 @@ namespace Assets.Code.Bon.Nodes.Map
 		private float _samplingX = 0;
 		private float _samplingY = 0;
 
-		private readonly Texture2D _texture2D;
+		private Texture2D _texture2D;
 
 		private readonly Rect _labelScale = 	new Rect(6, 	110, 30, BonConfig.SocketSize);
 		private readonly Rect _textFieldScale = new Rect(40, 	110, 65, BonConfig.SocketSize);
 
 		private readonly Rect _labelSeed = 		new Rect(6, 	130, 30, BonConfig.SocketSize);
 		private readonly Rect _textFieldSeed = 	new Rect(40, 	130, 65, BonConfig.SocketSize);
+
+		private Rect _textureArea = new Rect();
+
+		private static int _textureSize = 100;
 
 		public string Scale = "10";
 		public string Seed = "0";
@@ -30,14 +34,15 @@ namespace Assets.Code.Bon.Nodes.Map
 		public PerlinNoiseNode(int id) : base(id)
 		{
 			Sockets.Add(new Socket(this, NumberNode.FloatType, SocketDirection.Output));
-			_texture2D = new Texture2D(100, 100, TextureFormat.ARGB32, false);
+			_texture2D = new Texture2D(_textureSize, _textureSize, TextureFormat.ARGB32, false);
+			_textureArea.Set(6, 0, _texture2D.width, _texture2D.height);
 			Width = _texture2D.width + 12;
 			Height = _texture2D.height + 70;
 		}
 
 		public override void OnGUI()
 		{
-			if (_texture2D != null) GUI.DrawTexture(new Rect(6, 0, _texture2D.width, _texture2D.height), _texture2D);
+			if (_texture2D != null) GUI.DrawTexture(_textureArea, _texture2D);
 			GUI.Label(_labelScale, "scale");
 			if (NodeUtils.FloatTextField(_textFieldScale, ref Scale)) TriggerChangeEvent();
 			GUI.Label(_labelSeed, "seed");
