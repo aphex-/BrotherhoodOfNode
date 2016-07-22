@@ -38,6 +38,7 @@ namespace Assets.Code.Bon.Nodes.Map
 			_textureArea.Set(6, 0, _texture2D.width, _texture2D.height);
 			Width = _texture2D.width + 12;
 			Height = _texture2D.height + 70;
+			Update();
 		}
 
 		public override void OnGUI()
