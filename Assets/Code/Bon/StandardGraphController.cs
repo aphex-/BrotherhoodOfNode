@@ -43,19 +43,17 @@ namespace Assets.Code.Bon
 		public void OnUnLinked(Socket s01, Socket s02)
 		{
 			Debug.Log("OnUnLinked: Socket " + s02 + " and Socket " + s02);
-			_graph.ForceUpdateNodes();
+			_graph.UpdateNodes();
 		}
 
 		public void OnNodeAdded(Node node)
 		{
 			Debug.Log("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
-			_graph.UpdateNodes();
 		}
 
 		public void OnNodeRemoved(Node node)
 		{
 			Debug.Log("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
-			_graph.UpdateNodes();
 		}
 
 		public void OnNodeChanged(Node node)
