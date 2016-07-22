@@ -62,7 +62,6 @@ namespace Assets.Code.Bon.Nodes.Map
 
 		private void InitTexture(int size)
 		{
-			Debug.Log("InitTexture " + size);
 			if (size <= 99) return;
 			GUISize = size;
 			if (_texture2D != null) Texture2D.DestroyImmediate(_texture2D);
@@ -104,19 +103,15 @@ namespace Assets.Code.Bon.Nodes.Map
 
 			_errorMessage = null;
 
-			IList<ISampler2D> samplers = Graph.CreateUpperNodesList(this).OfType<ISampler2D>().ToList();
+			IList<ISampler2D> samplers = CreateUpperSamplerList();
 			if (samplers.Count > 0 && _texture2D != null)
 			{
 				for (int x = 0; x < _texture2D.width; x++)
 				{
 					for (int y = 0; y < _texture2D.height; y++)
 					{
-						foreach (ISampler2D sampler in samplers)
-						{
-							sampler.SampleFrom(x, y);
-							float value = (float) _inputSocket.GetConnectedSocket().Parent.GetResultOf(_inputSocket.GetConnectedSocket());
-							_texture2D.SetPixel(x, y, NodeUtils.GetMapValueColor(value));
-						}
+						float value = GetSampleFrom(x, y, samplers);
+						_texture2D.SetPixel(x, y, NodeUtils.GetMapValueColor(value));
 					}
 				}
 			}
@@ -125,6 +120,22 @@ namespace Assets.Code.Bon.Nodes.Map
 			_samplerConnected = samplers.Count > 0;
 			if (_texture2D != null) _texture2D.Apply();
 			return _texture2D;
+		}
+
+		public float GetSampleFrom(int x, int y, IList<ISampler2D> samplers)
+		{
+			foreach (ISampler2D sampler in samplers)
+			{
+				sampler.SampleFrom(x, y);
+			}
+			return (float) _inputSocket.GetConnectedSocket().Parent.GetResultOf(_inputSocket.GetConnectedSocket());
+		}
+
+
+		// <summary> Creates a list of sampler that are connected to the input socket of this Node</summary>
+		public List<ISampler2D> CreateUpperSamplerList()
+		{
+			return Graph.CreateUpperNodesList(this).OfType<ISampler2D>().ToList();
 		}
 
 		public override void OnFocus()
