@@ -9,19 +9,38 @@ using Assets.Code.Bon.Nodes.Map;
 using Assets.Code.Bon.Nodes.Math;
 
 
+
 namespace Assets.Code.Bon
 {
 	[ExecuteInEditMode]
 	public class BonLauncher : MonoBehaviour
 	{
 
-		private IGraphListener _controller;
 		private List<Graph> _graphs;
+		private IGraphListener _listener;
+
+
+		public List<Graph> Graphs
+		{
+			get
+			{
+				if (_graphs == null) _graphs = new List<Graph>();
+				return _graphs;
+			}
+		}
+
+		public IGraphListener Listener
+		{
+			get
+			{
+				if (_listener == null) _listener = new StandardGraphController(); // use this implementation or add your own listsner
+				return _listener;
+			}
+		}
 
 		public void OnWindowOpen()
 		{
-			if (_controller == null) _controller = new StandardGraphController();
-			if (_graphs == null) _graphs = new List<Graph>();
+
 		}
 
 		// <summary> Gets called if the editor opens a new Graph </summary>
@@ -29,8 +48,8 @@ namespace Assets.Code.Bon
 		{
 			Graph g;
 			if (path.Equals(BonConfig.DefaultGraphName)) g = CreateDefaultGraph();
-			else g = Graph.Load(path, _controller);
-			_graphs.Add(g);
+			else g = Graph.Load(path, Listener);
+			Graphs.Add(g);
 			return g;
 		}
 
@@ -43,19 +62,19 @@ namespace Assets.Code.Bon
 		// <summary> Gets called if the editor closes a graph </summary>
 		public void CloseGraph(Graph g)
 		{
-			_graphs.Remove(g);
-			_controller.OnClose(g);
+			Graphs.Remove(g);
+			Listener.OnClose(g);
 		}
 
 		// <summary> Gets the graph at the index </summary>
 		public Graph GetGraph(int index)
 		{
-			return _graphs[index];
+			return Graphs[index];
 		}
 
 		public void OnFocus(Graph graph)
 		{
-			_controller.OnFocus(graph);
+			Listener.OnFocus(graph);
 		}
 
 		// <summary> Creates a default Graph. Could also be an empty Graph </summary>
@@ -63,25 +82,26 @@ namespace Assets.Code.Bon
 		{
 			Graph graph = new Graph();
 
-			var numberNode01 = new NumberNode(graph.ObtainUniqueNodeId());
+
+			var numberNode01 = (NumberNode) graph.CreateNode<NumberNode>();
 			numberNode01.X = 20;
 			numberNode01.Y = 20;
 			numberNode01.Number = "355";
 			graph.AddNode(numberNode01);
 
-			var numberNode02 = new NumberNode(graph.ObtainUniqueNodeId());
+			var numberNode02 = (NumberNode) graph.CreateNode<NumberNode>();
 			numberNode02.X = 20;
 			numberNode02.Y = 80;
 			numberNode02.Number = "113";
 			graph.AddNode(numberNode02);
 
-			var operator01 = new MathOperatorNode(graph.ObtainUniqueNodeId());
+			var operator01 = (MathOperatorNode) graph.CreateNode<MathOperatorNode>();
 			operator01.X = 200;
 			operator01.Y = 40;
 			operator01.SetMode(Operator.Divide);
 			graph.AddNode(operator01);
 
-			var diplay01 = new MathDisplay(graph.ObtainUniqueNodeId());
+			var diplay01 = (MathDisplay) graph.CreateNode<MathDisplay>();
 			diplay01.X = 330;
 			diplay01.Y = 80;
 			graph.AddNode(diplay01);
@@ -98,12 +118,12 @@ namespace Assets.Code.Bon
 				operator01.GetSocket(NumberNode.FloatType, SocketDirection.Output, 0),
 				diplay01.GetSocket(NumberNode.FloatType, SocketDirection.Input, 0));
 
-			var perlinNoise = new PerlinNoiseNode(graph.ObtainUniqueNodeId());
+			var perlinNoise = graph.CreateNode<PerlinNoiseNode>();
 			perlinNoise.X = 80;
 			perlinNoise.Y = 250;
 			graph.AddNode(perlinNoise);
 
-			var displayMap = new MapDisplayNode(graph.ObtainUniqueNodeId());
+			var displayMap = graph.CreateNode<MapDisplayNode>();
 			displayMap.X = 300;
 			displayMap.Y = 280;
 			graph.AddNode(displayMap);
@@ -113,7 +133,7 @@ namespace Assets.Code.Bon
 
 			// == test serialization an deserialization ==
 			var serializedJSON = graph.ToJson();
-			var deserializedGraph = Graph.FromJson(serializedJSON, _controller);
+			var deserializedGraph = Graph.FromJson(serializedJSON, Listener);
 			// =====
 
 			return deserializedGraph;

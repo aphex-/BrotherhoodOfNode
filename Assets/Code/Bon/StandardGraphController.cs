@@ -10,17 +10,16 @@ namespace Assets.Code.Bon
 	public class StandardGraphController : IGraphListener
 	{
 
-		private Graph _graph;
-
 		public void OnCreate(Graph graph)
 		{
-			this._graph = graph;
-			_graph.UpdateNodes();
+
+			graph.UpdateNodes();
 		}
 
 		public void OnFocus(Graph graph)
 		{
 			Debug.Log("OnFocus " + graph);
+
 		}
 
 		public void OnClose(Graph graph)
@@ -29,40 +28,40 @@ namespace Assets.Code.Bon
 		}
 
 		// ======= Events =======
-		public void OnLink(Edge edge)
+		public void OnLink(Graph graph, Edge edge)
 		{
 			Debug.Log("OnLink: Node " + edge.Output.Parent.Id + " with Node " + edge.Input.Parent.Id);
-			_graph.UpdateNodes();
+			graph.UpdateNodes();
 		}
 
-		public void OnUnLink(Socket s01, Socket s02)
+		public void OnUnLink(Graph graph, Socket s01, Socket s02)
 		{
 			Debug.Log("OnUnLink: Node " + s01.Edge.Output.Parent.Id + " from Node " + s02.Edge.Input.Parent.Id);
 		}
 
-		public void OnUnLinked(Socket s01, Socket s02)
+		public void OnUnLinked(Graph graph, Socket s01, Socket s02)
 		{
 			Debug.Log("OnUnLinked: Socket " + s02 + " and Socket " + s02);
-			_graph.UpdateNodes();
+			graph.UpdateNodes();
 		}
 
-		public void OnNodeAdded(Node node)
+		public void OnNodeAdded(Graph graph, Node node)
 		{
 			Debug.Log("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
 		}
 
-		public void OnNodeRemoved(Node node)
+		public void OnNodeRemoved(Graph graph, Node node)
 		{
 			Debug.Log("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
 		}
 
-		public void OnNodeChanged(Node node)
+		public void OnNodeChanged(Graph graph, Node node)
 		{
 			Debug.Log("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
-			_graph.ForceUpdateNodes();
+			graph.ForceUpdateNodes();
 		}
 
-		public void OnFocus(Node node)
+		public void OnFocus(Graph graph, Node node)
 		{
 			Debug.Log("OnFocus: " + node.Id);
 		}

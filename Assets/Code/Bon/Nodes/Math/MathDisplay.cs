@@ -23,7 +23,7 @@ namespace Assets.Code.Bon.Nodes.Math
 		[System.NonSerialized]
 		private readonly Socket _inSocket;
 
-		public MathDisplay(int id) : base(id)
+		public MathDisplay(int id, Graph parent) : base(id, parent)
 		{
 			_inSocket = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
 			Sockets.Add(_inSocket);

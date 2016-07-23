@@ -22,7 +22,7 @@ namespace Assets.Code.Bon.Nodes.Math
 		[System.NonSerialized]
 		private readonly Socket _inputSocket02;
 
-		public MathOperatorNode(int id) : base(id)
+		public MathOperatorNode(int id, Graph parent) : base(id, parent)
 		{
 
 			_inputSocket01 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);

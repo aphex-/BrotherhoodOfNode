@@ -9,11 +9,11 @@ namespace Assets.Code.Bon.Interface
 		void OnFocus(Graph graph);
 		void OnClose(Graph graph);
 
-		void OnLink(Edge edge);
-		void OnUnLink(Socket s01, Socket s02);
-		void OnUnLinked(Socket s01, Socket s02);
+		void OnLink(Graph graph, Edge edge);
+		void OnUnLink(Graph graph, Socket s01, Socket s02);
+		void OnUnLinked(Graph graph, Socket s01, Socket s02);
 
-		void OnNodeAdded(Node node);
-		void OnNodeRemoved(Node node);
+		void OnNodeAdded(Graph graph, Node node);
+		void OnNodeRemoved(Graph graph, Node node);
 	}
 }

@@ -20,7 +20,7 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		private readonly Rect _textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
 
-		public NumberNode(int id) : base(id)
+		public NumberNode(int id, Graph parent) : base(id, parent)
 		{
 			Sockets.Add(new Socket(this, FloatType, SocketDirection.Output));
 			Height = 20 + BonConfig.SocketOffsetTop;

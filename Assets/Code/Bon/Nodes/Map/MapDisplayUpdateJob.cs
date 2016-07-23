@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Assets.Code.Bon.Interface;
 using Assets.Code.Thread;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ namespace Assets.Code.Bon.Nodes.Map
 	{
 
 		private Socket _socket;
-		private IList<ISampler2D> _samplers;
+		private IList<INode2D> _samplers;
 		private int _width;
 		private int _height;
 		private int _xStart;
@@ -19,7 +20,7 @@ namespace Assets.Code.Bon.Nodes.Map
 
 		public Texture2D Texture;
 
-		public void Request(Socket socket, IList<ISampler2D> samplers, int x, int y, int width, int height)
+		public void Request(Socket socket, IList<INode2D> samplers, int x, int y, int width, int height)
 		{
 			_socket = socket;
 			_samplers = samplers;
@@ -34,7 +35,7 @@ namespace Assets.Code.Bon.Nodes.Map
 			{
 				for (var y = _yStart; y < _yStart + _height; y++)
 				{
-					foreach (ISampler2D sampler in _samplers)
+					foreach (INode2D sampler in _samplers)
 					{
 						sampler.SampleFrom(x, y);
 					}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Code.Bon.Interface;
 using Assets.Code.Bon.Nodes.Math;
 using UnityEngine;
 
@@ -8,10 +9,10 @@ namespace Assets.Code.Bon.Nodes.Map
 {
 	[Serializable]
 	[GraphContextMenuItem("Map", "Display")]
-	public class MapDisplayNode : Node, IUpdateable {
+	public class MapDisplayNode : Node, IUpdateable, ISampler2D {
 
 		private readonly Socket _inputSocket;
-		private IList<ISampler2D> _connectedSamplers;
+		private IList<INode2D> _connectedSamplers;
 
 		private Rect _sizeLabel = 			new Rect(0, 0, 25, 15);
 		private Rect _sizePlusButton =		new Rect(25, 0, 18, 18);
@@ -29,7 +30,7 @@ namespace Assets.Code.Bon.Nodes.Map
 		[SerializeField]
 		public int TextureSize = 100;
 
-		public MapDisplayNode(int id) : base(id)
+		public MapDisplayNode(int id, Graph parent) : base(id, parent)
 		{
 			_inputSocket = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
 			Sockets.Add(_inputSocket);
@@ -145,12 +146,12 @@ namespace Assets.Code.Bon.Nodes.Map
 
 		public void UpdateConnectedSamplerList()
 		{
-			_connectedSamplers = Graph.CreateUpperNodesList(this).OfType<ISampler2D>().ToList();
+			_connectedSamplers = Graph.CreateUpperNodesList(this).OfType<INode2D>().ToList();
 		}
 
-		public float GetSampleAt(int x, int y)
+		public float GetSampleAt(float x, float y)
 		{
-			foreach (ISampler2D sampler in _connectedSamplers)
+			foreach (INode2D sampler in _connectedSamplers)
 			{
 				sampler.SampleFrom(x, y);
 			}

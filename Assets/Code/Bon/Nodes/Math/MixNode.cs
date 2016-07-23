@@ -15,7 +15,7 @@ namespace Assets.Code.Bon.Nodes.Math
 		private Socket _inputSocket02;
 		private Socket _factorSocket;
 
-		public MixNode(int id) : base(id)
+		public MixNode(int id, Graph parent) : base(id, parent)
 		{
 			_inputSocket01 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
 			_inputSocket02 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);

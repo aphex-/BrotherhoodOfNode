@@ -175,6 +175,7 @@ namespace Assets.Editor.Bon
 
 		public Node CreateNode(Type nodeType, Vector2 windowPosition)
 		{
+
 			Node node = (Node) Graph.CreateNode(nodeType);
 			var position = ProjectToCanvas(windowPosition);
 			node.X = position.x;

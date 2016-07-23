@@ -7,7 +7,6 @@ using UnityEngine;
 using Assets.Code.Bon;
 using Assets.Editor.Bon;
 using System.Linq;
-using System.Xml.Xsl;
 
 
 namespace Assets.Editor
@@ -23,7 +22,7 @@ namespace Assets.Editor
 		private const int TabButtonMargin = 4;
 		private const int TabCloseButtonSize = TopMenuHeight;
 
-		private const int WindowTitleHeight = 21; // Unity issue
+		private const int WindowTitleHeight = 21;
 		private const float CanvasZoomMin = 0.1f;
 		private const float CanvasZoomMax = 1.0f;
 
@@ -50,7 +49,7 @@ namespace Assets.Editor
 		private Dictionary<string, Type> _menuEntryToNodeType;
 
 		private Rect _tmpRect = new Rect();
-		private bool _initialized = false;
+
 
 		[MenuItem("Window/" + Name)]
 		static void Init()
@@ -88,18 +87,29 @@ namespace Assets.Editor
 			// get the launcher as an 'interface' to the non editor assembly
 			_launcher = GameObject.Find("Bon").GetComponent<BonLauncher>();
 
-			if (_initialized) return;
-			_initialized = true;
 
 			titleContent = new GUIContent(Name);
 			_launcher.OnWindowOpen();
-
 			_menuEntryToNodeType = CreateMenuEntries();
-			Graph graph = _launcher.LoadGraph(BonConfig.DefaultGraphName);
+			_menu = CreateGenericMenu();
+
+			_canvasList.Clear();
+			_currentCanvas = null;
+			if (_launcher.Graphs.Count > 0) LoadCanvas(_launcher.Graphs);
+			else LoadCanvas(_launcher.LoadGraph(BonConfig.DefaultGraphName));
+			Repaint();
+		}
+
+		private void LoadCanvas(List<Graph> graphs)
+		{
+			foreach (var graph in graphs) LoadCanvas(graph);
+		}
+
+		private void LoadCanvas(Graph graph)
+		{
+			graph.RegisterListener(_launcher.Listener);
 			_currentCanvas = new BonCanvas(graph);
 			_canvasList.Add(_currentCanvas);
-			_menu = CreateGenericMenu();
-			Repaint();
 		}
 
 		/// <summary>Creates a dictonary that maps a menu entry string to a node type using reflection.</summary>
@@ -127,7 +137,6 @@ namespace Assets.Editor
 		/// <summary>Draws the UI</summary>
 		void OnGUI()
 		{
-			HandleNodeRemoving();
 			HandleCanvasTranslation();
 			HandleDragAndDrop();
 
@@ -160,6 +169,8 @@ namespace Assets.Editor
 				_currentCanvas.Draw((EditorWindow) this, _canvasRegion, _currentDragSocket);
 			}
 			_lastMousePosition = Event.current.mousePosition;
+
+			Repaint();
 		}
 
 		private void HandleTabButtons()
@@ -285,18 +296,6 @@ namespace Assets.Editor
 			GUI.Button(_helpButtonRect, "Help");
 		}
 
-		private void HandleNodeRemoving()
-		{
-			// Delete or Backspace
-			/*if (Event.current.keyCode == KeyCode.Delete || Input.GetKeyDown(KeyCode.Backspace))
-			{
-				if (currentCanvas != null)
-				{
-					currentCanvas.RemoveFocusedNode();
-					Repaint();
-				}
-			}*/
-		}
 
 		private void HandleCanvasTranslation()
 		{

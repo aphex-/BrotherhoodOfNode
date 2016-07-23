@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using Assets.Code.Bon.Interface;
 using Assets.Code.Bon.Nodes.Math;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace Assets.Code.Bon.Nodes.Map
 {
 	[Serializable]
 	[GraphContextMenuItem("Map", "UnityPerlinNoise")]
-	public class PerlinNoiseNode : Node, ISampler2D, IUpdateable
+	public class PerlinNoiseNode : Node, INode2D, IUpdateable, ISampler2D
 	{
 
 		private float _samplingX = 0;
@@ -31,10 +32,10 @@ namespace Assets.Code.Bon.Nodes.Map
 		private string _lastUpdateScale;
 		private string _lastUpdateSeed;
 
-		public PerlinNoiseNode(int id) : base(id)
+		public PerlinNoiseNode(int id, Graph parent) : base(id, parent)
 		{
 			Sockets.Add(new Socket(this, NumberNode.FloatType, SocketDirection.Output));
-			_texture2D = new Texture2D(_textureSize, _textureSize, TextureFormat.ARGB32, false);
+			_texture2D =  new Texture2D(_textureSize, _textureSize, TextureFormat.RGB24, false);
 			_textureArea.Set(6, 0, _texture2D.width, _texture2D.height);
 			Width = _texture2D.width + 12;
 			Height = _texture2D.height + 70;
@@ -67,7 +68,7 @@ namespace Assets.Code.Bon.Nodes.Map
 			_samplingY = y;
 		}
 
-		private float GetSampleAt(float x, float y)
+		public float GetSampleAt(float x, float y)
 		{
 			float scale = float.Parse(Scale);
 			float seed = float.Parse(Seed);

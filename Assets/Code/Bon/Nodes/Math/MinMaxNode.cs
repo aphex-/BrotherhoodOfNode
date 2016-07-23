@@ -18,7 +18,7 @@ namespace Assets.Code.Bon.Nodes.Math
 
 		public static readonly string[] Options = { "min", "max"};
 
-		public MinMaxNode(int id) : base(id)
+		public MinMaxNode(int id, Graph parent) : base(id, parent)
 		{
 			_inputSocket01 = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
 			Sockets.Add(_inputSocket01);

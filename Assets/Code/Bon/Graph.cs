@@ -51,21 +51,33 @@ namespace Assets.Code.Bon
 			return tmpId;
 		}
 
-		public Node CreateNode(Type nodeType)
+
+
+		public Node CreateNode<T>()
 		{
-			return CreateNode(nodeType, ObtainUniqueNodeId());
+			return CreateNode<T>(ObtainUniqueNodeId());
 		}
 
-		public Node CreateNode(Type nodeType, int id)
+		public Node CreateNode<T>(int id)
+		{
+			return CreateNode(typeof(T), id);
+		}
+
+		public Node CreateNode(Type type)
+		{
+			return CreateNode(type, ObtainUniqueNodeId());
+		}
+
+		public Node CreateNode(Type type, int id)
 		{
 			_needsUpdate = true;
 			try
 			{
-				return (Node) Activator.CreateInstance(nodeType, id); ;
+				return (Node) Activator.CreateInstance(type, id, this);
 			}
 			catch (Exception exception)
 			{
-				Debug.LogErrorFormat("Node {0} could not be created " + exception.HelpLink, nodeType.FullName);
+				Debug.LogErrorFormat("Node {0} could not be created " + exception.HelpLink, type.FullName);
 			}
 			return null;
 		}
@@ -101,7 +113,7 @@ namespace Assets.Code.Bon
 			if (_listener != null && TriggerEvents)
 			{
 				node.RegisterListener(_listener);
-				_listener.OnNodeAdded(node);
+				_listener.OnNodeAdded(this, node);
 			}
 		}
 
@@ -121,7 +133,7 @@ namespace Assets.Code.Bon
 			_nodes.Remove(node);
 			if (_listener != null && TriggerEvents)
 			{
-				_listener.OnNodeRemoved(node);
+				_listener.OnNodeRemoved(this, node);
 			}
 			node.RegisterListener(null);
 		}
@@ -136,7 +148,7 @@ namespace Assets.Code.Bon
 			_needsUpdate = true;
 			if (_listener != null && TriggerEvents)
 			{
-				_listener.OnUnLink(s01, s02);
+				_listener.OnUnLink(this, s01, s02);
 			}
 			if (s01 != null && s01.Edge != null)
 			{
@@ -152,7 +164,7 @@ namespace Assets.Code.Bon
 			}
 			if (_listener != null && TriggerEvents)
 			{
-				_listener.OnUnLinked(s01, s02);
+				_listener.OnUnLinked(this, s01, s02);
 			}
 		}
 
@@ -191,7 +203,7 @@ namespace Assets.Code.Bon
 
 				if (_listener != null && TriggerEvents)
 				{
-					_listener.OnLink(edge);
+					_listener.OnLink(this, edge);
 				}
 			}
 			return true;
@@ -377,6 +389,7 @@ namespace Assets.Code.Bon
 			foreach (var sNode in _serializedNodes)
 			{
 				Node n = CreateNode(Type.GetType(sNode.type), sNode.id);
+
 				if (n != null)
 				{
 					JsonUtility.FromJsonOverwrite(sNode.data, n);

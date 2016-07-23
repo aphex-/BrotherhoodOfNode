@@ -21,6 +21,9 @@ namespace Assets.Code.Bon
 		[System.NonSerialized]
 		public string Name;
 
+		[System.NonSerialized]
+		private Graph _parent;
+
 		// Editor related
 		[System.NonSerialized]
 		public Rect WindowRect;
@@ -39,13 +42,14 @@ namespace Assets.Code.Bon
 		[System.NonSerialized]
 		public Rect ResizeArea = new Rect();
 
-		protected Node(int id)
+		protected Node(int id, Graph parent)
 		{
 			Id = id;
 			// default size
 			Width = 100;
 			Height = 100;
 			Name = GetNodeName(this.GetType());
+			this._parent = parent;
 		}
 
 		public abstract void OnGUI();
@@ -100,7 +104,7 @@ namespace Assets.Code.Bon
 
 		public virtual void OnFocus()
 		{
-			_listener.OnFocus(this);
+			_listener.OnFocus(_parent, this);
 		}
 
 		/// <summary>Returns true if this assigned position intersects the node.</summary>
@@ -168,7 +172,7 @@ namespace Assets.Code.Bon
 
 		protected void TriggerChangeEvent() // call this method if your nodes content has changed
 		{
-			if (this._listener != null) this._listener.OnNodeChanged(this);
+			if (this._listener != null) this._listener.OnNodeChanged(_parent, this);
 		}
 
 		public bool AllInputSocketsConnected()
