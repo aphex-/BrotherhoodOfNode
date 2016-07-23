@@ -46,7 +46,7 @@ namespace Assets.Code.Bon.Graph.Custom
 		[SerializeField]
 		private int myNumber;
 
-		public MyNode(int id) : base(id)
+		public MyNode(int id, Graph parent) : base(id, parent)
 		{
 			// Add the input / output sockets of this Node
 			Sockets.Add(new Socket(this, Color.red, SocketDirection.Output));
@@ -128,7 +128,7 @@ The default implementation that inherits from **IGraphListener** is the
 ```cs
 	public void OnCreate(Graph graph)
 	{
-		this.graph = graph;
+	
 	}
 
 	public void OnLink(Edge edge)
@@ -139,6 +139,12 @@ The default implementation that inherits from **IGraphListener** is the
 	public void OnUnLink(Socket s01, Socket s02)
 	{
 		Debug.Log("OnUnLink: Node " + s01.Edge.Source.Parent.Id + " from Node " + s02.Edge.Sink.Parent.Id);
+	}
+	
+	public void OnUnLinked(Graph graph, Socket s01, Socket s02)
+	{
+		Debug.Log("OnUnLinked: Socket " + s02 + " and Socket " + s02);
+		graph.UpdateNodes();
 	}
 
 	public void OnNodeAdded(Node node)
@@ -154,6 +160,16 @@ The default implementation that inherits from **IGraphListener** is the
 	public void OnNodeChanged(Node node)
 	{
 		Debug.Log("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
+	}
+	
+	public void OnFocus(Graph graph, Node node)
+	{
+		Debug.Log("OnFocus: " + node.Id);
+	}
+	
+	public void OnClose(Graph graph)
+	{
+		Debug.Log("OnClose " + graph);
 	}
 ```
 
