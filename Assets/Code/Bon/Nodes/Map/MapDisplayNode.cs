@@ -10,10 +10,8 @@ namespace Assets.Code.Bon.Nodes.Map
 	[GraphContextMenuItem("Map", "Display")]
 	public class MapDisplayNode : Node, IUpdateable {
 
-		private Texture2D _texture2D;
 		private readonly Socket _inputSocket;
-		private string _errorMessage = "";
-		private bool _samplerConnected = false;
+		private IList<ISampler2D> _connectedSamplers;
 
 		private Rect _sizeLabel = 			new Rect(0, 0, 25, 15);
 		private Rect _sizePlusButton =		new Rect(25, 0, 18, 18);
@@ -21,58 +19,87 @@ namespace Assets.Code.Bon.Nodes.Map
 		private Rect _textureArea = 		new Rect();
 		private Rect _errorMessageLabel = 	new Rect(0, 0, 100, 15);
 
+		private MapDisplayUpdateJob _job = new MapDisplayUpdateJob();
+		private Texture2D _texture;
+
+		private bool _isUpdating = false;
+		private bool _isConnected = false;
+		private bool _isSamplerConnected = false;
+
 		[SerializeField]
-		public int GUISize = 100;
+		public int TextureSize = 100;
 
 		public MapDisplayNode(int id) : base(id)
 		{
 			_inputSocket = new Socket(this, NumberNode.FloatType, SocketDirection.Input);
 			Sockets.Add(_inputSocket);
 			Sockets.Add(new Socket(this, NumberNode.FloatType, SocketDirection.Output));
-			InitTexture(GUISize);
+			InitTexture(TextureSize);
+			UpdateConnectedSamplerList();
 			Update();
 		}
 
 		public override void OnDeserialization(SerializableNode sNode)
 		{
-			InitTexture(GUISize);
+			InitTexture(TextureSize);
 			Update();
+		}
+
+		private bool UpdateJob()
+		{
+			if (_job != null)
+			{
+				_job.Update();
+				if (!_job.IsDone) return true;
+				else
+				{
+					_texture = _job.Texture;
+					_job.Abort();
+					_job = null;
+					return false;
+				}
+			}
+			return false;
 		}
 
 		public override void OnGUI()
 		{
-			if (_errorMessage == null)
+			_isUpdating = UpdateJob();
+			_isConnected = AllInputSocketsConnected();
+			_isSamplerConnected = _connectedSamplers != null && _connectedSamplers.Count > 0;
+
+			if (!_isUpdating && _isConnected && _isSamplerConnected)
 			{
 				GUI.Label(_sizeLabel, "size");
 				if (GUI.Button(_sizePlusButton, "+"))
 				{
-					InitTexture(GUISize + 50);
+					InitTexture(TextureSize + 50);
 					Update();
 				}
 				if (GUI.Button(_sizeMinusButton, "-"))
 				{
-					InitTexture(GUISize - 50);
+					InitTexture(TextureSize - 50);
 					Update();
 				}
 
-				//GUI.Label(new Rect(0, 20, 40, 15), "zoom");
-				//GUI.Button(new Rect(40, 20, 20, 20), "+");
-				//GUI.Button(new Rect(60, 20, 20, 20), "-");
-				_textureArea.Set(6, 24, _texture2D.width, _texture2D.height);
-				if (_texture2D != null) GUI.DrawTexture(_textureArea, _texture2D);
+				if (_texture != null)
+				{
+					_textureArea.Set(6, 24, _texture.width, _texture.height);
+					GUI.DrawTexture(_textureArea, _texture);
+				}
 			}
-			else
-			{
-				GUI.Label(_errorMessageLabel, _errorMessage);
-			}
+
+
+			if (_isUpdating) GUI.Label(_errorMessageLabel, "updating data..");
+			else if (!_isConnected) GUI.Label(_errorMessageLabel, NodeUtils.NotConnectedMessage);
+			else if (!_isSamplerConnected) GUI.Label(_errorMessageLabel, "no sampler data");
+
 		}
 
 		private void InitTexture(int size)
 		{
 			if (size <= 99) return;
-			GUISize = size;
-			if (_texture2D != null) Texture2D.DestroyImmediate(_texture2D);
-			_texture2D = new Texture2D(GUISize, GUISize, TextureFormat.ARGB32, false);
+			TextureSize = size;
 			Width = size + 12;
 			Height = size + 50;
 		}
@@ -103,57 +130,33 @@ namespace Assets.Code.Bon.Nodes.Map
 		{
 			if (!AllInputSocketsConnected())
 			{
-				_errorMessage = NodeUtils.NotConnectedMessage;
 				return null;
 			}
-
-			_errorMessage = null;
-
-			IList<ISampler2D> samplers = CreateUpperSamplerList();
-			if (samplers.Count > 0 && _texture2D != null)
+			UpdateConnectedSamplerList();
+			if (_connectedSamplers.Count > 0)
 			{
-				for (int x = 0; x < _texture2D.width; x++)
-				{
-					for (int y = 0; y < _texture2D.height; y++)
-					{
-						float value = GetSampleFrom(x, y, samplers);
-						_texture2D.SetPixel(x, y, NodeUtils.GetMapValueColor(value));
-					}
-				}
+				if (_job != null && !_job.IsDone) _job.Abort();
+				if (_job == null) _job = new MapDisplayUpdateJob();
+				_job.Request(_inputSocket, _connectedSamplers, 0, 0, TextureSize, TextureSize);
+				_job.Start();
 			}
-
-			if (samplers.Count == 0) _errorMessage = "no sample data";
-			_samplerConnected = samplers.Count > 0;
-			if (_texture2D != null) _texture2D.Apply();
-			return _texture2D;
+			return null;
 		}
 
-		public float GetSampleFrom(int x, int y, IList<ISampler2D> samplers)
+		public void UpdateConnectedSamplerList()
 		{
-			foreach (ISampler2D sampler in samplers)
+			_connectedSamplers = Graph.CreateUpperNodesList(this).OfType<ISampler2D>().ToList();
+		}
+
+		public float GetSampleAt(int x, int y)
+		{
+			foreach (ISampler2D sampler in _connectedSamplers)
 			{
 				sampler.SampleFrom(x, y);
 			}
 			return (float) _inputSocket.GetConnectedSocket().Parent.GetResultOf(_inputSocket.GetConnectedSocket());
 		}
 
-
-		// <summary> Creates a list of sampler that are connected to the input socket of this Node</summary>
-		public List<ISampler2D> CreateUpperSamplerList()
-		{
-			return Graph.CreateUpperNodesList(this).OfType<ISampler2D>().ToList();
-		}
-
-		public override void OnFocus()
-		{
-			base.OnFocus();
-			// this is a fix to reload textures that did not load during startup (if unity starts with an open EditorWindow)
-			if (_texture2D == null)
-			{
-				InitTexture(GUISize);
-				UpdateTexture();
-			}
-		}
 	}
 }
 
