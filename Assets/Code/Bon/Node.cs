@@ -16,9 +16,6 @@ namespace Assets.Code.Bon
 		public readonly int Id;
 
 		[System.NonSerialized]
-		private INodeListener _listener;
-
-		[System.NonSerialized]
 		public string Name;
 
 		[System.NonSerialized]
@@ -104,7 +101,10 @@ namespace Assets.Code.Bon
 
 		public virtual void OnFocus()
 		{
-			_listener.OnFocus(_parent, this);
+			if (_parent.TriggerEvents)
+			{
+				EventManager.TriggerOnFocusNode(_parent, this);
+			}
 		}
 
 		/// <summary>Returns true if this assigned position intersects the node.</summary>
@@ -165,14 +165,12 @@ namespace Assets.Code.Bon
 			return null;
 		}
 
-		public void RegisterListener(INodeListener l)
-		{
-			this._listener = l;
-		}
-
 		protected void TriggerChangeEvent() // call this method if your nodes content has changed
 		{
-			if (this._listener != null) this._listener.OnNodeChanged(_parent, this);
+			if (_parent.TriggerEvents)
+			{
+				EventManager.TriggerOnChangedNode(_parent, this);
+			}
 		}
 
 		public bool AllInputSocketsConnected()

@@ -26,20 +26,11 @@ namespace Assets.Code.Bon
 		// an endless recursion this can crash unity.
 		[SerializeField] public bool AllowCicles = false;
 
-		private IGraphListener _listener;
 
 		private bool _needsUpdate = true;
 
 		[System.NonSerialized] public bool TriggerEvents = true;
 
-		public void RegisterListener(IGraphListener listener)
-		{
-			this._listener = listener;
-			foreach (var node in _nodes)
-			{
-				node.RegisterListener(listener);
-			}
-		}
 
 		public int ObtainUniqueNodeId()
 		{
@@ -50,8 +41,6 @@ namespace Assets.Code.Bon
 			}
 			return tmpId;
 		}
-
-
 
 		public Node CreateNode<T>()
 		{
@@ -110,10 +99,9 @@ namespace Assets.Code.Bon
 		{
 			_needsUpdate = true;
 			_nodes.Add(node);
-			if (_listener != null && TriggerEvents)
+			if (TriggerEvents)
 			{
-				node.RegisterListener(_listener);
-				_listener.OnNodeAdded(this, node);
+				EventManager.TriggerOnAddedNode(this, node);
 			}
 		}
 
@@ -131,11 +119,10 @@ namespace Assets.Code.Bon
 			}
 
 			_nodes.Remove(node);
-			if (_listener != null && TriggerEvents)
+			if (TriggerEvents)
 			{
-				_listener.OnNodeRemoved(this, node);
+				EventManager.TriggerOnNodeRemoved(this, node);
 			}
-			node.RegisterListener(null);
 		}
 
 		public void RemoveNode(int id)
@@ -146,9 +133,9 @@ namespace Assets.Code.Bon
 		public void UnLink(Socket s01, Socket s02)
 		{
 			_needsUpdate = true;
-			if (_listener != null && TriggerEvents)
+			if (TriggerEvents)
 			{
-				_listener.OnUnLink(this, s01, s02);
+				EventManager.TriggerOnUnLinkSockets(this, s01, s02);
 			}
 			if (s01 != null && s01.Edge != null)
 			{
@@ -162,9 +149,9 @@ namespace Assets.Code.Bon
 				s02.Edge.Output = null;
 				s02.Edge = null;
 			}
-			if (_listener != null && TriggerEvents)
+			if (TriggerEvents)
 			{
-				_listener.OnUnLinked(this, s01, s02);
+				EventManager.TriggerOnUnLinkedSockets(this, s01, s02);
 			}
 		}
 
@@ -201,9 +188,9 @@ namespace Assets.Code.Bon
 					return false;
 				}
 
-				if (_listener != null && TriggerEvents)
+				if (TriggerEvents)
 				{
-					_listener.OnLink(this, edge);
+					EventManager.TriggerOnLinkEdge(this, edge);
 				}
 			}
 			return true;
@@ -285,11 +272,11 @@ namespace Assets.Code.Bon
 			return JsonUtility.ToJson(this);
 		}
 
-		public static Graph FromJson(string json, IGraphListener listener)
+		public static Graph FromJson(string json)
 		{
 			Graph g = JsonUtility.FromJson<Graph>(json);
-			listener.OnCreate(g);
-			g.RegisterListener(listener);
+			//listener.OnCreate(g);
+			EventManager.TriggerOnCreateGraph(g);
 			return g;
 		}
 
@@ -301,13 +288,13 @@ namespace Assets.Code.Bon
 			return true;
 		}
 
-		public static Graph Load(string fileName, IGraphListener listener)
+		public static Graph Load(string fileName)
 		{
 			if(File.Exists(fileName)){
 				var file = File.OpenText(fileName);
 				var json = file.ReadToEnd();
 				file.Close();
-				Graph deserializedGraph = FromJson(json, listener);
+				Graph deserializedGraph = FromJson(json);
 				if (deserializedGraph.Version != BonConfig.Version)
 				{
 					Debug.LogWarning("You loading a graph with a different version number: " + deserializedGraph.Version +

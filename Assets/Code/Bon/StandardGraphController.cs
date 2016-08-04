@@ -7,8 +7,28 @@ using UnityEngine;
 
 namespace Assets.Code.Bon
 {
-	public class StandardGraphController : IGraphListener
+	public class StandardGraphController
 	{
+
+		public StandardGraphController()
+		{
+			EventManager.OnCreateGraph += OnCreate;
+			EventManager.OnFocusGraph += OnFocus;
+			EventManager.OnCloseGraph += OnClose;
+			EventManager.OnLinkEdge += OnLink;
+			EventManager.OnUnLinkSockets += OnUnLink;
+			EventManager.OnUnLinkedSockets += OnUnLinked;
+			EventManager.OnAddedNode += OnNodeAdded;
+			EventManager.OnNodeRemoved += OnNodeRemoved;
+			EventManager.OnChangedNode += OnNodeChanged;
+			EventManager.OnFocusNode += OnFocusNode;
+			EventManager.OnEditorWindowOpen += OnWindowOpen;
+		}
+
+		private void OnWindowOpen()
+		{
+
+		}
 
 		public void OnCreate(Graph graph)
 		{
@@ -61,7 +81,7 @@ namespace Assets.Code.Bon
 			graph.ForceUpdateNodes();
 		}
 
-		public void OnFocus(Graph graph, Node node)
+		public void OnFocusNode(Graph graph, Node node)
 		{
 			Debug.Log("OnFocus: " + node.Id);
 		}

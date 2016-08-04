@@ -11,6 +11,10 @@ using System.Linq;
 
 namespace Assets.Editor
 {
+	/// <summary>
+	/// This class contains the logic of the editor window. It contains canvases that
+	/// are containing graphs. It uses the BonLauncher to load, save and close Graphs.
+	/// </summary>
 	public class BonWindow : EditorWindow
 	{
 		private const string Name = "BrotherhoodOfNode";
@@ -89,7 +93,7 @@ namespace Assets.Editor
 
 
 			titleContent = new GUIContent(Name);
-			_launcher.OnWindowOpen();
+			EventManager.TriggerOnWindowOpen();
 			_menuEntryToNodeType = CreateMenuEntries();
 			_menu = CreateGenericMenu();
 
@@ -107,13 +111,16 @@ namespace Assets.Editor
 
 		private void LoadCanvas(Graph graph)
 		{
-			graph.RegisterListener(_launcher.Listener);
 			_currentCanvas = new BonCanvas(graph);
 			_canvasList.Add(_currentCanvas);
 		}
 
-		/// <summary>Creates a dictonary that maps a menu entry string to a node type using reflection.</summary>
-		/// <returns>Dictonary that maps a menu entry string to a node type</returns>
+		/// <summary>
+		/// Creates a dictonary that maps a menu entry string to a node type using reflection.
+		/// </summary>
+		/// <returns>
+		/// Dictonary that maps a menu entry string to a node type
+		/// </returns>
 		public Dictionary<string, Type> CreateMenuEntries()
 		{
 			Dictionary<string, Type> menuEntries = new Dictionary<string, Type>();
@@ -217,7 +224,7 @@ namespace Assets.Editor
 
 		private void SetCurrentCanvas(BonCanvas canvas)
 		{
-			if (canvas != null) _launcher.OnFocus(canvas.Graph);
+			if (canvas != null) EventManager.TriggerOnFocusGraph(canvas.Graph);
 			_currentCanvas = canvas;
 		}
 
@@ -230,7 +237,8 @@ namespace Assets.Editor
 				if (canvas.FilePath == null) OpenSaveDialog();
 				else _launcher.SaveGraph(canvas.Graph, canvas.FilePath);
 			}
-			_launcher.CloseGraph(canvas.Graph);
+			EventManager.TriggerOnCloseGraph(canvas.Graph);
+			_launcher.RemoveGraph(canvas.Graph);
 			_canvasList.Remove(canvas);
 			if (_canvasList.Count > 0) SetCurrentCanvas(_canvasList[0]);
 			else SetCurrentCanvas(null);

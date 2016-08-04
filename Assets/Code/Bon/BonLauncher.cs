@@ -12,76 +12,86 @@ using Assets.Code.Bon.Nodes.Math;
 
 namespace Assets.Code.Bon
 {
+	/// <summary>
+	/// A class to controll the creation of Graphs. It contains loaded Grpahs.
+	/// (A gameobject with this script is created by the editor if it is not in the scene)
+	/// </summary>
 	[ExecuteInEditMode]
 	public class BonLauncher : MonoBehaviour
 	{
 
 		private List<Graph> _graphs;
-		private IGraphListener _listener;
-
+		private StandardGraphController _controller;
 
 		public List<Graph> Graphs
 		{
-			get
-			{
-				if (_graphs == null) _graphs = new List<Graph>();
-				return _graphs;
-			}
+			get { return _graphs; }
 		}
 
-		public IGraphListener Listener
+		public void Awake()
 		{
-			get
-			{
-				if (_listener == null) _listener = new StandardGraphController(); // use this implementation or add your own listsner
-				return _listener;
-			}
+			_graphs = new List<Graph>();
 		}
 
-		public void OnWindowOpen()
-		{
-
-		}
-
-		// <summary> Gets called if the editor opens a new Graph </summary>
+		/// <summary>
+		/// Loads a graph by its path, adds it to the internal list
+		/// and returns it.
+		/// (Also used by the editor to open Graphs)
+		/// </summary>
 		public Graph LoadGraph(string path)
 		{
 			Graph g;
 			if (path.Equals(BonConfig.DefaultGraphName)) g = CreateDefaultGraph();
-			else g = Graph.Load(path, Listener);
+			else g = Graph.Load(path);
 			Graphs.Add(g);
+			CreateGraphController(g);
+			g.UpdateNodes();
 			return g;
 		}
 
-		// <summary> Gets called if the editor requests to save the assigned graph </summary>
+		/// <summary>
+		/// Saves a graph by its path.
+		/// (Also used by the editor to save Graphs)
+		/// </summary>
 		public void SaveGraph(Graph g, string path)
 		{
 			Graph.Save(path, g);
 		}
 
-		// <summary> Gets called if the editor closes a graph </summary>
-		public void CloseGraph(Graph g)
+		/// <summary>
+		/// Removes a Graph from the internal list.
+		/// (Also used by the editor to close Graphs)
+		/// </summary>
+		public void RemoveGraph(Graph g)
 		{
 			Graphs.Remove(g);
-			Listener.OnClose(g);
 		}
 
-		// <summary> Gets the graph at the index </summary>
+		/// <summary>
+		/// Returns the graph at the index
+		/// </summary>
 		public Graph GetGraph(int index)
 		{
 			return Graphs[index];
 		}
 
-		public void OnFocus(Graph graph)
+		/// <summary>
+		/// Create a controller for the assigned Graph.
+		/// </summary>
+		private void CreateGraphController(Graph graph)
 		{
-			Listener.OnFocus(graph);
+			// in this case we create one controller for all graphs
+			// you could also create different controllers for different graphs
+			if (_controller == null) _controller = new StandardGraphController();
 		}
 
-		// <summary> Creates a default Graph. Could also be an empty Graph </summary>
+		/// <summary>
+		/// Creates a default Graph.
+		/// (see: BonConfig.DefaultGraphName)
+		/// </summary>
 		public Graph CreateDefaultGraph()
 		{
 			Graph graph = new Graph();
-
 
 			var numberNode01 = (NumberNode) graph.CreateNode<NumberNode>();
 			numberNode01.X = 20;
@@ -133,7 +143,7 @@ namespace Assets.Code.Bon
 
 			// == test serialization an deserialization ==
 			var serializedJSON = graph.ToJson();
-			var deserializedGraph = Graph.FromJson(serializedJSON, Listener);
+			var deserializedGraph = Graph.FromJson(serializedJSON);
 			// =====
 
 			return deserializedGraph;
