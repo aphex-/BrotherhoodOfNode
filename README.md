@@ -20,6 +20,8 @@ A visual graph editor for Unity3D
 * easy creation of custom nodes (extend Node.cs)
 * tab pages for multiple graphs
 
+![alt text](https://github.com/aphex-/BrotherhoodOfNode/blob/master/feature_preview.png "feature preview")
+
 ### Non-Features
 * nothing but a tool to create graphs and make them persitent (ok.. there are some math related Nodes now..)
 
