@@ -54,7 +54,7 @@ namespace Assets.Code.Bon
 			}
 		}
 
-		public static void DrawEdge(Vector2 position01, Vector2 tangent01, Vector2 position02, Vector2 tangent02, Color c)
+		public static void DrawEdge(Vector2 position01, Vector2 tangent01, Vector2 position02, Vector2 tangent02, Type type)
 		{
 			Handles.DrawBezier(
 				position01, position02,
@@ -62,19 +62,23 @@ namespace Assets.Code.Bon
 
 			Handles.DrawBezier(
 				position01, position02,
-				tangent01, tangent02, c, null, 3);
+				tangent01, tangent02, Node.GetEdgeColor(type), null, 3);
 		}
 
 		public static Vector2 GetEdgePosition(Socket socket, Vector2 position)
 		{
-			float width = 0;
-			if (socket.Direction == SocketDirection.Output)
+			if (socket.Parent.Collapsed)
 			{
-				width = BonConfig.SocketSize;
+				float width = BonConfig.SocketSize;
+				if (socket.Direction == SocketDirection.Output) width = 0;
+				position.Set(socket.X + width, socket.Parent.WindowRect.y + 8);
 			}
-			position.Set(
-				socket.X + width,
-				socket.Y + (BonConfig.SocketSize/2f));
+			else
+			{
+				float width = 0;
+				if (socket.Direction == SocketDirection.Output) width = BonConfig.SocketSize;
+				position.Set(socket.X + width, socket.Y + BonConfig.SocketSize / 2f);
+			}
 			return position;
 		}
 

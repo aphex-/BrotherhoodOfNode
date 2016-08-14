@@ -67,5 +67,10 @@ namespace Assets.Code.Thread
 			ThreadFunction();
 			IsDone = true;
 		}
+
+		public bool IsStarted()
+		{
+			return _Thread != null;
+		}
 	}
 }

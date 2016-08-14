@@ -1,21 +1,29 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Net.NetworkInformation;
+using System.Security.Cryptography;
 using UnityEditor;
 using UnityEngine;
 using Assets.Code.Bon;
 
 namespace Assets.Editor.Bon
 {
+	[Serializable]
 	public class BonCanvas
 	{
-		public readonly GUIStyle Style = new GUIStyle();
+		public  GUIStyle Style = new GUIStyle();
 
 		public const float CanvasSize = 100000;
 
 		public string FilePath;
 
 		public Rect DrawArea = new Rect();
+
+		[SerializeField]
 		public float Zoom = 1;
+		[SerializeField]
 		public Vector2 Position = new Vector2();
+
 		public Graph Graph;
 
 		public Rect TabButton = new Rect();
@@ -24,18 +32,19 @@ namespace Assets.Editor.Bon
 		private Vector2 _tmpVector01 = new Vector2();
 		private Vector2 _tmpVector02 = new Vector2();
 
-		private readonly Color _backgroundColor = new Color(0.18f, 0.18f, 0.18f, 1f);
-		private readonly Color _backgroundLineColor01 = new Color(0.14f, 0.14f, 0.14f, 1f);
-		private readonly Color _backgroundLineColor02 = new Color(0.10f, 0.10f, 0.10f, 1f);
+		private  Color _backgroundColor = new Color(0.18f, 0.18f, 0.18f, 1f);
+		private  Color _backgroundLineColor01 = new Color(0.14f, 0.14f, 0.14f, 1f);
+		private  Color _backgroundLineColor02 = new Color(0.10f, 0.10f, 0.10f, 1f);
+
+		private GUIStyle centeredLabelStyle;
 
 		public BonCanvas(Graph graph)
 		{
-			this.Graph = graph;
+			Graph = graph;
 			Style.normal.background = CreateBackgroundTexture();
 			Style.normal.background.wrapMode = TextureWrapMode.Repeat;
 			Style.fixedHeight = CanvasSize;
 			Style.fixedWidth = CanvasSize;
-
 		}
 
 		private Texture2D CreateBackgroundTexture()
@@ -60,17 +69,20 @@ namespace Assets.Editor.Bon
 
 		public void Draw(EditorWindow window, Rect region, Socket currentDragingSocket)
 		{
+			if (centeredLabelStyle == null) centeredLabelStyle = GUI.skin.GetStyle("Label");
+			centeredLabelStyle.alignment = TextAnchor.MiddleCenter;
+
 			EditorZoomArea.Begin(Zoom, region);
 
-			if (this.Style.normal.background == null) 	this.Style.normal.background = CreateBackgroundTexture();
-			GUI.DrawTextureWithTexCoords(this.DrawArea, this.Style.normal.background, new Rect(0, 0, 1000, 1000));
-			this.DrawArea.Set(this.Position.x, this.Position.y, CanvasSize, CanvasSize);
-			GUILayout.BeginArea(this.DrawArea);
-			this.DrawEdges();
+			if (Style.normal.background == null) 	Style.normal.background = CreateBackgroundTexture();
+			GUI.DrawTextureWithTexCoords(DrawArea, Style.normal.background, new Rect(0, 0, 1000, 1000));
+			DrawArea.Set(Position.x, Position.y, CanvasSize, CanvasSize);
+			GUILayout.BeginArea(DrawArea);
+			DrawEdges();
 			window.BeginWindows();
-			this.DrawNodes();
+			DrawNodes();
 			window.EndWindows();
-			this.DrawDragEdge(currentDragingSocket);
+			DrawDragEdge(currentDragingSocket);
 
 			for (var i = 0; i < Graph.GetNodeCount(); i++)
 			{
@@ -97,7 +109,14 @@ namespace Assets.Editor.Bon
 			for (var i = 0; i < Graph.GetNodeCount(); i++)
 			{
 				Node node = Graph.GetNodeAt(i);
-				node.WindowRect = GUI.Window(node.Id, node.WindowRect, GUIDrawNodeWindow, node.Name + " (" + node.Id + ")");
+				if (!node.Collapsed) node.WindowRect.height = node.Height;
+				node.WindowRect = GUI.Window(node.Id, node.WindowRect, GUIDrawNodeWindow, node.Name + "");
+				if (node.Collapsed)
+				{
+					// title bar text is not visible if collapsed
+					GUI.Label(node.WindowRect, node.Name + "", centeredLabelStyle);
+				}
+
 				node.GUIAlignSockets();
 			}
 		}
@@ -114,14 +133,22 @@ namespace Assets.Editor.Bon
 				m.AddDisabledItem(new GUIContent(node.Name + " (" + nodeId + ")"));
 				m.AddSeparator("");
 				m.AddItem(new GUIContent("Delete"), false, DeleteNode, nodeId);
+
+				if (node.Collapsed) m.AddItem(new GUIContent("Expand"), false, ExpandNode, nodeId);
+				else m.AddItem(new GUIContent("Collapse"), false, CollapseNode, nodeId);
+
 				m.ShowAsContext();
 				Event.current.Use();
 			}
 
-			GUILayout.BeginArea(node.ContentRect);
-			GUI.color = Color.white;
-			node.OnGUI();
-			GUILayout.EndArea();
+			if (!node.Collapsed)
+			{
+				GUILayout.BeginArea(node.ContentRect);
+				GUI.color = Color.white;
+				node.OnGUI();
+				GUILayout.EndArea();
+			}
+
 			GUI.DragWindow();
 			if (Event.current.GetTypeForControl(node.Id) == EventType.Used)
 			{
@@ -129,6 +156,18 @@ namespace Assets.Editor.Bon
 				Node.LastFocusedNodeId = node.Id;
 			}
 		}
+
+		private void CollapseNode(object nodeId)
+		{
+			Node node = Graph.GetNode((int) nodeId);
+			node.Collapse();
+		}
+
+		private void ExpandNode(object nodeId)
+		{
+			Graph.GetNode((int) nodeId).Expand();
+		}
+
 
 		private void DeleteNode(object nodeId)
 		{

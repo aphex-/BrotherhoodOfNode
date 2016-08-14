@@ -2,9 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Assets.Code.Bon.Interface;
 
 public class NodeUtils {
+
 	public const string NotConnectedMessage = "not connected";
+	private static Texture2D _staticRectTexture;
+	private static GUIStyle _staticRectStyle;
 
 	/** Draws a textfield that accepts float inputs only.
 		Returns true if the value has changed.
@@ -34,9 +38,40 @@ public class NodeUtils {
 
 	public static Color GetMapValueColor(float value)
 	{
+		if (float.IsNaN(value)) return Color.magenta;
 		if (value > 1f) return Color.red;
-		if (value < 0f) return Color.blue;
-		return Color.white * value;
+		if (value < -1f) return Color.blue;
+		return Color.white * (value + 1f) / 2f;
+	}
+
+
+	public static Color[] ToColorMap(float[,] values, IColorSampler1D colorSampler = null)
+	{
+		int width = values.GetLength(0);
+		int height = values.GetLength(1);
+		Color[] colorMap = new Color[width * height];
+		for (int y = 0; y < height; y++)
+		{
+			for (int x = 0; x < width; x++)
+			{
+				Color c;
+				if (colorSampler == null) c = GetMapValueColor(values[x, y]);
+				else c = colorSampler.GetColorFrom((values[x, y] + 1f) / 2f);
+				colorMap[y * width + x] = c;
+			}
+		}
+		return colorMap;
+	}
+
+
+	public static void GUIDrawRect( Rect position, UnityEngine.Color color )
+	{
+		if(_staticRectTexture == null) _staticRectTexture = new Texture2D( 1, 1 );
+		if(_staticRectStyle == null) _staticRectStyle = new GUIStyle();
+		_staticRectTexture.SetPixel(0, 0, color);
+		_staticRectTexture.Apply();
+		_staticRectStyle.normal.background = _staticRectTexture;
+		GUI.Box( position, GUIContent.none, _staticRectStyle );
 	}
 
 }

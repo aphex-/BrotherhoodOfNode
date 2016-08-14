@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using System.Reflection;
-using System.Text;
-using System.Linq;
-using Assets.Code.Bon.Interface;
-using Assets.Code.Bon.Nodes.Map;
-using Assets.Code.Bon.Nodes.Math;
-
+using Assets.Code.Bon.Nodes;
+using Assets.Code.Bon.Nodes.Number;
+using Assets.Code.Bon.Nodes.Number.Map2D;
 
 
 namespace Assets.Code.Bon
@@ -17,20 +12,17 @@ namespace Assets.Code.Bon
 	/// (A gameobject with this script is created by the editor if it is not in the scene)
 	/// </summary>
 	[ExecuteInEditMode]
+	[System.Serializable]
 	public class BonLauncher : MonoBehaviour
 	{
 
-		private List<Graph> _graphs;
+		private List<Graph> _graphs = new List<Graph>();
+
 		private StandardGraphController _controller;
 
 		public List<Graph> Graphs
 		{
 			get { return _graphs; }
-		}
-
-		public void Awake()
-		{
-			_graphs = new List<Graph>();
 		}
 
 		/// <summary>
@@ -43,6 +35,7 @@ namespace Assets.Code.Bon
 			Graph g;
 			if (path.Equals(BonConfig.DefaultGraphName)) g = CreateDefaultGraph();
 			else g = Graph.Load(path);
+			g.Name = path;
 			Graphs.Add(g);
 			CreateGraphController(g);
 			g.UpdateNodes();
@@ -93,41 +86,23 @@ namespace Assets.Code.Bon
 		{
 			Graph graph = new Graph();
 
-			var numberNode01 = (NumberNode) graph.CreateNode<NumberNode>();
-			numberNode01.X = 20;
-			numberNode01.Y = 20;
-			numberNode01.Number = "355";
-			graph.AddNode(numberNode01);
-
-			var numberNode02 = (NumberNode) graph.CreateNode<NumberNode>();
-			numberNode02.X = 20;
-			numberNode02.Y = 80;
-			numberNode02.Number = "113";
-			graph.AddNode(numberNode02);
-
-			var operator01 = (MathOperatorNode) graph.CreateNode<MathOperatorNode>();
+			// Number Nodes
+			var operator01 = (NumberOperatorNode) graph.CreateNode<NumberOperatorNode>();
 			operator01.X = 200;
 			operator01.Y = 40;
-			operator01.SetMode(Operator.Divide);
+			operator01.SetMode(Operator.Add);
 			graph.AddNode(operator01);
 
-			var diplay01 = (MathDisplay) graph.CreateNode<MathDisplay>();
+			var diplay01 = (NumberDisplayNode) graph.CreateNode<NumberDisplayNode>();
 			diplay01.X = 330;
 			diplay01.Y = 80;
 			graph.AddNode(diplay01);
 
 			graph.Link(
-				numberNode01.GetSocket(NumberNode.FloatType, SocketDirection.Output, 0),
-				operator01.GetSocket(NumberNode.FloatType, SocketDirection.Input, 0));
+				operator01.GetSocket(typeof(AbstractNumberNode), SocketDirection.Output, 0),
+				diplay01.GetSocket(typeof(AbstractNumberNode), SocketDirection.Input, 0));
 
-			graph.Link(
-				numberNode02.GetSocket(NumberNode.FloatType, SocketDirection.Output, 0),
-				operator01.GetSocket(NumberNode.FloatType, SocketDirection.Input, 1));
-
-			graph.Link(
-				operator01.GetSocket(NumberNode.FloatType, SocketDirection.Output, 0),
-				diplay01.GetSocket(NumberNode.FloatType, SocketDirection.Input, 0));
-
+			// Map2D Nodes
 			var perlinNoise = graph.CreateNode<PerlinNoiseNode>();
 			perlinNoise.X = 80;
 			perlinNoise.Y = 250;
@@ -138,8 +113,9 @@ namespace Assets.Code.Bon
 			displayMap.Y = 280;
 			graph.AddNode(displayMap);
 
-			graph.Link(perlinNoise.GetSocket(NumberNode.FloatType, SocketDirection.Output, 0),
-				displayMap.GetSocket(NumberNode.FloatType, SocketDirection.Input, 0));
+			graph.Link(perlinNoise.GetSocket(typeof(AbstractNumberNode), SocketDirection.Output, 0),
+				displayMap.GetSocket(typeof(AbstractNumberNode), SocketDirection.Input, 0));
+
 
 			// == test serialization an deserialization ==
 			var serializedJSON = graph.ToJson();

@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using Assets.Code.Bon.Nodes;
 using UnityEngine;
 
 namespace Assets.Code.Bon
@@ -6,18 +7,22 @@ namespace Assets.Code.Bon
 
 	public class Socket
 	{
+		private string _directInputString = "0";
+
 		public Edge Edge;
-		public Color Type;
+		public Type Type;
 		public Node Parent;
 
-		// Editor related
-		private Rect _boxRect = new Rect();
 		public SocketDirection Direction;
 
-		private static readonly RectOffset Padding = new RectOffset(0,0,0,0);
+		private Rect _boxRect;
+		private Rect _directInputRect;
+		private float _directInputNumber = float.NaN;
+		private RectOffset _padding;
 
-		public Socket(Node parent, Color type, SocketDirection direciton)
+		public Socket(Node parent, Type type, SocketDirection direciton)
 		{
+			_padding = new RectOffset(0, 0, -2, 0);
 			Parent = parent;
 			Type = type;
 			_boxRect.width = BonConfig.SocketSize;
@@ -39,6 +44,11 @@ namespace Assets.Code.Bon
 			set { _boxRect.y = value; }
 		}
 
+		public bool IsConnected()
+		{
+			return Edge != null;
+		}
+
 		public Socket GetConnectedSocket()
 		{
 			if (Edge == null)
@@ -52,18 +62,78 @@ namespace Assets.Code.Bon
 			return Edge.Input;
 		}
 
+		public bool CanGetResult()
+		{
+			if (IsInDirectInputMode()) return true;
+			return Direction == SocketDirection.Input && IsConnected() &&
+			       GetConnectedSocket().Parent.CanGetResultOf(GetConnectedSocket());
+		}
+
 		public bool Intersects(Vector2 nodePosition)
 		{
+			if (Parent.Collapsed) return false;
+
+			if (IsInDirectInputMode())
+			{
+				float width = CalcDirectInputOffset();
+				_boxRect.x -= width;
+				var intersects = _boxRect.Contains(nodePosition);
+				_boxRect.x += width;
+				return intersects;
+			}
 			return _boxRect.Contains(nodePosition);
 		}
 
 		public void Draw()
 		{
-			GUI.color = Type;
-			GUI.skin.box.padding = Padding;
-			GUI.skin.box.fontSize = 10;
-			GUI.Box(_boxRect, ">");
+			GUI.skin.box.normal.textColor = Node.GetEdgeColor(Type);
+			GUI.skin.box.padding = _padding;
+			GUI.skin.box.fontSize = 14;
+			GUI.skin.box.fontStyle = FontStyle.Bold;
+			if (IsInDirectInputMode()) DrawDirectNumberInput();
+			else GUI.Box(_boxRect, ">");
 		}
+
+		public bool IsInDirectInputMode()
+		{
+			return Type == typeof(AbstractNumberNode) && Direction == SocketDirection.Input && Edge == null;
+		}
+
+		private float CalcDirectInputOffset()
+		{
+			return GUI.skin.textField.CalcSize(new GUIContent(_directInputString)).x + 5;
+		}
+
+		private void DrawDirectNumberInput()
+		{
+			float width = CalcDirectInputOffset();
+			_boxRect.x -= width;
+			GUI.Box(_boxRect, ">");
+			_directInputRect.Set(_boxRect.x + _boxRect.width, _boxRect.y, width, _boxRect.height);
+			if (NodeUtils.FloatTextField(_directInputRect, ref _directInputString))
+			{
+				_directInputNumber = float.Parse(_directInputString);
+				Parent.TriggerChangeEvent();
+			}
+			_boxRect.x += width;
+		}
+
+		public float GetDirectInputNumber()
+		{
+			if (float.IsNaN(_directInputNumber)) _directInputNumber = float.Parse(_directInputString);
+			return _directInputNumber;
+		}
+
+		public void SetDirectInputNumber(float number, bool triggerChangeEvent)
+		{
+			if (!float.IsNaN(number))
+			{
+				_directInputNumber = number;
+				_directInputString = number + "";
+				if (triggerChangeEvent) Parent.TriggerChangeEvent();
+			}
+		}
+
 	}
 
 	public enum SocketDirection

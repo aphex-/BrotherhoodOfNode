@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -22,6 +21,7 @@ namespace Assets.Editor
 		public const int BottomOffset = 20;
 		public const int TopMenuHeight = 20;
 
+
 		private const int TabButtonWidth = 200;
 		private const int TabButtonMargin = 4;
 		private const int TabCloseButtonSize = TopMenuHeight;
@@ -30,24 +30,23 @@ namespace Assets.Editor
 		private const float CanvasZoomMin = 0.1f;
 		private const float CanvasZoomMax = 1.0f;
 
-		private readonly Rect _openButtonRect = new Rect(0, 0, 80, TopMenuHeight);
-		private readonly Rect _saveButtonRect = new Rect(80, 0, 80, TopMenuHeight);
-		private readonly Rect _newButtonRect = new Rect(160, 0, 80, TopMenuHeight);
-		private readonly Rect _helpButtonRect = new Rect(240, 0, 80, TopMenuHeight);
+		private  Rect _openButtonRect = new Rect(0, 0, 80, TopMenuHeight);
+		private  Rect _saveButtonRect = new Rect(80, 0, 80, TopMenuHeight);
+		private  Rect _newButtonRect = new Rect(160, 0, 80, TopMenuHeight);
+		private  Rect _helpButtonRect = new Rect(240, 0, 80, TopMenuHeight);
 
-		private Vector2 _nextTranlationPosition = new Vector2();
+		private Vector2 _nextTranlationPosition;
 
 		private Color _tabColorUnselected = new Color(0.8f, 0.8f, 0.8f, 0.5f);
 		private Color _tabColorSelected = Color.white;
 
 
-		private BonLauncher _launcher;
-		private readonly List<BonCanvas> _canvasList = new List<BonCanvas>();
-		private BonCanvas _currentCanvas = null;
+		private  List<BonCanvas> _canvasList = new List<BonCanvas>();
+		private BonCanvas _currentCanvas;
 		private Rect _canvasRegion = new Rect();
 
 		private Socket _currentDragSocket = null;
-		private Vector2 _lastMousePosition = new Vector2();
+		private Vector2 _lastMousePosition;
 
 		private GenericMenu _menu;
 		private Dictionary<string, Type> _menuEntryToNodeType;
@@ -56,52 +55,51 @@ namespace Assets.Editor
 
 
 		[MenuItem("Window/" + Name)]
-		static void Init()
+		static void OnCreateWindow()
 		{
-			BonWindow window = EditorWindow.GetWindow<BonWindow>();
+			BonWindow window = GetWindow<BonWindow>();
 			// BonWindow window = CreateInstance<BonWindow>(); // to create a new window
-			window.wantsMouseMove = true;
-			GUIContent c = new GUIContent();
-			c.text = "Graph";
-			window.titleContent = c;
 			window.Show();
-			window.InitializeInstance();
 		}
 
-		public void Awake()
+		public void OnEnable()
 		{
-			InitializeInstance(); // this is needed if unity is loaded with an open EditorWindow
+			Init();
 		}
 
-		public void InitializeInstance()
+		public void Init()
 		{
 
+			EditorApplication.playmodeStateChanged = OnPlaymodeStateChanged;
 			// create GameObject and the Component if it is not added to the scene
-			if (GameObject.Find(BonConfig.GameObjectName) == null)
-			{
-				var b = new GameObject(BonConfig.GameObjectName);
-				Debug.Log("Created GameObject '" + BonConfig.GameObjectName + "'");
-			}
-			if (GameObject.Find(BonConfig.GameObjectName).GetComponent<BonLauncher>() == null)
-			{
-				Debug.Log("Added BonLauncher component to the GameObject '" + BonConfig.GameObjectName + "'");
-				GameObject.Find(BonConfig.GameObjectName).AddComponent<BonLauncher>();
-			}
-
-			// get the launcher as an 'interface' to the non editor assembly
-			_launcher = GameObject.Find("Bon").GetComponent<BonLauncher>();
-
 
 			titleContent = new GUIContent(Name);
+			wantsMouseMove = true;
 			EventManager.TriggerOnWindowOpen();
 			_menuEntryToNodeType = CreateMenuEntries();
 			_menu = CreateGenericMenu();
 
 			_canvasList.Clear();
 			_currentCanvas = null;
-			if (_launcher.Graphs.Count > 0) LoadCanvas(_launcher.Graphs);
-			else LoadCanvas(_launcher.LoadGraph(BonConfig.DefaultGraphName));
+
+			if (GetLauncher().Graphs.Count > 0) LoadCanvas(GetLauncher().Graphs);
+			else LoadCanvas(GetLauncher().LoadGraph(BonConfig.DefaultGraphName));
+			UpdateGraphs();
 			Repaint();
+		}
+
+		private void OnPlaymodeStateChanged()
+		{
+			UpdateGraphs();
+			Repaint();
+		}
+
+		private void UpdateGraphs()
+		{
+			foreach (var graph in GetLauncher().Graphs)
+			{
+				graph.ForceUpdateNodes();
+			}
 		}
 
 		private void LoadCanvas(List<Graph> graphs)
@@ -141,6 +139,22 @@ namespace Assets.Editor
 			return Node.GetNodeName(type);
 		}
 
+
+		private BonLauncher GetLauncher()
+		{
+			if (GameObject.Find(BonConfig.GameObjectName) == null)
+			{
+				new GameObject(BonConfig.GameObjectName);
+				Debug.Log("Created GameObject '" + BonConfig.GameObjectName + "'");
+			}
+			if (GameObject.Find(BonConfig.GameObjectName).GetComponent<BonLauncher>() == null)
+			{
+				Debug.Log("Added BonLauncher component to the GameObject '" + BonConfig.GameObjectName + "'");
+				GameObject.Find(BonConfig.GameObjectName).AddComponent<BonLauncher>();
+			}
+			return GameObject.Find(BonConfig.GameObjectName).GetComponent<BonLauncher>();
+		}
+
 		/// <summary>Draws the UI</summary>
 		void OnGUI()
 		{
@@ -153,6 +167,8 @@ namespace Assets.Editor
 				Event.current.Use();
 			}
 			HandleMenuButtons();
+
+			if (GetLauncher() == null) return;
 
 			HandleTabButtons();
 
@@ -195,10 +211,8 @@ namespace Assets.Editor
 					TopMenuHeight + TabButtonMargin, TabCloseButtonSize, TabCloseButtonSize);
 
 				bool isSelected = (_currentCanvas == tmpCanvas);
-				string tabName;
-				if (tmpCanvas.FilePath == null) tabName = "untitled";
-				else tabName = Path.GetFileName(tmpCanvas.FilePath);
-
+				string tabName = tmpCanvas.Graph.Name;
+				//tabName = Path.GetFileName(tmpCanvas.FilePath);
 
 				if (isSelected) GUI.backgroundColor = _tabColorSelected;
 				else GUI.backgroundColor = _tabColorUnselected;
@@ -219,11 +233,12 @@ namespace Assets.Editor
 
 			GUI.backgroundColor = standardBackgroundColor;
 			if (canvasToClose != null) 	CloseCanvas(canvasToClose);
-
 		}
 
 		private void SetCurrentCanvas(BonCanvas canvas)
 		{
+			UpdateGraphs();
+			Repaint();
 			if (canvas != null) EventManager.TriggerOnFocusGraph(canvas.Graph);
 			_currentCanvas = canvas;
 		}
@@ -235,10 +250,10 @@ namespace Assets.Editor
 			if (doSave)
 			{
 				if (canvas.FilePath == null) OpenSaveDialog();
-				else _launcher.SaveGraph(canvas.Graph, canvas.FilePath);
+				else GetLauncher().SaveGraph(canvas.Graph, canvas.FilePath);
 			}
 			EventManager.TriggerOnCloseGraph(canvas.Graph);
-			_launcher.RemoveGraph(canvas.Graph);
+			GetLauncher().RemoveGraph(canvas.Graph);
 			_canvasList.Remove(canvas);
 			if (_canvasList.Count > 0) SetCurrentCanvas(_canvasList[0]);
 			else SetCurrentCanvas(null);
@@ -263,8 +278,8 @@ namespace Assets.Editor
 		private void CreateCanvas(string path)
 		{
 			BonCanvas canvas;
-			if (path != null) canvas = new BonCanvas(_launcher.LoadGraph(path));
-			else canvas = new BonCanvas(_launcher.LoadGraph(BonConfig.DefaultGraphName));
+			if (path != null) canvas = new BonCanvas(GetLauncher().LoadGraph(path));
+			else canvas = new BonCanvas(GetLauncher().LoadGraph(BonConfig.DefaultGraphName));
 			canvas.FilePath = path;
 			_canvasList.Add(canvas);
 			SetCurrentCanvas(canvas);
@@ -275,7 +290,7 @@ namespace Assets.Editor
 			var path = EditorUtility.SaveFilePanel("save graph data", "", "graph", "json");
 			if (!path.Equals(""))
 			{
-				_launcher.SaveGraph(_currentCanvas.Graph, path);
+				GetLauncher().SaveGraph(_currentCanvas.Graph, path);
 				_currentCanvas.FilePath = path;
 			}
 		}
@@ -289,17 +304,9 @@ namespace Assets.Editor
 			}
 
 			// Save Button
-			if (GUI.Button(_saveButtonRect, "Save"))
-			{
-				OpenSaveDialog();
-			}
-
+			if (GUI.Button(_saveButtonRect, "Save")) OpenSaveDialog();
 			// New Button
-			if (GUI.Button(_newButtonRect, "New"))
-			{
-				CreateCanvas(null);
-			}
-
+			if (GUI.Button(_newButtonRect, "New")) CreateCanvas(null);
 			// Help Button
 			GUI.Button(_helpButtonRect, "Help");
 		}
@@ -341,7 +348,6 @@ namespace Assets.Editor
 
 				_currentCanvas.Position = _nextTranlationPosition;
 				Event.current.Use();
-				return;
 			}
 		}
 

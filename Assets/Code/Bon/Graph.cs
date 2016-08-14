@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
-using Assets.Code.Bon.Interface;
 using Assets.Code.Bon.Nodes;
 using UnityEngine;
 
@@ -12,53 +10,63 @@ namespace Assets.Code.Bon
 	[Serializable]
 	public class Graph : ISerializationCallbackReceiver
 	{
+
+		[SerializeField] public string Name;
+
 		private List<Node> _nodes = new List<Node>();
 
-		[SerializeField]
-		private List<SerializableEdge> _serializedEdges = new List<SerializableEdge>();
-
-		[SerializeField]
-		private List<SerializableNode> _serializedNodes = new List<SerializableNode>();
-
+		[HideInInspector] [SerializeField] private List<SerializableEdge> _serializedEdges = new List<SerializableEdge>();
+		[HideInInspector] [SerializeField] private List<SerializableNode> _serializedNodes = new List<SerializableNode>();
 		[SerializeField] public int Version = BonConfig.Version;
 
 		// be warned to allow circles.. if you parse the graph you can end up in
 		// an endless recursion this can crash unity.
-		[SerializeField] public bool AllowCicles = false;
+		[HideInInspector] [SerializeField] public bool AllowCicles = false;
 
+		private bool _needsUpdate = true; [NonSerialized] public bool TriggerEvents = true;
 
-		private bool _needsUpdate = true;
-
-		[System.NonSerialized] public bool TriggerEvents = true;
-
-
+		/// <summary>Returns an id for a Node that is unique for this Graph.</summary>
+		/// <returns> An id for a Node that is unique for this Graph.</returns>
 		public int ObtainUniqueNodeId()
 		{
 			var tmpId = 0;
-			while (GetNode(tmpId) != null)
-			{
-				tmpId++;
-			}
+			while (GetNode(tmpId) != null) tmpId++;
 			return tmpId;
 		}
 
+		/// <summary>Creates a Node of the given type. Type must inherit from Node.
+		/// Does not add the Node to the Graph.</summary>
+		/// <returns>The created Node of the given Type.</returns>
 		public Node CreateNode<T>()
 		{
 			return CreateNode<T>(ObtainUniqueNodeId());
 		}
 
+		/// <summary>Creates a Node of the given type with the assigned id. Type must inherit from Node.
+		/// Does not add the Node to the Graph.</summary>
+		/// <returns>The created Node of the given Type with the assigned id.</returns>
 		public Node CreateNode<T>(int id)
 		{
 			return CreateNode(typeof(T), id);
 		}
 
+		/// <summary>Creates a Node of the given type. Type must inherit from Node.
+		/// Does not add the Node to the Graph.</summary>
+		/// <param name="type">The Type of the Node to create.</param>
+		/// <returns>The created Node of the given Type.</returns>
 		public Node CreateNode(Type type)
 		{
 			return CreateNode(type, ObtainUniqueNodeId());
 		}
 
+		/// <summary>Creates a Node of the given type with the assigned id. Type must inherit from Node.
+		/// Does not add the Node to the Graph.</summary>
+		/// <param name="type">The Type of the Node to create.</param>
+		/// <param name="id">The id of the Node to create.</param>
+		/// <returns>The created Node of the given Type with the assigned id.</returns>
 		public Node CreateNode(Type type, int id)
 		{
+			if (type == null) return null;
 			_needsUpdate = true;
 			try
 			{
@@ -66,70 +74,72 @@ namespace Assets.Code.Bon
 			}
 			catch (Exception exception)
 			{
-				Debug.LogErrorFormat("Node {0} could not be created " + exception.HelpLink, type.FullName);
+				Debug.LogErrorFormat("Node {0} could not be created " + exception.Message, type.FullName);
 			}
 			return null;
 		}
 
+		/// <summary>Returns the Node with the assigned id or null.</summary>
+		/// <param name="nodeId">The id of the Node to get.</param>
+		/// <returns>The Node with the assigned id or null.</returns>
 		public Node GetNode(int nodeId)
 		{
 			if (_nodes == null) return null;
-			foreach (var node in _nodes)
-			{
-				if (node.Id == nodeId)
-				{
-					return node;
-				}
-			}
+			foreach (var node in _nodes) if (node.Id == nodeId) return node;
 			return null;
 		}
 
+		/// <summary>Returns the count of Nodes in this Graph.</summary>
+		/// <returns>The count of Nodes in this Graph.</returns>
 		public int GetNodeCount()
 		{
 			return _nodes.Count;
 		}
 
+		/// <summary>Returns the Node at the assigned index.</summary>
+		/// <param name="index">The index of the Node to get.</param>
+		/// <returns>The Node at the assigned index.</returns>
 		public Node GetNodeAt(int index)
 		{
-
+			if (index >= _nodes.Count) return null;
 			return _nodes[index];
 		}
 
-		public void AddNode(Node node)
+		/// <summary>Adds a node to the Graph. Does not add Nodes with an id that is already taken.
+		/// Triggers a 'AddedNode' event. </summary>
+		/// <param name="node">The Node to add.</param>
+		/// <returns>True if the node was added.</returns>
+		public bool AddNode(Node node)
 		{
+			if (GetNode(node.Id) != null) return false;
 			_needsUpdate = true;
 			_nodes.Add(node);
-			if (TriggerEvents)
-			{
-				EventManager.TriggerOnAddedNode(this, node);
-			}
+			if (TriggerEvents) EventManager.TriggerOnAddedNode(this, node);
+			return true;
 		}
 
-		public void RemoveNode(Node node)
+		/// <summary>Removes the assigned Node from this Graph.</summary>
+		/// <param name="node">The Node to remove.</param>
+		/// <returns>True if the Node was removed.</returns>
+		public bool RemoveNode(Node node)
 		{
+			if (node == null) return false;
 			_needsUpdate = true;
-			if (node == null) return;
-
-			foreach (var socket in node.Sockets)
-			{
-				if (socket.Edge != null)
-				{
-					UnLink(socket);
-				}
-			}
-
-			_nodes.Remove(node);
-			if (TriggerEvents)
-			{
-				EventManager.TriggerOnNodeRemoved(this, node);
-			}
+			foreach (var socket in node.Sockets) if (socket.Edge != null) UnLink(socket);
+			bool removed = _nodes.Remove(node);
+			if (TriggerEvents) EventManager.TriggerOnNodeRemoved(this, node);
+			return removed;
 		}
 
-		public void RemoveNode(int id)
+		/// <summary>Removes the Node with the assigned id from this Graph.</summary>
+		/// <param name="id">The id of the Node to remove.</param>
+		/// <returns>True if the Node was removed.</returns>
+		public bool RemoveNode(int id)
 		{
-			RemoveNode(GetNode(id));
+			return RemoveNode(GetNode(id));
 		}
 
+		/// <summary>Unlinkes the assigned sockets. Triggeres 'Unlink' events.</summary>
 		public void UnLink(Socket s01, Socket s02)
 		{
 			_needsUpdate = true;
@@ -375,14 +385,26 @@ namespace Assets.Code.Bon
 			// deserialize nodes
 			foreach (var sNode in _serializedNodes)
 			{
-				Node n = CreateNode(Type.GetType(sNode.type), sNode.id);
-
+				Type nodeType = Type.GetType(sNode.type);
+				if (nodeType == null)
+				{
+					Debug.LogWarning("Unknown node type: " + sNode.type);
+					continue;
+				}
+				Node n = CreateNode(nodeType, sNode.id);
 				if (n != null)
 				{
 					JsonUtility.FromJsonOverwrite(sNode.data, n);
 					n.OnDeserialization(sNode);
 					n.X = sNode.X;
 					n.Y = sNode.Y;
+
+					for (var i = 0; i < sNode.directInputValues.Length; i++)
+					{
+						n.Sockets[i].SetDirectInputNumber(sNode.directInputValues[i], false);
+					}
+
+					if (sNode.Collapsed) n.Collapse();
 					AddNode(n);
 				}
 			}

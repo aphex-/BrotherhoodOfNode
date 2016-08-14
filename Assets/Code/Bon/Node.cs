@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Assets.Code.Bon.Interface;
-using UnityEditor;
+using Assets.Code.Bon.Nodes;
 using UnityEngine;
 
 namespace Assets.Code.Bon
@@ -9,44 +8,37 @@ namespace Assets.Code.Bon
 
 	public abstract class Node
 	{
- 		[System.NonSerialized]
-		public List<Socket> Sockets = new List<Socket>();
+ 		[NonSerialized] public List<Socket> Sockets = new List<Socket>();
+		[NonSerialized] public  int Id;
+		[NonSerialized] public string Name;
+		[NonSerialized] private Graph _parent;
 
-		[System.NonSerialized]
-		public readonly int Id;
+		[NonSerialized] public Rect WindowRect;
+		[NonSerialized] public bool VisitFlag = false;
+		[NonSerialized] public Rect ContentRect;
+		[NonSerialized] public static int LastFocusedNodeId;
+		[NonSerialized] public bool Resizable = true;
+		[NonSerialized] public Rect ResizeArea;
+		[NonSerialized] public float SocketTopOffsetInput;
+		[NonSerialized] public float SocketTopOffsetOutput;
 
-		[System.NonSerialized]
-		public string Name;
-
-		[System.NonSerialized]
-		private Graph _parent;
-
-		// Editor related
-		[System.NonSerialized]
-		public Rect WindowRect;
-		[System.NonSerialized]
-		public bool VisitFlag = false;
-
-		[System.NonSerialized]
-		public Rect ContentRect;
-
-		[System.NonSerialized]
-		public static int LastFocusedNodeId;
-
-		[System.NonSerialized]
-		public bool Resizable = true;
-
-		[System.NonSerialized]
-		public Rect ResizeArea = new Rect();
+		[NonSerialized] public bool Collapsed;
+		[NonSerialized] public float Height;
 
 		protected Node(int id, Graph parent)
 		{
+			ResizeArea = new Rect();
 			Id = id;
 			// default size
 			Width = 100;
 			Height = 100;
-			Name = GetNodeName(this.GetType());
-			this._parent = parent;
+			Name = GetNodeName(GetType());
+			_parent = parent;
+		}
+
+		public int GetId()
+		{
+			return Id;
 		}
 
 		public abstract void OnGUI();
@@ -85,13 +77,6 @@ namespace Assets.Code.Bon
 			set { WindowRect.width = value; }
 		}
 
-		/// The height of the node
-		public float Height
-		{
-			get { return WindowRect.height; }
-			set { WindowRect.height = value; }
-		}
-
 		/// <summary>Returns true if the node is focused.</summary>
 		/// <returns>True if the node is focused.</returns>
 		public bool HasFocus()
@@ -105,6 +90,18 @@ namespace Assets.Code.Bon
 			{
 				EventManager.TriggerOnFocusNode(_parent, this);
 			}
+		}
+
+		public void Collapse()
+		{
+			WindowRect.Set(WindowRect.x, WindowRect.y, WindowRect.width, 18);
+			Collapsed = true;
+		}
+
+		public void Expand()
+		{
+			WindowRect.Set(WindowRect.x, WindowRect.y, WindowRect.width, Height);
+			Collapsed = false;
 		}
 
 		/// <summary>Returns true if this assigned position intersects the node.</summary>
@@ -123,13 +120,20 @@ namespace Assets.Code.Bon
 			return Sockets.Contains(socket);
 		}
 
+		public int GetInputSocketCount()
+		{
+			var count = 0;
+			foreach (var socket in Sockets) if (socket.Direction == SocketDirection.Input) count++;
+			return count;
+		}
+
 		/// <summary> Returns the socket of the type and index.</summary>
 		/// <param name="type"> The type of the socket.</param>
 		/// <param name="direction"> The input or output direction of the socket.</param>
 		/// <param name="index"> The index of sockets of this type.
 		/// You can have multiple sockets of the same type.</param>
 		/// <returns>The socket of the type with the index or null.</returns>
-		public Socket GetSocket(Color type, SocketDirection direction, int index)
+		public Socket GetSocket(Type type, SocketDirection direction, int index)
 		{
 			var searchIndex = -1;
 			foreach (var socket in Sockets)
@@ -165,7 +169,9 @@ namespace Assets.Code.Bon
 			return null;
 		}
 
-		protected void TriggerChangeEvent() // call this method if your nodes content has changed
+		/// <summary> Triggers the OnChangedNode event from within a Node.
+		/// Call this method if your nodes content has changed. </summary>
+		public void TriggerChangeEvent()
 		{
 			if (_parent.TriggerEvents)
 			{
@@ -173,6 +179,8 @@ namespace Assets.Code.Bon
 			}
 		}
 
+		/// <summary> Returns true if all input Sockets are connected.</summary>
+		/// <returns> True if all input Sockets are connected.</returns>
 		public bool AllInputSocketsConnected()
 		{
 			foreach (var socket in Sockets)
@@ -184,7 +192,7 @@ namespace Assets.Code.Bon
 
 		public void GUIDrawSockets()
 		{
-			foreach (var socket in Sockets) socket.Draw();
+			if (!Collapsed) foreach (var socket in Sockets) socket.Draw();
 		}
 
 		public void GUIDrawEdges()
@@ -205,13 +213,13 @@ namespace Assets.Code.Bon
 				if (socket.Direction == SocketDirection.Input)
 				{
 					socket.X = - BonConfig.SocketSize + WindowRect.x;
-					socket.Y = GUICalcSocketTopOffset(leftCount) + WindowRect.y;
+					socket.Y = GUICalcSocketTopOffset(leftCount) + WindowRect.y + SocketTopOffsetInput;
 					leftCount++;
 				}
 				else
 				{
 					socket.X = WindowRect.width + WindowRect.x;
-					socket.Y = GUICalcSocketTopOffset(rightCount) + WindowRect.y;
+					socket.Y = GUICalcSocketTopOffset(rightCount) + WindowRect.y + SocketTopOffsetOutput;
 					rightCount++;
 				}
 			}
@@ -244,13 +252,27 @@ namespace Assets.Code.Bon
 		public SerializableNode ToSerializedNode()
 		{
 			SerializableNode n = new SerializableNode();
-			n.type = this.GetType().FullName;
+			n.type = GetType().FullName;
 			n.id = Id;
 			n.X = WindowRect.xMin;
 			n.Y = WindowRect.yMin;
+			n.Collapsed = Collapsed;
+			n.directInputValues = new float[Sockets.Count];
+			for (var i = 0; i < n.directInputValues.Length; i++)
+			{
+				if (Sockets[i].IsInDirectInputMode()) n.directInputValues[i] = Sockets[i].GetDirectInputNumber();
+			}
 			n.data = JsonUtility.ToJson(this); // custom node data can be used
 			OnSerialization(n);
 			return n;
+		}
+
+		public static Color GetEdgeColor(Type nodeType)
+		{
+			if (nodeType == typeof(AbstractNumberNode)) return new Color(0.32f, 0.58f, 0.86f, 1);
+			if (nodeType == typeof(AbstractColorNode)) return new Color(0.54f, 0.70f, 0.50f, 1);
+			if (nodeType == typeof(AbstractStringNode)) return new Color(0.84f, 0.45f, 0.39f, 1f);
+			return Color.black;
 		}
 	}
 
@@ -262,16 +284,18 @@ namespace Assets.Code.Bon
 		[SerializeField] public float X;
 		[SerializeField] public float Y;
 		[SerializeField] public string data;
+		[SerializeField] public float[] directInputValues;
+		[SerializeField] public bool Collapsed;
 	}
 
 	/// <summary> Annotation to register menu entries of Nodes to the editor.</summary>
 	[AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
 	public sealed class GraphContextMenuItem : Attribute
 	{
-		private readonly string _menuPath;
+		private  string _menuPath;
 		public string Path { get { return _menuPath; } }
 
-		private readonly string _itemName;
+		private  string _itemName;
 		public string Name { get { return _itemName; } }
 
 		public GraphContextMenuItem(string menuPath) : this(menuPath, null)
@@ -280,11 +304,13 @@ namespace Assets.Code.Bon
 
 		public GraphContextMenuItem(string menuPath, string itemName)
 		{
-			this._menuPath = menuPath;
-			this._itemName = itemName;
+			_menuPath = menuPath;
+			_itemName = itemName;
 		}
-
 	}
+
+
+
 }
 
 
