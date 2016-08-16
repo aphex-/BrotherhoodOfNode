@@ -24,6 +24,11 @@ namespace Assets.Code.Bon.Nodes.Number
 
 		}
 
+		public override void Update()
+		{
+
+		}
+
 		public override object GetResultOf(Socket outSocket)
 		{
 			return GetSampleAt(_x, _y, _seed); // return same value for all out sockets

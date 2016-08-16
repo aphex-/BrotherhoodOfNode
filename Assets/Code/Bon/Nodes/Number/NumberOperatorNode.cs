@@ -40,6 +40,11 @@ namespace Assets.Code.Bon.Nodes.Number
 			GUILayout.EndHorizontal();
 		}
 
+		public override void Update()
+		{
+
+		}
+
 		public override object GetResultOf(Socket outSocket)
 		{
 			return GetSampleAt(_x, _y, _seed);

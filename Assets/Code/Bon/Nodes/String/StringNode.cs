@@ -25,6 +25,11 @@ namespace Assets.Code.Bon.Nodes.String
 			_text = newText;
 		}
 
+		public override void Update()
+		{
+
+		}
+
 		public override object GetResultOf(Socket outSocket)
 		{
 			return _text;

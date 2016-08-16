@@ -7,7 +7,7 @@ namespace Assets.Code.Bon.Nodes.Color
 {
 	[Serializable]
 	[GraphContextMenuItem("Color", "Color")]
-	public class ColorNode : AbstractColorNode, IUpdateable
+	public class ColorNode : AbstractColorNode
 	{
 		[SerializeField] private UnityEngine.Color _color;
 
@@ -100,7 +100,7 @@ namespace Assets.Code.Bon.Nodes.Color
 			_color.a = a;
 		}
 
-		public void Update()
+		public override void Update()
 		{
 			_color.r = AbstractNumberNode.GetInputNumber(_inputSocketR, 0, 0, 0);
 			_color.g = AbstractNumberNode.GetInputNumber(_inputSocketG, 0, 0, 0);

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using Assets.Code.Bon.Nodes;
 using UnityEngine;
 
 namespace Assets.Code.Bon
 {
 
-	public abstract class Node
+	public abstract class Node : IUpdateable
 	{
  		[NonSerialized] public List<Socket> Sockets = new List<Socket>();
 		[NonSerialized] public  int Id;
@@ -42,6 +43,8 @@ namespace Assets.Code.Bon
 		}
 
 		public abstract void OnGUI();
+
+		public abstract void Update();
 
 		public virtual void OnSerialization(SerializableNode sNode)
 		{
@@ -102,6 +105,7 @@ namespace Assets.Code.Bon
 		{
 			WindowRect.Set(WindowRect.x, WindowRect.y, WindowRect.width, Height);
 			Collapsed = false;
+			Update();
 		}
 
 		/// <summary>Returns true if this assigned position intersects the node.</summary>
@@ -272,6 +276,7 @@ namespace Assets.Code.Bon
 			if (nodeType == typeof(AbstractNumberNode)) return new Color(0.32f, 0.58f, 0.86f, 1);
 			if (nodeType == typeof(AbstractColorNode)) return new Color(0.54f, 0.70f, 0.50f, 1);
 			if (nodeType == typeof(AbstractStringNode)) return new Color(0.84f, 0.45f, 0.39f, 1f);
+			if (nodeType == typeof(AbstractPositionNode)) return new Color(0.9f, 0.9f, 0.9f, 1f);
 			return Color.black;
 		}
 	}

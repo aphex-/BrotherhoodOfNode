@@ -17,22 +17,27 @@ public class SineMapNode : AbstractMap2DNode, IUpdateable {
 
 	public SineMapNode(int id, Graph parent) : base(id, parent)
 	{
-		_textLabelScaleX = new Rect(6, 110, 65, BonConfig.SocketSize);
-		_textLabelScaleY = new Rect(6, 130, 65, BonConfig.SocketSize);
+		_textLabelScaleX = new Rect(6, 0, 65, BonConfig.SocketSize);
+		_textLabelScaleY = new Rect(6, 20, 65, BonConfig.SocketSize);
 		_socketInputX = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
 		Sockets.Add(_socketInputX);
 		_socketInputY = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
 		Sockets.Add(_socketInputY);
 
-		SocketTopOffsetInput = 110;
+		Height = 60;
+		_textures.Add(new GUIThreadedTexture()); // heightmap
 	}
 
 	public override void OnGUI()
 	{
-		Height = CurrentTextureSize + 70;
-		DrawTexture();
+		if (!_textures[0].DoneInitialUpdate) Update();
+
+		_textures[0].X = 48;
+		GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 		GUI.Label(_textLabelScaleX, "scale x");
 		GUI.Label(_textLabelScaleY, "scale y");
+		GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+		DrawTextures();
 	}
 
 	public override object GetResultOf(Socket outSocket)
@@ -53,18 +58,13 @@ public class SineMapNode : AbstractMap2DNode, IUpdateable {
 		return (float) (Math.Sin(x / scaleX + seed) + Math.Sin(y / scaleY + seed)) / 2f;
 	}
 
-	protected override bool CanCreatePreview()
-	{
-		return true;
-	}
-
-	protected override IColorSampler1D GetColorSampler()
+	/*protected override IColorSampler1D GetColorSampler()
 	{
 		return null;
-	}
+	}*/
 
-	public void Update()
+	public override void Update()
 	{
-		StartTextureUpdateJob();
+		if (!Collapsed) _textures[0].StartTextureUpdateJob(45, 35, this, null);
 	}
 }

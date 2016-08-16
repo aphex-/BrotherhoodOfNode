@@ -6,7 +6,7 @@ namespace Assets.Code.Bon.Nodes.Number.Map2D
 {
 	[Serializable]
 	[GraphContextMenuItem("Number/Map2D", "UnityPerlinNoise")]
-	public class PerlinNoiseNode : AbstractMap2DNode, IUpdateable
+	public class PerlinNoiseNode : AbstractMap2DNode
 	{
 
 		[NonSerialized] private Rect _labelScale;
@@ -17,22 +17,27 @@ namespace Assets.Code.Bon.Nodes.Number.Map2D
 
 		public PerlinNoiseNode(int id, Graph parent) : base(id, parent)
 		{
-			_labelScale = new Rect(6, 110, 30, BonConfig.SocketSize);
-			_labelSeed = new Rect(6, 130, 30, BonConfig.SocketSize);
+			_labelScale = new Rect(6, 0, 30, BonConfig.SocketSize);
+			_labelSeed = new Rect(6, 20, 30, BonConfig.SocketSize);
 			_inputSocketScale = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
 			_inputSocketSeed = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
 			Sockets.Add(_inputSocketScale);
 			Sockets.Add(_inputSocketSeed);
 
-			Height = CurrentTextureSize + 70;
-			SocketTopOffsetInput = 110;
+			//Height = CurrentTextureSize + 70;
+			_textures.Add(new GUIThreadedTexture()); // heightmap
+			Height = 60;
 		}
 
 		public override void OnGUI()
 		{
+			if (!_textures[0].DoneInitialUpdate) Update();
+
+			_textures[0].X = 40;
+
 			GUI.Label(_labelScale, "scale");
 			GUI.Label(_labelSeed, "seed");
-			DrawTexture();
+			DrawTextures();
 		}
 
 
@@ -56,19 +61,9 @@ namespace Assets.Code.Bon.Nodes.Number.Map2D
 			return Math.Max(Math.Min(noise, 1), -1);
 		}
 
-		protected override bool CanCreatePreview()
+		public override void Update()
 		{
-			return true;
-		}
-
-		protected override IColorSampler1D GetColorSampler()
-		{
-			return null;
-		}
-
-		public void Update()
-		{
-			StartTextureUpdateJob();
+			if (!Collapsed) _textures[0].StartTextureUpdateJob(55, 35, this, null);
 		}
 	}
 }

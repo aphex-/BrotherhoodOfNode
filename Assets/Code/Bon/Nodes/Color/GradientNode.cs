@@ -7,7 +7,7 @@ namespace Assets.Code.Bon.Nodes.Color
 {
 	[Serializable]
 	[GraphContextMenuItem("Color", "Gradient")]
-	public class GradientNode : AbstractColorNode, IUpdateable
+	public class GradientNode : AbstractColorNode
 	{
 
 		[SerializeField] private List<float> _times = new List<float>();
@@ -123,8 +123,9 @@ namespace Assets.Code.Bon.Nodes.Color
 			_gradient.SetKeys(colorKeys, alphaKeys);
 		}
 
-		public void Update()
+		public override void Update()
 		{
+			if (!Collapsed)
 			UpdateColorPreview();
 		}
 

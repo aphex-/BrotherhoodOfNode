@@ -38,6 +38,11 @@ namespace Assets.Code.Bon.Nodes.Number
 			GUI.Label(labelFactor, "factor (0 - 1)");
 		}
 
+		public override void Update()
+		{
+
+		}
+
 		public override object GetResultOf(Socket outSocket)
 		{
 			return GetSampleAt(_x, _y, _seed);

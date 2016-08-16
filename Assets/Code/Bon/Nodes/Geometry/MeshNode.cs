@@ -6,7 +6,7 @@ namespace Assets.Code.Bon.Nodes.Geometry
 {
 	[Serializable]
 	[GraphContextMenuItem("Geometry", "Mesh")]
-	public class MeshNode : AbstractNumberNode, IUpdateable, IColorSampler1D, IStringSampler {
+	public class MeshNode : AbstractNumberNode, IColorSampler1D, IStringSampler {
 
 		[NonSerialized] private Rect _heightValueLabel;
 		[NonSerialized] private Rect _colorRangeLabel;
@@ -48,7 +48,7 @@ namespace Assets.Code.Bon.Nodes.Geometry
 		}
 
 
-		public void Update()
+		public override void Update()
 		{
 
 		}

@@ -41,7 +41,9 @@ public class NodeUtils {
 		if (float.IsNaN(value)) return Color.magenta;
 		if (value > 1f) return Color.red;
 		if (value < -1f) return Color.blue;
-		return Color.white * (value + 1f) / 2f;
+		Color c = Color.white * (value + 1f) / 2f;
+		c.a = 1;
+		return c;
 	}
 
 
@@ -64,7 +66,7 @@ public class NodeUtils {
 	}
 
 
-	public static void GUIDrawRect( Rect position, UnityEngine.Color color )
+	public static void GUIDrawRect(Rect position, Color color )
 	{
 		if(_staticRectTexture == null) _staticRectTexture = new Texture2D( 1, 1 );
 		if(_staticRectStyle == null) _staticRectStyle = new GUIStyle();

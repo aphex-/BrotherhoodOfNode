@@ -6,7 +6,7 @@ namespace Assets.Code.Bon.Nodes.Number
 
 	[Serializable]
 	[GraphContextMenuItem("Number", "Display")]
-	public class NumberDisplayNode : AbstractNumberNode, IUpdateable
+	public class NumberDisplayNode : AbstractNumberNode
 	{
 		[NonSerialized] public float Value;
 		[NonSerialized] private Rect _textFieldArea;
@@ -31,7 +31,7 @@ namespace Assets.Code.Bon.Nodes.Number
 			return GetSampleAt(_x, _y, _seed);
 		}
 
-		public void Update()
+		public override void Update()
 		{
 			Value = GetInputNumber(_inSocket, _x, _y, _seed);
 		}

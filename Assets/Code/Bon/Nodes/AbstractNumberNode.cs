@@ -27,14 +27,14 @@ namespace Assets.Code.Bon.Nodes
 
 		public abstract float GetSampleAt(float x, float y, float seed);
 
-		public static float GetInputNumber(Socket inputSocket, float x, float y, float seed)
+		public static float GetInputNumber(Socket socket, float x, float y, float seed)
 		{
-			if (inputSocket.Type != typeof(AbstractNumberNode)) return float.NaN;
-			if (inputSocket.IsInDirectInputMode()) return inputSocket.GetDirectInputNumber();
+			if (socket.Type != typeof(AbstractNumberNode) || socket.Direction == SocketDirection.Output) return float.NaN;
+			if (socket.IsInDirectInputMode()) return socket.GetDirectInputNumber();
 
-			AbstractNumberNode node = (AbstractNumberNode) inputSocket.GetConnectedSocket().Parent;
+			AbstractNumberNode node = (AbstractNumberNode) socket.GetConnectedSocket().Parent;
 			node.SetPosition(x, y, seed);
-			return (float) node.GetResultOf(inputSocket.GetConnectedSocket());
+			return (float) node.GetResultOf(socket.GetConnectedSocket());
 		}
 
 		/// AbstractNumberNodes can always return a result even if not all sockets are connected.

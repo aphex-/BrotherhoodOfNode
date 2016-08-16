@@ -44,6 +44,11 @@ namespace Assets.Code.Bon.Nodes.Number
 			_minActive = currentMin;
 		}
 
+		public override void Update()
+		{
+
+		}
+
 		public override object GetResultOf(Socket outSocket)
 		{
 			return GetSampleAt(_x, _y, _seed);

@@ -21,6 +21,11 @@ public class AbsNode : AbstractNumberNode
 
 	}
 
+	public override void Update()
+	{
+
+	}
+
 	public override object GetResultOf(Socket outSocket)
 	{
 		return GetSampleAt(_x, _y, _seed);

@@ -33,7 +33,7 @@ namespace Assets.Code.Bon.Nodes.Number.Map2D
 			Sockets.Add(_inputIterationSocket);
 			Sockets.Add(_inputLacunaritySocket);
 			Sockets.Add(_inputPersistanceSocket);
-			Width = 80;
+			Width = 100;
 		}
 
 		public override void OnGUI()
@@ -42,6 +42,11 @@ namespace Assets.Code.Bon.Nodes.Number.Map2D
 			GUI.Label(_labelIteration, "iteration");
 			GUI.Label(_labelLacunarity, "lacunarity");
 			GUI.Label(_labelPersistance, "persistance");
+		}
+
+		public override void Update()
+		{
+
 		}
 
 		public override object GetResultOf(Socket outSocket)

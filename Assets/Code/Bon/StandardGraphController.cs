@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using Assets.Code.Bon;
-using Assets.Code.Bon.Interface;
-using Assets.Code.Bon.Nodes;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Assets.Code.Bon
 {
@@ -10,6 +6,10 @@ namespace Assets.Code.Bon
 	{
 
 		public StandardGraphController()
+		{
+		}
+
+		public void Register()
 		{
 			EventManager.OnCreateGraph += OnCreate;
 			EventManager.OnFocusGraph += OnFocus;
