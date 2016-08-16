@@ -7,7 +7,9 @@ namespace Assets.Code.Bon.Nodes.Noise
 {
 	[Serializable]
 	[GraphContextMenuItem("Noise", "Display")]
-	public class NoiseDisplayNode : AbstractNoiseNode {
+	public class NoiseDisplayNode : AbstractNoiseNode
+	{
+		[SerializeField] private int _sizeModifcator;
 
 		[NonSerialized] private Socket _inputSocketNumber;
 		[NonSerialized] private Socket _inputSocketColor;
@@ -18,6 +20,10 @@ namespace Assets.Code.Bon.Nodes.Noise
 		[NonSerialized] private Rect _sizeMinusButton;
 
 		[NonSerialized] private bool _isConnected;
+
+		[NonSerialized] private const int _sizeStep = 50;
+
+		private bool _initializedSize;
 
 		public NoiseDisplayNode(int id, Graph parent) : base(id, parent)
 		{
@@ -40,6 +46,9 @@ namespace Assets.Code.Bon.Nodes.Noise
 
 		public override void OnGUI()
 		{
+
+			if (!_initializedSize) ChangeTextureSize(_sizeModifcator * _sizeStep);
+
 			if (!_textures[0].DoneInitialUpdate) _textures[0].StartTextureUpdateJob((int) Width -12, (int) Height - 50, GetNumberSampler(), GetColorSampler());
 			if (!_textures[1].DoneInitialUpdate) _textures[1].StartTextureUpdateJob((int) Width -12, (int) Height - 50, GetNumberSampler(), GetColorSampler());
 
@@ -54,11 +63,13 @@ namespace Assets.Code.Bon.Nodes.Noise
 				GUI.Label(_sizeLabel, "size");
 				if (GUI.Button(_sizePlusButton, "+"))
 				{
-					ChangeTextureSize(+50);
+					ChangeTextureSize(+_sizeStep);
+					_sizeModifcator++;
 				}
-				if (GUI.Button(_sizeMinusButton, "-"))
+				if (Width > 100 && GUI.Button(_sizeMinusButton, "-"))
 				{
-					ChangeTextureSize(-50);
+					ChangeTextureSize(-_sizeStep);
+					_sizeModifcator--;
 				}
 			}
 			DrawTextures();
@@ -68,10 +79,10 @@ namespace Assets.Code.Bon.Nodes.Noise
 
 		private void ChangeTextureSize(int size)
 		{
+			_initializedSize = true;
 			Width += size;
 			Height += size;
 			Update();
-
 		}
 
 		public override object GetResultOf(Socket outSocket)
