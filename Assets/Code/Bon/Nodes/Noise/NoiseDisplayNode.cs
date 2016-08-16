@@ -1,12 +1,13 @@
 ﻿using System;
 using Assets.Code.Bon.Interface;
+using Assets.Code.Bon.Nodes.Number;
 using UnityEngine;
 
-namespace Assets.Code.Bon.Nodes.Number.Map2D
+namespace Assets.Code.Bon.Nodes.Noise
 {
 	[Serializable]
-	[GraphContextMenuItem("Number/Map2D", "Display")]
-	public class MapDisplayNode : AbstractMap2DNode {
+	[GraphContextMenuItem("Noise", "Display")]
+	public class NoiseDisplayNode : AbstractNoiseNode {
 
 		[NonSerialized] private Socket _inputSocketNumber;
 		[NonSerialized] private Socket _inputSocketColor;
@@ -18,7 +19,7 @@ namespace Assets.Code.Bon.Nodes.Number.Map2D
 
 		[NonSerialized] private bool _isConnected;
 
-		public MapDisplayNode(int id, Graph parent) : base(id, parent)
+		public NoiseDisplayNode(int id, Graph parent) : base(id, parent)
 		{
 			_sizeLabel = new Rect(3, 0, 25, 15);
 			_sizePlusButton = new Rect(28, 0, 18, 18);
@@ -30,7 +31,7 @@ namespace Assets.Code.Bon.Nodes.Number.Map2D
 			_inputSocketColor = new Socket(this, typeof(AbstractColorNode), SocketDirection.Input);
 			Sockets.Add(_inputSocketColor);
 
-			_inputSocketPosition = new Socket(this, typeof(AbstractPositionNode), SocketDirection.Input);
+			_inputSocketPosition = new Socket(this, typeof(AbstractVector3Node), SocketDirection.Input);
 			Sockets.Add(_inputSocketPosition);
 
 			_textures.Add(new GUIThreadedTexture()); // heightmap
@@ -111,7 +112,7 @@ namespace Assets.Code.Bon.Nodes.Number.Map2D
 
 		private IPositionSampler GetPositionSampler()
 		{
-			if (_inputSocketPosition.CanGetResult()) return (AbstractPositionNode) _inputSocketPosition.GetConnectedSocket().Parent;
+			if (_inputSocketPosition.CanGetResult()) return (AbstractVector3Node) _inputSocketPosition.GetConnectedSocket().Parent;
 			return null;
 		}
 

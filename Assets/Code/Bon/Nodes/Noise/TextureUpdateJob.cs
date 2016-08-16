@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using Assets.Code.Bon.Interface;
+using Assets.Code.Bon.Nodes.Vector3;
 using Assets.Code.Thread;
 using UnityEngine;
 
-namespace Assets.Code.Bon.Nodes.Number.Map2D
+namespace Assets.Code.Bon.Nodes.Noise
 {
 	public class TextureUpdateJob : ThreadedJob
 	{
 
 		private ISampler3D _sampler3D;
 		private IColorSampler1D _samplerColor;
-		private List<Vector3> _positions;
+		private List<UnityEngine.Vector3> _positions;
 
 		private int _width;
 		private int _height;
@@ -26,10 +27,10 @@ namespace Assets.Code.Bon.Nodes.Number.Map2D
 			Init(width, height);
 		}
 
-		public void Request(int width, int height, List<Vector3> positions)
+		public void Request(int width, int height, List<UnityEngine.Vector3> positions)
 		{
 			_positions = positions;
-			_samplerColor = new PositionDisplayColorSampler();
+			_samplerColor = new Vector3DisplayColorSampler();
 			Init(width, height);
 		}
 

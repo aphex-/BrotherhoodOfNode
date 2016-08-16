@@ -1,10 +1,10 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Assets.Code.Bon.Nodes.Number.Map2D
+namespace Assets.Code.Bon.Nodes.Noise
 {
 	[Serializable]
-	[GraphContextMenuItem("Number/Map2D", "Octave")]
+	[GraphContextMenuItem("Noise", "Octave")]
 	public class OctaveNode : AbstractNumberNode {
 
 

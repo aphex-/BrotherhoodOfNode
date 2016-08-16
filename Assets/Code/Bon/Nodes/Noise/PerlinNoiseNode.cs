@@ -1,12 +1,11 @@
 ﻿using System;
-using Assets.Code.Bon.Interface;
 using UnityEngine;
 
-namespace Assets.Code.Bon.Nodes.Number.Map2D
+namespace Assets.Code.Bon.Nodes.Noise
 {
 	[Serializable]
-	[GraphContextMenuItem("Number/Map2D", "UnityPerlinNoise")]
-	public class PerlinNoiseNode : AbstractMap2DNode
+	[GraphContextMenuItem("Noise", "UnityPerlinNoise")]
+	public class PerlinNoiseNode : AbstractNoiseNode
 	{
 
 		[NonSerialized] private Rect _labelScale;

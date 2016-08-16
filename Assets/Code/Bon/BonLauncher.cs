@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Assets.Code.Bon.Nodes;
+using Assets.Code.Bon.Nodes.Noise;
 using Assets.Code.Bon.Nodes.Number;
-using Assets.Code.Bon.Nodes.Number.Map2D;
 
 
 namespace Assets.Code.Bon
@@ -114,7 +114,7 @@ namespace Assets.Code.Bon
 			perlinNoise.Y = 250;
 			graph.AddNode(perlinNoise);
 
-			var displayMap = graph.CreateNode<MapDisplayNode>();
+			var displayMap = graph.CreateNode<NoiseDisplayNode>();
 			displayMap.X = 300;
 			displayMap.Y = 280;
 			graph.AddNode(displayMap);

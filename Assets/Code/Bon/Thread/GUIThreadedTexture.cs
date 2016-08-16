@@ -1,6 +1,6 @@
 ﻿using System;
 using Assets.Code.Bon.Interface;
-using Assets.Code.Bon.Nodes.Number.Map2D;
+using Assets.Code.Bon.Nodes.Noise;
 using UnityEngine;
 using UnityEngineInternal;
 
@@ -58,7 +58,7 @@ public class GUIThreadedTexture {
 	public void StartTextureUpdateJob(int width, int height, IPositionSampler positionSampler)
 	{
 		InitJob(width, height);
-		_job.Request(width, height, positionSampler.GetPositions(0, 0, 0, width, height, 0, 0));
+		_job.Request(width, height, positionSampler.GetVector3DList(0, 0, 0, width, height, 0, 0));
 		_job.Start();
 	}
 
