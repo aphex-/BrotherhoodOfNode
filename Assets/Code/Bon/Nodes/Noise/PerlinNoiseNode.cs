@@ -51,15 +51,15 @@ namespace Assets.Code.Bon.Nodes.Noise
 		public override float GetSampleAt(float x, float y, float seed)
 		{
 			var scale = GetInputNumber(_inputSocketScale, x, y, seed);
-			var internalSeed = GetInputNumber(_inputSocketSeed, x, y, seed);
+			var socketSeed = GetInputNumber(_inputSocketSeed, x, y, seed);
 
-			if (float.IsNaN(scale) || float.IsNaN(internalSeed)) return float.NaN;
+			if (float.IsNaN(scale) || float.IsNaN(socketSeed)) return float.NaN;
 
 			if (scale == 0) scale = 1;
 
-			if (Math.Abs(internalSeed) > 0.0000001) internalSeed = seed;
+			var modifiedSeed = NodeUtils.ModifySeed(socketSeed, seed);
 
-			float noise = Mathf.PerlinNoise(x / scale + internalSeed, y / scale + internalSeed) * 2f - 1f;
+			float noise = Mathf.PerlinNoise(x / scale + modifiedSeed, y / scale + modifiedSeed) * 2f - 1f;
 			return Math.Max(Math.Min(noise, 1), -1);
 		}
 

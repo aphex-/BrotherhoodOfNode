@@ -85,14 +85,18 @@ namespace Assets.Code.Bon.Nodes.Vector3
 			{
 				for (var i = 0; i < vectors.Count; i++)
 				{
-					if (_selectedMode == 0)
-					{
-						UnityEngine.Vector3 v = vectors[i];
-						v.x += v.x + AbstractNumberNode.GetInputNumber(_inputSocketX, v.x, v.y, v.z);
-						v.y += v.y + AbstractNumberNode.GetInputNumber(_inputSocketY, v.x, v.y, v.z);
-						v.z += v.z + AbstractNumberNode.GetInputNumber(_inputSocketZ, v.x, v.y, v.z);
-						vectors[i] = v;
-					}
+					UnityEngine.Vector3 v = vectors[i];
+
+					float valueX = AbstractNumberNode.GetInputNumber(_inputSocketX, v.x, v.y, v.z);
+					float valueY = AbstractNumberNode.GetInputNumber(_inputSocketY, v.x, v.y, v.z);
+					float valueZ = AbstractNumberNode.GetInputNumber(_inputSocketZ, v.x, v.y, v.z);
+
+					if (_selectedMode == 0) v.Set(v.x + valueX, v.y + valueY, v.z + valueZ);
+					if (_selectedMode == 1) v.Set(v.x - valueX, v.y - valueY, v.z - valueZ);
+					if (_selectedMode == 2) v.Set(v.x * valueX, v.y * valueY, v.z * valueZ);
+					if (_selectedMode == 3) v.Set(valueX != 0 ? v.x / valueX : v.x, valueY != 0 ? v.y / valueY : v.y, valueZ != 0 ? v.z / valueZ : valueZ);
+
+					vectors[i] = v;
 				}
 			}
 			return vectors;

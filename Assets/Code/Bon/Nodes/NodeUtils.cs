@@ -76,4 +76,10 @@ public class NodeUtils {
 		GUI.Box( position, GUIContent.none, _staticRectStyle );
 	}
 
+	public static float ModifySeed(float baseSeed, float modifierSeed)
+	{
+		if (modifierSeed == 0) return baseSeed;
+		return baseSeed * modifierSeed % float.MaxValue;
+	}
+
 }
