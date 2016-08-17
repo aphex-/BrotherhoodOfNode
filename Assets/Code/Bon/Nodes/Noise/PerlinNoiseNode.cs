@@ -20,6 +20,9 @@ namespace Assets.Code.Bon.Nodes.Noise
 			_labelSeed = new Rect(6, 20, 30, BonConfig.SocketSize);
 			_inputSocketScale = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
 			_inputSocketSeed = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+
+			_inputSocketScale.SetDirectInputNumber(5, false);
+
 			Sockets.Add(_inputSocketScale);
 			Sockets.Add(_inputSocketSeed);
 

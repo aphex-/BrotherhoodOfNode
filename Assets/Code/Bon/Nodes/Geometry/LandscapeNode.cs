@@ -5,8 +5,8 @@ using UnityEngine;
 namespace Assets.Code.Bon.Nodes.Geometry
 {
 	[Serializable]
-	[GraphContextMenuItem("Geometry", "Mesh")]
-	public class MeshNode : AbstractNumberNode, IColorSampler1D, IStringSampler {
+	[GraphContextMenuItem("Geometry", "Lanscape")]
+	public class LandscapeNode : AbstractNumberNode, IColorSampler1D, IStringSampler {
 
 		[NonSerialized] private Rect _heightValueLabel;
 		[NonSerialized] private Rect _colorRangeLabel;
@@ -16,7 +16,7 @@ namespace Assets.Code.Bon.Nodes.Geometry
 		[NonSerialized] private Socket _gradientSocket;
 		[NonSerialized] private Socket _materialSocket;
 
-		public MeshNode(int id, Graph parent) : base(id, parent)
+		public LandscapeNode(int id, Graph parent) : base(id, parent)
 		{
 			_heightValueLabel = new Rect(8, 0, 75, 20);
 			_colorRangeLabel = new Rect(8, 20, 75, 20);

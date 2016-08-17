@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Assets.Code.Bon.Interface;
 using Assets.Code.Bon.Nodes.Number;
 using UnityEngine;
@@ -23,7 +24,10 @@ namespace Assets.Code.Bon.Nodes.Noise
 
 		[NonSerialized] private const int _sizeStep = 50;
 
+		private List<UnityEngine.Vector3> _lastVectors;
+
 		private bool _initializedSize;
+		private Rect _tmpRect;
 
 		public NoiseDisplayNode(int id, Graph parent) : base(id, parent)
 		{
@@ -42,6 +46,10 @@ namespace Assets.Code.Bon.Nodes.Noise
 
 			_textures.Add(new GUIThreadedTexture()); // heightmap
 			_textures.Add(new GUIThreadedTexture()); // points
+
+			_tmpRect = new Rect();
+			Width = 160;
+			Height = 220;
 		}
 
 		public override void OnGUI()
@@ -49,16 +57,16 @@ namespace Assets.Code.Bon.Nodes.Noise
 
 			if (!_initializedSize) ChangeTextureSize(_sizeModifcator * _sizeStep);
 
-			if (!_textures[0].DoneInitialUpdate) _textures[0].StartTextureUpdateJob((int) Width -12, (int) Height - 50, GetNumberSampler(), GetColorSampler());
-			if (!_textures[1].DoneInitialUpdate) _textures[1].StartTextureUpdateJob((int) Width -12, (int) Height - 50, GetNumberSampler(), GetColorSampler());
+			if (!_textures[0].DoneInitialUpdate) _textures[0].StartTextureUpdateJob((int) Width -10, (int) Height - 70, GetNumberSampler(), GetColorSampler());
+			if (!_textures[1].DoneInitialUpdate) _textures[1].StartTextureUpdateJob((int) Width -10, (int) Height - 70, GetNumberSampler(), GetColorSampler());
 
 			_isConnected = CanGetResultOf(null);
 
 			if (!IsUpdatingTexture() && _isConnected)
 			{
-				_sizeLabel.Set(_sizeLabel.x, Height - 45, _sizeLabel.width, _sizeLabel.height);
-				_sizePlusButton.Set(_sizePlusButton.x, Height - 45, _sizePlusButton.width, _sizePlusButton.height);
-				_sizeMinusButton.Set(_sizeMinusButton.x, Height - 45, _sizeMinusButton.width, _sizeMinusButton.height);
+				_sizeLabel.Set(_sizeLabel.x, Height - 65, _sizeLabel.width, _sizeLabel.height);
+				_sizePlusButton.Set(_sizePlusButton.x, Height - 65, _sizePlusButton.width, _sizePlusButton.height);
+				_sizeMinusButton.Set(_sizeMinusButton.x, Height - 65, _sizeMinusButton.width, _sizeMinusButton.height);
 
 				GUI.Label(_sizeLabel, "size");
 				if (GUI.Button(_sizePlusButton, "+"))
@@ -75,6 +83,18 @@ namespace Assets.Code.Bon.Nodes.Noise
 			DrawTextures();
 			//Width = CurrentTextureSize + 12;
 			//Height = CurrentTextureSize + 50;
+
+			GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+			_tmpRect.Set(3, Height - 45, 100, 20);
+			GUI.Label(_tmpRect, "w" + _textures[0].Width + " h" + _textures[0].Height);
+
+			if (_lastVectors != null)
+			{
+				_tmpRect.Set(70, Height - 45, 100, 20);
+				GUI.Label(_tmpRect, "vec" + _lastVectors.Count);
+			}
+
+			GUI.skin.label.alignment = TextAnchor.MiddleCenter;
 		}
 
 		private void ChangeTextureSize(int size)
@@ -95,12 +115,19 @@ namespace Assets.Code.Bon.Nodes.Noise
 			if (Collapsed) return;
 
 			if (_inputSocketNumber.CanGetResult())
-				_textures[0].StartTextureUpdateJob((int) Width -12, (int) Height - 50, GetNumberSampler(), GetColorSampler());
+				_textures[0].StartTextureUpdateJob((int) Width -10, (int) Height - 70, GetNumberSampler(), GetColorSampler());
 			else _textures[0].Hide();
 
 			if (_inputSocketPosition.CanGetResult())
-				_textures[1].StartTextureUpdateJob((int) Width -12, (int) Height - 50, GetPositionSampler());
-			else _textures[1].Hide();
+			{
+				_lastVectors = GetPositionSampler().GetVector3List(0, 0, 0, (int) Width - 10, (int) Height - 70, 0, 0);
+				_textures[1].StartTextureUpdateJob((int) Width - 10, (int) Height - 70, _lastVectors);
+			}
+			else
+			{
+				_textures[1].Hide();
+				_lastVectors = null;
+			}
 		}
 
 		public override float GetSampleAt(float x, float y, float seed)

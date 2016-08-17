@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Assets.Code.Bon.Interface;
 using Assets.Code.Bon.Nodes.Noise;
 using UnityEngine;
@@ -34,6 +35,15 @@ public class GUIThreadedTexture {
 		set { _textureArea.y = value; }
 	}
 
+	public float Width
+	{
+		get { return _textureArea.width; }
+	}
+
+	public float Height
+	{
+		get { return _textureArea.height; }
+	}
 
 	public GUIThreadedTexture()
 	{
@@ -55,10 +65,10 @@ public class GUIThreadedTexture {
 		_job.Start();
 	}
 
-	public void StartTextureUpdateJob(int width, int height, IPositionSampler positionSampler)
+	public void StartTextureUpdateJob(int width, int height, List<Vector3> vectors)
 	{
 		InitJob(width, height);
-		_job.Request(width, height, positionSampler.GetVector3DList(0, 0, 0, width, height, 0, 0));
+		_job.Request(width, height, vectors);
 		_job.Start();
 	}
 

@@ -20,14 +20,14 @@ public abstract class AbstractVector3Node : Node, IPositionSampler
 
 	}
 
-	public static List<Vector3> GetInputVector3DList(Socket socket, float x, float y, float z,
+	public static List<Vector3> GetInputVector3List(Socket socket, float x, float y, float z,
 													float width, float height,float depth, float seed)
 	{
 		if (socket.Type != typeof(AbstractVector3Node) || socket.Direction == SocketDirection.Output) return null;
 		AbstractVector3Node node = (AbstractVector3Node) socket.GetConnectedSocket().Parent;
-		return node.GetVector3DList(x, y, z, width, height, depth, seed);
+		return node.GetVector3List(x, y, z, width, height, depth, seed);
 	}
 
-	public abstract List<Vector3> GetVector3DList(float x, float y, float z, float width, float height, float depth, float seed);
+	public abstract List<Vector3> GetVector3List(float x, float y, float z, float width, float height, float depth, float seed);
 
 }

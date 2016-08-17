@@ -24,6 +24,7 @@ namespace Assets.Code.Bon.Nodes.Noise
 		{
 			_sampler3D = sampler;
 			_samplerColor = colorSampler;
+			_values = new float[width, height];
 			Init(width, height);
 		}
 
@@ -38,40 +39,36 @@ namespace Assets.Code.Bon.Nodes.Noise
 		{
 			_width = width;
 			_height = height;
-			_values = new float[width, height];
 		}
 
 		protected override void ThreadFunction()
 		{
+			if (_sampler3D == null) return;
 			var _xStart = 0;
 			var _yStart = 0;
 			for (var x = _xStart; x < _xStart + _width; x++)
 			{
 				for (var y = _yStart; y < _yStart + _height; y++)
 				{
-					_values[x - _xStart, y - _yStart] = GetValueAt(x, y);
+					_values[x - _xStart, y - _yStart] = _sampler3D.GetSampleAt(x, y, 0);
 				}
 			}
-		}
-
-		private float GetValueAt(float x, float y)
-		{
-			if (_sampler3D != null) return _sampler3D.GetSampleAt(x, y, 0);
-			if (_positions != null)
-			{
-				foreach (var position in _positions)
-				{
-					if (Math.Floor(x).Equals(Math.Floor(position.x)) && Math.Floor(y).Equals(Math.Floor(position.y))) return 1;
-				}
-			}
-			return float.NaN;
 		}
 
 		protected override void OnFinished()
 		{
 			if (Texture != null) Texture2D.DestroyImmediate(Texture);
 			Texture = new Texture2D(_width, _height, TextureFormat.RGBA32, false);
-			Texture.SetPixels(NodeUtils.ToColorMap(_values, _samplerColor));
+
+			if (_sampler3D != null) Texture.SetPixels(NodeUtils.ToColorMap(_values, _samplerColor));
+			else if (_positions != null)
+			{
+				Texture.SetPixels(new UnityEngine.Color[_width * _height]);
+				foreach (var position in _positions)
+				{
+					Texture.SetPixel((int) position.x, (int) position.y, UnityEngine.Color.white);
+				}
+			}
 			Texture.Apply();
 		}
 
