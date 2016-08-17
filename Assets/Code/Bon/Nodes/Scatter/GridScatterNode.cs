@@ -51,7 +51,7 @@ public class GridScatterNode : AbstractVector3Node
 
 	public override object GetResultOf(Socket outSocket)
 	{
-		return null;
+		return GetVector3List(outSocket, _x, _y, _z, _width, _height, _depth, _seed);
 	}
 
 	public override bool CanGetResultOf(Socket outSocket)
@@ -59,7 +59,7 @@ public class GridScatterNode : AbstractVector3Node
 		return true;
 	}
 
-	public override List<Vector3> GetVector3List(float x, float y, float z, float width, float height, float depth, float seed)
+	public override List<Vector3> GetVector3List(Socket s, float x, float y, float z, float width, float height, float depth, float seed)
 	{
 		float left = x;
 		float right = x + width;

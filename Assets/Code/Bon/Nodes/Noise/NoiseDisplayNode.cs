@@ -118,9 +118,11 @@ namespace Assets.Code.Bon.Nodes.Noise
 				_textures[0].StartTextureUpdateJob((int) Width -10, (int) Height - 70, GetNumberSampler(), GetColorSampler());
 			else _textures[0].Hide();
 
+
 			if (_inputSocketPosition.CanGetResult())
 			{
-				_lastVectors = GetPositionSampler().GetVector3List(0, 0, 0, (int) Width - 10, (int) Height - 70, 0, 0);
+				_lastVectors = GetPositionSampler().GetVector3List(_inputSocketPosition.GetConnectedSocket(),
+						0, 0, 0, (int) Width - 10, (int) Height - 70, 0, 0);
 				_textures[1].StartTextureUpdateJob((int) Width - 10, (int) Height - 70, _lastVectors);
 			}
 			else

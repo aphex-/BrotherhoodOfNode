@@ -70,7 +70,7 @@ namespace Assets.Code.Bon.Nodes.Vector3
 
 		public override object GetResultOf(Socket outSocket)
 		{
-			return GetVector3List(_x, _y, _z, _width, _height, _depth, _seed);
+			return GetVector3List(outSocket, _x, _y, _z, _width, _height, _depth, _seed);
 		}
 
 		public override bool CanGetResultOf(Socket outSocket)
@@ -78,7 +78,7 @@ namespace Assets.Code.Bon.Nodes.Vector3
 			return true;
 		}
 
-		public override List<UnityEngine.Vector3> GetVector3List(float x, float y, float z, float width, float height, float depth, float seed)
+		public override List<UnityEngine.Vector3> GetVector3List(Socket s, float x, float y, float z, float width, float height, float depth, float seed)
 		{
 			List<UnityEngine.Vector3> vectors = GetInputVector3List(_inputSocketVectors, x, y, z, width, height, depth, seed);
 			if (vectors != null)
