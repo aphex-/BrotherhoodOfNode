@@ -19,11 +19,13 @@ A visual graph editor for Unity3D
 * human readable JSON serialization of the graph
 * easy creation of custom nodes (extend Node.cs)
 * tab pages for multiple graphs
+* noise creation/manipulation, color gradient, point scattering, masking
 
 ![alt text](https://github.com/aphex-/BrotherhoodOfNode/blob/master/feature_preview.gif "feature preview")
 
 ### Non-Features
-* nothing but a tool to create graphs and make them persitent (ok.. there are some math related Nodes now..)
+* ~~nothing but a tool to create graphs and make them persitent (ok.. there are some math related Nodes now..)~~
+Ok.. there are several useful node types now.. 
 
 
 ### Usage
