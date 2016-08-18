@@ -20,6 +20,8 @@ A visual graph editor for Unity3D
 * easy creation of custom nodes (extend Node.cs)
 * tab pages for multiple graphs
 
+![alt text](https://github.com/aphex-/BrotherhoodOfNode/blob/master/feature_preview.gif "feature preview")
+
 ### Non-Features
 * nothing but a tool to create graphs and make them persitent (ok.. there are some math related Nodes now..)
 
@@ -33,6 +35,10 @@ Right click to add a node. Middle mouse button to scroll. Right click on a node 
 To create your own nodes you need to create a new class. Let's call it MyNode.cs
 for this example. **MyNode** now needs to inherit from the class Node. And this 
 class needs the annotation **[Serializable]** in order to save it as a json file.
+
+Notice that the method **GetResultOf(Socket outSocket)** will may be deprecated in the furture.
+Some Nodes already using type related interfaces for results. I think this is a better solution.
+
 ```cs
 using System;
 using UnityEngine;
@@ -63,6 +69,7 @@ namespace Assets.Code.Bon.Graph.Custom
 		}
 		
 		// To return a result of one of the nodes output sockets.
+
 		public override object GetResultOf(Socket outSocket)
 		{
 			// Check if the assigned socket is ready for a result..
@@ -78,6 +85,7 @@ namespace Assets.Code.Bon.Graph.Custom
 		}
 		
 		// To return if the nodes socket is ready for a result.
+		// Notice: this may change in the future
 		public override bool CanGetResultOf(Socket outSocket)
 		{
 			// In our case just check if all input sockets are connected
@@ -145,8 +153,7 @@ the methods **OnSerialization** and **OnDeserialization** to add your logic.
 
 
 ### Next Up..
-* fix socket color issue (currently the socket is very transparent)
-* improve performacne with noise Nodes
+* Implement multiple output Edges per Socket https://github.com/aphex-/BrotherhoodOfNode/issues/3
 * Remove the tab-pages and implement the possibility of multiple editor windows
 * Check for recursion in the graph.
 * Unit tests
