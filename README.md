@@ -33,11 +33,10 @@ Right click to add a node. Middle mouse button to scroll. Right click on a node 
 
 ## How To Create A Custom Node
 To create your own nodes you need to create a new class. Let's call it MyNode.cs
-for this example. **MyNode** now needs to inherit from the class Node. And this 
+for this example. **MyNode** now needs to inherit from the class **Node** (or from its abstract subclasses). And this 
 class needs the annotation **[Serializable]** in order to save it as a json file.
 
-Notice that the method **GetResultOf(Socket outSocket)** will may be deprecated in the furture.
-Some Nodes already using type related interfaces for results. I think this is a better solution.
+Notice that our **Node** is extending **AbstractNumberNode** and contains an output socket for numbers.
 
 ```cs
 using System;
@@ -47,7 +46,7 @@ namespace Assets.Code.Bon.Graph.Custom
 {
 	[Serializable]
 	[GraphContextMenuItem("Standard", "MyNode")]
-	public class MyNode : Node {
+	public class MyNode : AbstractNumberNode {
 
 		[SerializeField]
 		private int myNumber;
@@ -55,9 +54,9 @@ namespace Assets.Code.Bon.Graph.Custom
 		public MyNode(int id, Graph parent) : base(id, parent)
 		{
 			// Add the input / output sockets of this Node
-			Sockets.Add(new Socket(this, Color.red, SocketDirection.Output));
-			Sockets.Add(new Socket(this, Color.red, SocketDirection.Input));
-			Sockets.Add(new Socket(this, Color.red, SocketDirection.Input));
+			Sockets.Add(new OutputSocket(this, typeof(AbstractNumberNode));
+			Sockets.Add(new InputSocket(this, typeof(AbstractColorNode));
+			Sockets.Add(new InputSocket(this, typeof(AbstractNumberNode));
 			Height = 65;
 		}
 
@@ -68,50 +67,21 @@ namespace Assets.Code.Bon.Graph.Custom
 			// (if your nodes content has changed call: TriggerChangeEvent())
 		}
 		
-		// To return a result of one of the nodes output sockets.
-
-		public override object GetResultOf(Socket outSocket)
+		// This method comes from the AbstractNumberNode. It makes sure that all classes of
+		// this type can return a number. Return your number here depending on the parameters.
+		// Your number is usually also depending on the InputSockets of this Node. The assigned
+		// OutputSocket can be igrnored as long as you only have one output.
+		public override float GetNumber(OutputSocket outSocket, float x, float y, float z, float seed)
 		{
-			// Check if the assigned socket is ready for a result..
-			if (CanGetResultOf(outSocket)) 
-			{
-				return myNumber;
-				// (you usally want to make the result depending on the nodes input sockets)
-			}
-			else 
-			{
-				return float.NaN; // return not a number
-			}
+			return 0f;
 		}
-		
-		// To return if the nodes socket is ready for a result.
-		// Notice: this may change in the future
-		public override bool CanGetResultOf(Socket outSocket)
-		{
-			// In our case just check if all input sockets are connected
-			return AllInputSocketsConnected();
-		}
+	
 
-		// For custom serialization
-		public override void OnSerialization(SerializableNode sNode)
-		{	
-			// You usually do not need to add custom serialization
-			// (if you have class members you want to serialize use: [SerializeField])
-		}
-
-		// For custom deserialization
-		public override void OnDeserialization(SerializableNode sNode)
-		{
-			// You usually do not need to add custom deserialization
-		}
 	}
 }
 ```
 The anotation **[GraphContextMenuItem]** tells the editor where to add the menu entry for our **Node**.
 
-### Adding Sockets
-We created a node class that contains three red **Sockets**. A **Socket** needs a parent node as first parameter (this) and a connection type (Color.Red). Only sockets of the same type can be connected.
-The last boolean parameter tells the socket if it is an input (left) or output socket (right).
 
 ### Add UI elememts
 To add custom UI elements to your node simply use the **OnGUI** method as usual.
