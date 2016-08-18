@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.Color
@@ -15,18 +16,18 @@ namespace Assets.Code.Bon.Nodes.Color
 		[NonSerialized] private Rect _tmpRect;
 		[NonSerialized] private Rect _addColorButton;
 
-		[NonSerialized] private  List<Socket> _inputSockets;
+		[NonSerialized] private  List<InputSocket> _inputSockets;
 		[NonSerialized] private Gradient _gradient;
 		[NonSerialized] private Texture2D _previewTexture;
 		[NonSerialized] private bool _needsUpdate = true;
 
 		public GradientNode(int id, Graph parent) : base(id, parent)
 		{
-			_inputSockets = new List<Socket>();
+			_inputSockets = new List<InputSocket>();
 			_tmpRect = new Rect();
 			_addColorButton = new Rect();
 			_gradient = new Gradient();
-			Sockets.Add(new Socket(this, typeof(AbstractColorNode), SocketDirection.Output));
+			Sockets.Add(new OutputSocket(this, typeof(AbstractColorNode)));
 			Width = 156;
 		}
 
@@ -38,7 +39,7 @@ namespace Assets.Code.Bon.Nodes.Color
 
 		private void AddInputSocket(bool addTimes)
 		{
-			Socket s = new Socket(this, typeof(AbstractColorNode), SocketDirection.Input);
+			InputSocket s = new InputSocket(this, typeof(AbstractColorNode));
 			Sockets.Add(s);
 			_inputSockets.Add(s);
 			if (addTimes) _times.Add(0);
@@ -111,7 +112,7 @@ namespace Assets.Code.Bon.Nodes.Color
 				if (_inputSockets[i].IsConnected())
 				{
 					AbstractColorNode colorNode = (AbstractColorNode) _inputSockets[i].GetConnectedSocket().Parent;
-					c = colorNode.GetColorFrom(_i);
+					c = colorNode.GetColor(_inputSockets[i].GetConnectedSocket(), 0);
 				}
 				colorKeys[i] = new GradientColorKey();
 				colorKeys[i].color = c;
@@ -129,18 +130,7 @@ namespace Assets.Code.Bon.Nodes.Color
 			UpdateColorPreview();
 		}
 
-		public override object GetResultOf(Socket outSocket)
-		{
-			return GetColorFrom(_i);
-		}
-
-		public override bool CanGetResultOf(Socket outSocket)
-		{
-			return true;
-		}
-
-
-		public override UnityEngine.Color GetColorFrom(float i)
+		public override UnityEngine.Color GetColor(OutputSocket outSocket, float i)
 		{
 			return _gradient.Evaluate(i);
 		}

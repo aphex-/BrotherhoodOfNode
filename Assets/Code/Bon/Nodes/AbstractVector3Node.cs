@@ -1,33 +1,25 @@
-﻿
-
-using System.Collections.Generic;
-using Assets.Code.Bon;
+﻿using System.Collections.Generic;
 using Assets.Code.Bon.Interface;
-using UnityEngine;
+using Assets.Code.Bon.Socket;
 
-public abstract class AbstractVector3Node : Node, IPositionSampler
+namespace Assets.Code.Bon.Nodes
 {
-	protected float _x;
-	protected float _y;
-	protected float _z;
-	protected float _width;
-	protected float _height;
-	protected float _depth;
-	protected float _seed;
-
-	protected AbstractVector3Node(int id, Graph parent) : base(id, parent)
+	public abstract class AbstractVector3Node : Node, IVectorSampler
 	{
+		protected AbstractVector3Node(int id, Graph parent) : base(id, parent)
+		{
+
+		}
+
+		public static List<UnityEngine.Vector3> GetInputVector3List(InputSocket socket, float x, float y, float z,
+			float sizeX, float sizeY, float sizeZ, float seed)
+		{
+			if (socket.Type != typeof(AbstractVector3Node) || !socket.CanGetResult()) return null;
+			AbstractVector3Node node = (AbstractVector3Node) socket.GetConnectedSocket().Parent;
+			return node.GetVector3List(socket.GetConnectedSocket(), x, y, z, sizeX, sizeY, sizeZ, seed);
+		}
+
+		public abstract List<UnityEngine.Vector3> GetVector3List(OutputSocket socket, float x, float y, float z, float sizeX, float sizeY, float sizeZ, float seed);
 
 	}
-
-	public static List<Vector3> GetInputVector3List(Socket socket, float x, float y, float z,
-													float width, float height,float depth, float seed)
-	{
-		if (socket.Type != typeof(AbstractVector3Node) || socket.Direction == SocketDirection.Output || !socket.CanGetResult()) return null;
-		AbstractVector3Node node = (AbstractVector3Node) socket.GetConnectedSocket().Parent;
-		return node.GetVector3List(socket.GetConnectedSocket(), x, y, z, width, height, depth, seed);
-	}
-
-	public abstract List<Vector3> GetVector3List(Socket socket, float x, float y, float z, float width, float height, float depth, float seed);
-
 }

@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 
-namespace Assets.Code.Thread
+namespace Assets.Code.Bon.Thread
 {
-	public class ThreadedJob  {
+	public abstract class ThreadedJob  {
 
-		private bool _IsDone = false;
+		private bool _IsDone;
 		private object _Handle = new object();
 
-		private System.Threading.Thread _Thread = null;
+		private System.Threading.Thread _Thread;
 
 		public bool IsDone
 		{

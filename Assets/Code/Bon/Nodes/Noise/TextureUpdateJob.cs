@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Assets.Code.Bon.Interface;
 using Assets.Code.Bon.Nodes.Vector3;
-using Assets.Code.Thread;
+using Assets.Code.Bon.Thread;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.Noise
@@ -10,8 +10,8 @@ namespace Assets.Code.Bon.Nodes.Noise
 	public class TextureUpdateJob : ThreadedJob
 	{
 
-		private ISampler3D _sampler3D;
-		private IColorSampler1D _samplerColor;
+		private INumberSampler _numberSampler;
+		private IColorSampler _samplerColor;
 		private List<UnityEngine.Vector3> _positions;
 
 		private int _width;
@@ -20,9 +20,9 @@ namespace Assets.Code.Bon.Nodes.Noise
 
 		public Texture2D Texture;
 
-		public void Request(int width, int height, ISampler3D sampler, IColorSampler1D colorSampler = null)
+		public void Request(int width, int height, INumberSampler sampler, IColorSampler colorSampler = null)
 		{
-			_sampler3D = sampler;
+			_numberSampler = sampler;
 			_samplerColor = colorSampler;
 			_values = new float[width, height];
 			Init(width, height);
@@ -43,14 +43,14 @@ namespace Assets.Code.Bon.Nodes.Noise
 
 		protected override void ThreadFunction()
 		{
-			if (_sampler3D == null) return;
+			if (_numberSampler == null) return;
 			var _xStart = 0;
-			var _yStart = 0;
+			var _zStart = 0;
 			for (var x = _xStart; x < _xStart + _width; x++)
 			{
-				for (var y = _yStart; y < _yStart + _height; y++)
+				for (var z = _zStart; z < _zStart + _height; z++)
 				{
-					_values[x - _xStart, y - _yStart] = _sampler3D.GetSampleAt(x, y, 0);
+					_values[x - _xStart, z - _zStart] = _numberSampler.GetNumber(null, x, 0, z, 0);
 				}
 			}
 		}
@@ -60,17 +60,18 @@ namespace Assets.Code.Bon.Nodes.Noise
 			if (Texture != null) Texture2D.DestroyImmediate(Texture);
 			Texture = new Texture2D(_width, _height, TextureFormat.RGBA32, false);
 
-			if (_sampler3D != null) Texture.SetPixels(NodeUtils.ToColorMap(_values, _samplerColor));
+			if (_numberSampler != null) Texture.SetPixels(NodeUtils.ToColorMap(_values, _samplerColor));
 			else if (_positions != null)
 			{
 				Texture.SetPixels(new UnityEngine.Color[_width * _height]);
 				foreach (var position in _positions)
 				{
-					Texture.SetPixel((int) position.x, (int) position.y, UnityEngine.Color.white);
+					Texture.SetPixel((int) position.x, (int) position.z, UnityEngine.Color.white);
 				}
 			}
 			Texture.Apply();
 		}
+
 
 	}
 }

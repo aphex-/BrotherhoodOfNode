@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.Number
@@ -10,19 +11,19 @@ namespace Assets.Code.Bon.Nodes.Number
 		[SerializeField] private bool _minActive;
 		[SerializeField] private bool _maxActive;
 
-		[NonSerialized] private Socket _inputSocket01;
-		[NonSerialized] private Socket _inputSocketMin;
-		[NonSerialized] private Socket _inputSocketMax;
+		[NonSerialized] private InputSocket _inputSocket01;
+		[NonSerialized] private InputSocket _inputSocketMin;
+		[NonSerialized] private InputSocket _inputSocketMax;
 
 		[NonSerialized] private Rect _tmpRect;
 
 		public LimitNode(int id, Graph parent) : base(id, parent)
 		{
-			_inputSocket01 = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inputSocket01 = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_inputSocket01);
-			_inputSocketMin = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inputSocketMin = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_inputSocketMin);
-			_inputSocketMax = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inputSocketMax = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_inputSocketMax);
 
 			_tmpRect = new Rect();
@@ -49,27 +50,22 @@ namespace Assets.Code.Bon.Nodes.Number
 
 		}
 
-		public override object GetResultOf(Socket outSocket)
+		public override float GetNumber(OutputSocket outSocket, float x, float y, float z, float seed)
 		{
-			return GetSampleAt(_x, _y, _seed);
-		}
-
-		public override float GetSampleAt(float x, float y, float seed)
-		{
-			var value01 = GetInputNumber(_inputSocket01, x, y, seed);
+			var value01 = GetInputNumber(_inputSocket01, x, y, z, seed);
 
 			if (float.IsNaN(value01)) return float.NaN;
 
 			if (_minActive)
 			{
-				var min = GetInputNumber(_inputSocketMin, x, y, seed);
+				var min = GetInputNumber(_inputSocketMin, x, y, z, seed);
 				if (float.IsNaN(min)) return float.NaN;
 				value01 = Math.Min(value01, min);
 			}
 
 			if (_maxActive)
 			{
-				var max = GetInputNumber(_inputSocketMax, x, y, seed);
+				var max = GetInputNumber(_inputSocketMax, x, y, z, seed);
 				if (float.IsNaN(max)) return float.NaN;
 				value01 = Math.Max(value01, max);
 			}

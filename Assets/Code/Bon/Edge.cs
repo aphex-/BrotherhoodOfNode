@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Code.Bon.Socket;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,8 +8,8 @@ namespace Assets.Code.Bon
 
 	public class Edge
 	{
-		public Socket Input;
-		public Socket Output;
+		public InputSocket Input;
+		public OutputSocket Output;
 
 		// cached vectors for drawing
 		private Vector2 _tmpStartPos;
@@ -16,24 +17,16 @@ namespace Assets.Code.Bon
 		private Vector2 _tmpTangent01;
 		private Vector2 _tmpTangent02;
 
-		public Edge(Socket socket01, Socket socket02)
+		public Edge(OutputSocket outputSocket, InputSocket inputSocket)
 		{
-			if (socket01.Direction == SocketDirection.Input)
-			{
-				Input = socket01;
-				Output = socket02;
-			}
-			else
-			{
-				Input = socket02;
-				Output = socket01;
-			}
+			Input = inputSocket;
+			Output = outputSocket;
 		}
 
-		public Socket GetOtherSocket(Socket socket)
+		public AbstractSocket GetOtherSocket(AbstractSocket socket)
 		{
 			if (socket == Input) return Output;
-			else return Input;
+			return Input;
 		}
 
 		public void Draw()
@@ -65,29 +58,27 @@ namespace Assets.Code.Bon
 				tangent01, tangent02, Node.GetEdgeColor(type), null, 3);
 		}
 
-		public static Vector2 GetEdgePosition(Socket socket, Vector2 position)
+		public static Vector2 GetEdgePosition(AbstractSocket socket, Vector2 position)
 		{
 			if (socket.Parent.Collapsed)
 			{
 				float width = BonConfig.SocketSize;
-				if (socket.Direction == SocketDirection.Output) width = 0;
+				if (socket.IsOutput()) width = 0;
 				position.Set(socket.X + width, socket.Parent.WindowRect.y + 8);
 			}
 			else
 			{
 				float width = 0;
-				if (socket.Direction == SocketDirection.Output) width = BonConfig.SocketSize;
+				if (socket.IsOutput()) width = BonConfig.SocketSize;
 				position.Set(socket.X + width, socket.Y + BonConfig.SocketSize / 2f);
 			}
 			return position;
 		}
 
-		public static Vector2 GetTangentPosition(Socket socket, Vector2 position)
+		public static Vector2 GetTangentPosition(AbstractSocket socket, Vector2 position)
 		{
-			if (socket.Direction == SocketDirection.Input)
-				return position + Vector2.left*BonConfig.EdgeTangent;
-			else
-				return position + Vector2.right*BonConfig.EdgeTangent;
+			if (socket.IsInput()) return position + Vector2.left*BonConfig.EdgeTangent;
+			return position + Vector2.right*BonConfig.EdgeTangent;
 		}
 
 		///<summary>Creates a serializable version of this edge.</summary>

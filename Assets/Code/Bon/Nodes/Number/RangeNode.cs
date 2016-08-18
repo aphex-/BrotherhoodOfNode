@@ -1,6 +1,7 @@
 ﻿using System;
 using Assets.Code.Bon;
 using Assets.Code.Bon.Nodes;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 [Serializable]
@@ -10,12 +11,12 @@ public class RangeNode : AbstractNumberNode {
 
 	[SerializeField] private int _selectedMode;
 
-	[NonSerialized] private Socket _inputSocket01;
+	[NonSerialized] private InputSocket _inputSocket01;
 	[NonSerialized] public static string[] Modes = {"[-1:1] to [0:1]", "[0:1] to [-1:1]"};
 
 	public RangeNode(int id, Graph parent) : base(id, parent)
 	{
-		_inputSocket01 = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+		_inputSocket01 = new InputSocket(this, typeof(AbstractNumberNode));
 		Sockets.Add(_inputSocket01);
 		Height = 60;
 		Width = 100;
@@ -40,14 +41,10 @@ public class RangeNode : AbstractNumberNode {
 
 	}
 
-	public override object GetResultOf(Socket outSocket)
-	{
-		return GetSampleAt(_x, _y, _seed);
-	}
 
-	public override float GetSampleAt(float x, float y, float seed)
+	public override float GetNumber(OutputSocket outSocket, float x, float y, float z, float seed)
 	{
-		float value = GetInputNumber(_inputSocket01, x, y, seed);
+		float value = GetInputNumber(_inputSocket01, x, y, z, seed);
 		if (float.IsNaN(value)) return float.NaN;
 
 		if (_selectedMode == 0) return (value + 1f) / 2f;

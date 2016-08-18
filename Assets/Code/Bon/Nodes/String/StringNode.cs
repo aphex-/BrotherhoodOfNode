@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.String
@@ -13,7 +14,7 @@ namespace Assets.Code.Bon.Nodes.String
 		public StringNode(int id, Graph parent) : base(id, parent)
 		{
 			_textFieldRect = new Rect(3, 0, 100, 20);
-			Sockets.Add(new Socket(this, typeof(AbstractStringNode), SocketDirection.Output));
+			Sockets.Add(new OutputSocket(this, typeof(AbstractStringNode)));
 			Height = 45;
 			Width = 108;
 		}
@@ -30,17 +31,7 @@ namespace Assets.Code.Bon.Nodes.String
 
 		}
 
-		public override object GetResultOf(Socket outSocket)
-		{
-			return _text;
-		}
-
-		public override bool CanGetResultOf(Socket outSocket)
-		{
-			return true;
-		}
-
-		public override string GetString()
+		public override string GetString(OutputSocket outSocket)
 		{
 			return _text;
 		}

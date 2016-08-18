@@ -58,10 +58,10 @@ public class GUIThreadedTexture {
 		if (_texture != null && !_isUpdatingTexture) GUI.DrawTexture(_textureArea, _texture);
 	}
 
-	public void StartTextureUpdateJob(int width, int height, ISampler3D sampler3D, IColorSampler1D samplerColor)
+	public void StartTextureUpdateJob(int width, int height, INumberSampler numberSampler, IColorSampler samplerColor)
 	{
 		InitJob(width, height);
-		_job.Request(width, height, sampler3D, samplerColor);
+		_job.Request(width, height, numberSampler, samplerColor);
 		_job.Start();
 	}
 

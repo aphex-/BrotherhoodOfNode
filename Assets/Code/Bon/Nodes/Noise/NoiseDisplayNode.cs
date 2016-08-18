@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Assets.Code.Bon.Interface;
 using Assets.Code.Bon.Nodes.Number;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.Noise
@@ -12,15 +13,13 @@ namespace Assets.Code.Bon.Nodes.Noise
 	{
 		[SerializeField] private int _sizeModifcator;
 
-		[NonSerialized] private Socket _inputSocketNumber;
-		[NonSerialized] private Socket _inputSocketColor;
-		[NonSerialized] private Socket _inputSocketPosition;
+		[NonSerialized] private InputSocket _inputSocketNumber;
+		[NonSerialized] private InputSocket _inputSocketColor;
+		[NonSerialized] private InputSocket _inputSocketPosition;
 
 		[NonSerialized] private Rect _sizeLabel;
 		[NonSerialized] private Rect _sizePlusButton;
 		[NonSerialized] private Rect _sizeMinusButton;
-
-		[NonSerialized] private bool _isConnected;
 
 		[NonSerialized] private const int _sizeStep = 50;
 
@@ -35,13 +34,13 @@ namespace Assets.Code.Bon.Nodes.Noise
 			_sizePlusButton = new Rect(28, 0, 18, 18);
 			_sizeMinusButton = new Rect(46, 0, 18, 18);
 
-			_inputSocketNumber = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inputSocketNumber = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_inputSocketNumber);
 
-			_inputSocketColor = new Socket(this, typeof(AbstractColorNode), SocketDirection.Input);
+			_inputSocketColor = new InputSocket(this, typeof(AbstractColorNode));
 			Sockets.Add(_inputSocketColor);
 
-			_inputSocketPosition = new Socket(this, typeof(AbstractVector3Node), SocketDirection.Input);
+			_inputSocketPosition = new InputSocket(this, typeof(AbstractVector3Node));
 			Sockets.Add(_inputSocketPosition);
 
 			_textures.Add(new GUIThreadedTexture()); // heightmap
@@ -60,9 +59,7 @@ namespace Assets.Code.Bon.Nodes.Noise
 			if (!_textures[0].DoneInitialUpdate) _textures[0].StartTextureUpdateJob((int) Width -10, (int) Height - 70, GetNumberSampler(), GetColorSampler());
 			if (!_textures[1].DoneInitialUpdate) _textures[1].StartTextureUpdateJob((int) Width -10, (int) Height - 70, GetNumberSampler(), GetColorSampler());
 
-			_isConnected = CanGetResultOf(null);
-
-			if (!IsUpdatingTexture() && _isConnected)
+			if (!IsUpdatingTexture())
 			{
 				_sizeLabel.Set(_sizeLabel.x, Height - 65, _sizeLabel.width, _sizeLabel.height);
 				_sizePlusButton.Set(_sizePlusButton.x, Height - 65, _sizePlusButton.width, _sizePlusButton.height);
@@ -105,11 +102,6 @@ namespace Assets.Code.Bon.Nodes.Noise
 			Update();
 		}
 
-		public override object GetResultOf(Socket outSocket)
-		{
-			return GetSampleAt(_x, _y, _seed);
-		}
-
 		public override void Update()
 		{
 			if (Collapsed) return;
@@ -121,8 +113,9 @@ namespace Assets.Code.Bon.Nodes.Noise
 
 			if (_inputSocketPosition.CanGetResult())
 			{
-				_lastVectors = GetPositionSampler().GetVector3List(_inputSocketPosition.GetConnectedSocket(),
-						0, 0, 0, (int) Width - 10, (int) Height - 70, 0, 0);
+				_lastVectors = GetPositionSampler().GetVector3List(
+					_inputSocketPosition.GetConnectedSocket(),
+					0, 0, 0, (int) Width - 10, 0, (int) Height - 70, 0);
 				_textures[1].StartTextureUpdateJob((int) Width - 10, (int) Height - 70, _lastVectors);
 			}
 			else
@@ -132,25 +125,25 @@ namespace Assets.Code.Bon.Nodes.Noise
 			}
 		}
 
-		public override float GetSampleAt(float x, float y, float seed)
+		public override float GetNumber(OutputSocket outSocket, float x, float y, float z, float seed)
 		{
-			return GetInputNumber(_inputSocketNumber, x, y, seed);
+			return GetInputNumber(_inputSocketNumber, x, y, z, seed);
 		}
 
-		private IColorSampler1D GetColorSampler()
+		private IColorSampler GetColorSampler()
 		{
 			if (_inputSocketColor.CanGetResult()) return (AbstractColorNode) _inputSocketColor.GetConnectedSocket().Parent;
 			return null;
 		}
 
-		private ISampler3D GetNumberSampler()
+		private INumberSampler GetNumberSampler()
 		{
-			if (_inputSocketNumber.IsInDirectInputMode()) return new SingleNumberSampler(GetInputNumber(_inputSocketNumber, 0, 0, 0));
+			if (_inputSocketNumber.IsInDirectInputMode()) return new SingleNumberSampler(GetInputNumber(_inputSocketNumber, 0, 0, 0, 0));
 			if (_inputSocketNumber.CanGetResult()) return (AbstractNumberNode) _inputSocketNumber.GetConnectedSocket().Parent;
 			return null;
 		}
 
-		private IPositionSampler GetPositionSampler()
+		private IVectorSampler GetPositionSampler()
 		{
 			if (_inputSocketPosition.CanGetResult()) return (AbstractVector3Node) _inputSocketPosition.GetConnectedSocket().Parent;
 			return null;

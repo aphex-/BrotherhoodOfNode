@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.Number
@@ -10,12 +11,12 @@ namespace Assets.Code.Bon.Nodes.Number
 	{
 		[NonSerialized] public float Value;
 		[NonSerialized] private Rect _textFieldArea;
-		[NonSerialized] private Socket _inSocket;
+		[NonSerialized] private InputSocket _inSocket;
 
 		public NumberDisplayNode(int id, Graph parent) : base(id, parent)
 		{
 			_textFieldArea = new Rect(10, 0, 80, BonConfig.SocketSize);
-			_inSocket = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inSocket = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_inSocket);
 			Height = 20 + BonConfig.SocketOffsetTop;
 		}
@@ -25,20 +26,14 @@ namespace Assets.Code.Bon.Nodes.Number
 			GUI.Label(_textFieldArea, Value + "");
 		}
 
-
-		public override object GetResultOf(Socket outSocket)
-		{
-			return GetSampleAt(_x, _y, _seed);
-		}
-
 		public override void Update()
 		{
-			Value = GetInputNumber(_inSocket, _x, _y, _seed);
+			Value = GetInputNumber(_inSocket, 0, 0, 0, 0);
 		}
 
-		public override float GetSampleAt(float x, float y, float seed)
+		public override float GetNumber(OutputSocket outSocket, float x, float y, float z, float seed)
 		{
-			return GetInputNumber(_inSocket, x, y, seed);
+			return GetInputNumber(_inSocket, x, y, z, seed);
 		}
 	}
 }

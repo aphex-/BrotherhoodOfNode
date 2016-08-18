@@ -3,6 +3,7 @@ using UnityEngine;
 using Assets.Code.Bon.Nodes;
 using Assets.Code.Bon.Nodes.Noise;
 using Assets.Code.Bon.Nodes.Number;
+using Assets.Code.Bon.Socket;
 
 
 namespace Assets.Code.Bon
@@ -105,11 +106,11 @@ namespace Assets.Code.Bon
 			graph.AddNode(diplay01);
 
 			graph.Link(
-				operator01.GetSocket(typeof(AbstractNumberNode), SocketDirection.Output, 0),
-				diplay01.GetSocket(typeof(AbstractNumberNode), SocketDirection.Input, 0));
+				(InputSocket) diplay01.GetSocket(typeof(AbstractNumberNode), typeof(InputSocket), 0),
+				(OutputSocket) operator01.GetSocket(typeof(AbstractNumberNode), typeof(OutputSocket), 0));
 
 			// Map2D Nodes
-			var perlinNoise = graph.CreateNode<PerlinNoiseNode>();
+			var perlinNoise = graph.CreateNode<UnityPerlinNoiseNode>();
 			perlinNoise.X = 80;
 			perlinNoise.Y = 250;
 			graph.AddNode(perlinNoise);
@@ -119,8 +120,9 @@ namespace Assets.Code.Bon
 			displayMap.Y = 280;
 			graph.AddNode(displayMap);
 
-			graph.Link(perlinNoise.GetSocket(typeof(AbstractNumberNode), SocketDirection.Output, 0),
-				displayMap.GetSocket(typeof(AbstractNumberNode), SocketDirection.Input, 0));
+			graph.Link(
+				(InputSocket) displayMap.GetSocket(typeof(AbstractNumberNode), typeof(InputSocket), 0),
+				(OutputSocket) perlinNoise.GetSocket(typeof(AbstractNumberNode), typeof(OutputSocket), 0));
 
 
 			// == test serialization an deserialization ==

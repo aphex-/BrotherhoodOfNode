@@ -47,7 +47,7 @@ public class NodeUtils {
 	}
 
 
-	public static Color[] ToColorMap(float[,] values, IColorSampler1D colorSampler = null)
+	public static Color[] ToColorMap(float[,] values, IColorSampler colorSampler = null)
 	{
 		int width = values.GetLength(0);
 		int height = values.GetLength(1);
@@ -58,7 +58,7 @@ public class NodeUtils {
 			{
 				Color c;
 				if (colorSampler == null) c = GetMapValueColor(values[x, y]);
-				else c = colorSampler.GetColorFrom((values[x, y] + 1f) / 2f);
+				else c = colorSampler.GetColor(null, (values[x, y] + 1f) / 2f);
 				colorMap[y * width + x] = c;
 			}
 		}

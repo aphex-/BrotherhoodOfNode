@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 /**
@@ -16,9 +17,9 @@ namespace Assets.Code.Bon.Nodes.Number
 		[NonSerialized] private Rect _labelInput02;
 		[NonSerialized] private Rect _labelCondition;
 
-		[NonSerialized] private Socket _inputSocket01;
-		[NonSerialized] private Socket _inputSocket02;
-		[NonSerialized] private Socket _conditionSocket;
+		[NonSerialized] private InputSocket _inputSocket01;
+		[NonSerialized] private InputSocket _inputSocket02;
+		[NonSerialized] private InputSocket _conditionSocket;
 
 		public ConditionNode(int id, Graph parent) : base(id, parent)
 		{
@@ -26,9 +27,9 @@ namespace Assets.Code.Bon.Nodes.Number
 			_labelInput02 = new Rect(3, 20, 100, 20);
 			_labelCondition = new Rect(3, 40, 100, 20);
 
-			_inputSocket01 = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-			_inputSocket02 = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-			_conditionSocket = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inputSocket01 = new InputSocket(this, typeof(AbstractNumberNode));
+			_inputSocket02 = new InputSocket(this, typeof(AbstractNumberNode));
+			_conditionSocket = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_inputSocket01);
 			Sockets.Add(_inputSocket02);
 			Sockets.Add(_conditionSocket);
@@ -49,17 +50,12 @@ namespace Assets.Code.Bon.Nodes.Number
 
 		}
 
-		public override object GetResultOf(Socket outSocket)
+		public override float GetNumber(OutputSocket outSocket, float x, float y, float z, float seed)
 		{
-			return GetSampleAt(_x, _y, _seed);
-		}
-
-		public override float GetSampleAt(float x, float y, float seed)
-		{
-			var conditionValue02 = GetInputNumber(_conditionSocket, x, y, seed);
+			var conditionValue02 = GetInputNumber(_conditionSocket, x, y, z, seed);
 			if (float.IsNaN(conditionValue02)) return float.NaN;
-			if (conditionValue02 < 0.0f) return GetInputNumber(_inputSocket01, x, y, seed);
-			return GetInputNumber(_inputSocket02, x, y, seed);
+			if (conditionValue02 < 0.0f) return GetInputNumber(_inputSocket01, x, y, z, seed);
+			return GetInputNumber(_inputSocket02, x, y, z, seed);
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Code.Bon.Socket;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,10 +12,10 @@ namespace Assets.Code.Bon.Nodes.Color
 	{
 		[SerializeField] private UnityEngine.Color _color;
 
-		[NonSerialized] private Socket _inputSocketR;
-		[NonSerialized] private Socket _inputSocketG;
-		[NonSerialized] private Socket _inputSocketB;
-		[NonSerialized] private Socket _inputSocketA;
+		[NonSerialized] private InputSocket _inputSocketR;
+		[NonSerialized] private InputSocket _inputSocketG;
+		[NonSerialized] private InputSocket _inputSocketB;
+		[NonSerialized] private InputSocket _inputSocketA;
 
 		[NonSerialized] private Rect _labelR;
 		[NonSerialized] private Rect _labelG;
@@ -38,17 +39,17 @@ namespace Assets.Code.Bon.Nodes.Color
 			_sliderB = new Rect(23, 40, 50, 20);
 			_sliderA = new Rect(23, 60, 50, 20);
 
-			_inputSocketR = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-			_inputSocketG = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-			_inputSocketB = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-			_inputSocketA = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inputSocketR = new InputSocket(this, typeof(AbstractNumberNode));
+			_inputSocketG = new InputSocket(this, typeof(AbstractNumberNode));
+			_inputSocketB = new InputSocket(this, typeof(AbstractNumberNode));
+			_inputSocketA = new InputSocket(this, typeof(AbstractNumberNode));
 
 			Sockets.Add(_inputSocketR);
 			Sockets.Add(_inputSocketG);
 			Sockets.Add(_inputSocketB);
 			Sockets.Add(_inputSocketA);
 
-			Sockets.Add(new Socket(this, typeof(AbstractColorNode), SocketDirection.Output));
+			Sockets.Add(new OutputSocket(this, typeof(AbstractColorNode)));
 		}
 
 		public override void OnGUI()
@@ -82,7 +83,7 @@ namespace Assets.Code.Bon.Nodes.Color
 			NodeUtils.GUIDrawRect(new Rect(77, 0, 20, 20), _color);
 		}
 
-		private bool UpdateDirectInput(Socket socket, float oldValue, float newValue)
+		private bool UpdateDirectInput(InputSocket socket, float oldValue, float newValue)
 		{
 			if (oldValue != newValue && socket.IsInDirectInputMode())
 			{
@@ -102,27 +103,15 @@ namespace Assets.Code.Bon.Nodes.Color
 
 		public override void Update()
 		{
-			_color.r = AbstractNumberNode.GetInputNumber(_inputSocketR, 0, 0, 0);
-			_color.g = AbstractNumberNode.GetInputNumber(_inputSocketG, 0, 0, 0);
-			_color.b = AbstractNumberNode.GetInputNumber(_inputSocketB, 0, 0, 0);
-			_color.a = AbstractNumberNode.GetInputNumber(_inputSocketA, 0, 0, 0);
+			_color.r = AbstractNumberNode.GetInputNumber(_inputSocketR, 0, 0, 0, 0);
+			_color.g = AbstractNumberNode.GetInputNumber(_inputSocketG, 0, 0, 0, 0);
+			_color.b = AbstractNumberNode.GetInputNumber(_inputSocketB, 0, 0, 0, 0);
+			_color.a = AbstractNumberNode.GetInputNumber(_inputSocketA, 0, 0, 0, 0);
 		}
 
-		public override object GetResultOf(Socket outSocket)
+		public override UnityEngine.Color GetColor(OutputSocket outSocket, float i)
 		{
 			return _color;
 		}
-
-		public override bool CanGetResultOf(Socket outSocket)
-		{
-			return true;
-		}
-
-		public override UnityEngine.Color GetColorFrom(float x)
-		{
-			return _color;
-		}
-
-
 	}
 }

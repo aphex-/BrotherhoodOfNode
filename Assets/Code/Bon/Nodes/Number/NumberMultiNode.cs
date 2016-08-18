@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Code.Bon.Socket;
 
 namespace Assets.Code.Bon.Nodes.Number
 {
@@ -7,13 +8,13 @@ namespace Assets.Code.Bon.Nodes.Number
 	public class NumberMultiNode : AbstractNumberNode
 	{
 
-		[NonSerialized] private Socket _inputSocket;
+		[NonSerialized] private InputSocket _inputSocket;
 
 		public NumberMultiNode(int id, Graph parent) : base(id, parent)
 		{
-			_inputSocket = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inputSocket = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_inputSocket);
-			Sockets.Add(new Socket(this, typeof(AbstractNumberNode), SocketDirection.Output)); // second output
+			Sockets.Add(new OutputSocket(this, typeof(AbstractNumberNode))); // second output
 			SocketTopOffsetInput = 15;
 			Width = 50;
 			Height = 60;
@@ -29,14 +30,9 @@ namespace Assets.Code.Bon.Nodes.Number
 
 		}
 
-		public override object GetResultOf(Socket outSocket)
+		public override float GetNumber(OutputSocket outSocket, float x, float y, float z, float seed)
 		{
-			return GetSampleAt(_x, _y, _seed); // return same value for all out sockets
-		}
-
-		public override float GetSampleAt(float x, float y, float seed)
-		{
-			return GetInputNumber(_inputSocket, x, y, seed);
+			return GetInputNumber(_inputSocket, x, y, z, seed);
 		}
 	}
 }

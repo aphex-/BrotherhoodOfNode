@@ -1,4 +1,7 @@
-﻿namespace Assets.Code.Bon.Nodes
+﻿using Assets.Code.Bon.Interface;
+using Assets.Code.Bon.Socket;
+
+namespace Assets.Code.Bon.Nodes
 {
 	public abstract class AbstractStringNode : Node, IStringSampler {
 
@@ -6,6 +9,6 @@
 		{
 		}
 
-		public abstract string GetString();
+		public abstract string GetString(OutputSocket outSocket);
 	}
 }

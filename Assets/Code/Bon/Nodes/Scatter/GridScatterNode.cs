@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Assets.Code.Bon.Nodes;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 
@@ -10,23 +11,23 @@ using UnityEngine;
 public class GridScatterNode : AbstractVector3Node
 {
 
-	private Socket _inputX;
-	private Socket _inputY;
+	private InputSocket _inputX;
+	private InputSocket _inputZ;
 
 	private Rect _tmpRect;
 
 	public GridScatterNode(int id, Graph parent) : base(id, parent)
 	{
-		_inputX = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-		_inputY = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+		_inputX = new InputSocket(this, typeof(AbstractNumberNode));
+		_inputZ = new InputSocket(this, typeof(AbstractNumberNode));
 
 		_inputX.SetDirectInputNumber(5, false);
-		_inputY.SetDirectInputNumber(5, false);
+		_inputZ.SetDirectInputNumber(5, false);
 
 		Sockets.Add(_inputX);
-		Sockets.Add(_inputY);
+		Sockets.Add(_inputZ);
 
-		Sockets.Add(new Socket(this, typeof(AbstractVector3Node), SocketDirection.Output));
+		Sockets.Add(new OutputSocket(this, typeof(AbstractVector3Node)));
 
 		_tmpRect = new Rect();
 
@@ -40,7 +41,7 @@ public class GridScatterNode : AbstractVector3Node
 		_tmpRect.Set(3, 0, 50, 20);
 		GUI.Label(_tmpRect, "scale x");
 		_tmpRect.Set(3, 20, 50, 20);
-		GUI.Label(_tmpRect, "scale y");
+		GUI.Label(_tmpRect, "scale z");
 		GUI.skin.label.alignment = TextAnchor.MiddleCenter;
 	}
 
@@ -49,56 +50,46 @@ public class GridScatterNode : AbstractVector3Node
 
 	}
 
-	public override object GetResultOf(Socket outSocket)
-	{
-		return GetVector3List(outSocket, _x, _y, _z, _width, _height, _depth, _seed);
-	}
-
-	public override bool CanGetResultOf(Socket outSocket)
-	{
-		return true;
-	}
-
-	public override List<Vector3> GetVector3List(Socket s, float x, float y, float z, float width, float height, float depth, float seed)
+	public override List<Vector3> GetVector3List(OutputSocket s, float x, float y, float z, float sizeX, float sizeY, float sizeZ, float seed)
 	{
 		float left = x;
-		float right = x + width;
+		float right = x + sizeX;
 
-		if (width < 0)
+		if (sizeX < 0)
 		{
-			left = x + width;
+			left = x + sizeX;
 			right = x;
 		}
 
 		left = (float) Math.Floor(left);
 		right = (float) Math.Ceiling(right);
 
-		float bottom = y;
-		float top = y + height;
+		float bottom = z;
+		float top = z + sizeZ;
 
-		if (height < 0)
+		if (sizeZ < 0)
 		{
-			bottom = y + height;
-			top = y;
+			bottom = z + sizeZ;
+			top = z;
 		}
 
 		bottom = (float) Math.Floor(bottom);
 		top = (float) Math.Ceiling(top);
 
-		float scaleX = AbstractNumberNode.GetInputNumber(_inputX, x, y, seed);
-		float scaleY = AbstractNumberNode.GetInputNumber(_inputY, x, y, seed);
+		float scaleX = AbstractNumberNode.GetInputNumber(_inputX, x, y, z, seed);
+		float scaleZ = AbstractNumberNode.GetInputNumber(_inputZ, x, y, z, seed);
 
 
-		List<UnityEngine.Vector3> positions = new List<UnityEngine.Vector3>();
+		List<Vector3> positions = new List<Vector3>();
 		for (int leftIndex = (int) Math.Floor(left / scaleX); leftIndex <= (int) Math.Ceiling(right / scaleX); leftIndex++)
 		{
-			for (int bottomIndex = (int) Math.Floor(bottom / scaleY); bottomIndex <= (int) Math.Ceiling(top / scaleY); bottomIndex++)
+			for (int bottomIndex = (int) Math.Floor(bottom / scaleZ); bottomIndex <= (int) Math.Ceiling(top / scaleZ); bottomIndex++)
 			{
 				if (leftIndex * scaleX >= left && leftIndex * scaleX < right)
 				{
-					if (bottomIndex * scaleY >= bottom && bottomIndex * scaleY < top)
+					if (bottomIndex * scaleZ >= bottom && bottomIndex * scaleZ < top)
 					{
-						positions.Add(new Vector3(leftIndex * scaleX, bottomIndex * scaleY, 0));
+						positions.Add(new Vector3(leftIndex * scaleX, 0, bottomIndex * scaleZ));
 					}
 				}
 			}

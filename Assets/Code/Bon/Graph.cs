@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Assets.Code.Bon.Nodes;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon
@@ -125,7 +126,8 @@ namespace Assets.Code.Bon
 		{
 			if (node == null) return false;
 			_needsUpdate = true;
-			foreach (var socket in node.Sockets) if (socket.Edge != null) UnLink(socket);
+
+			foreach (var socket in node.Sockets) UnLink(socket);
 			bool removed = _nodes.Remove(node);
 			if (TriggerEvents) EventManager.TriggerOnNodeRemoved(this, node);
 			return removed;
@@ -139,62 +141,88 @@ namespace Assets.Code.Bon
 			return RemoveNode(GetNode(id));
 		}
 
+		public bool AreConected(InputSocket inputSocket, OutputSocket outputSocket)
+		{
+			if (inputSocket == null || outputSocket == null || inputSocket.Edge == null || outputSocket.Edges.Count == 0) return false;
+			return outputSocket.Edges.Contains(inputSocket.Edge);
+		}
+
 		/// <summary>Unlinkes the assigned sockets. Triggeres 'Unlink' events.</summary>
-		public void UnLink(Socket s01, Socket s02)
+		public void UnLink(InputSocket inputSocket, OutputSocket outputSocket)
 		{
 			_needsUpdate = true;
+
+			if (inputSocket == null || outputSocket == null || !inputSocket.IsConnected() || !outputSocket.IsConnected()) return;
+			if (!AreConected(inputSocket, outputSocket)) return;
+
 			if (TriggerEvents)
 			{
-				EventManager.TriggerOnUnLinkSockets(this, s01, s02);
+				EventManager.TriggerOnUnLinkSockets(this, inputSocket, outputSocket);
 			}
-			if (s01 != null && s01.Edge != null)
+
+			var index = outputSocket.Edges.IndexOf(inputSocket.Edge);
+			if (index > -1)
 			{
-				s01.Edge.Input = null;
-				s01.Edge.Output = null;
-				s01.Edge = null;
+				outputSocket.Edges[index].Input = null;
+				outputSocket.Edges[index].Output = null;
+				outputSocket.Edges.RemoveAt(index);
 			}
-			if (s02 != null && s02.Edge != null)
-			{
-				s02.Edge.Input = null;
-				s02.Edge.Output = null;
-				s02.Edge = null;
-			}
+
+			inputSocket.Edge.Input = null;
+			inputSocket.Edge.Output = null;
+			inputSocket.Edge = null;
+
 			if (TriggerEvents)
 			{
-				EventManager.TriggerOnUnLinkedSockets(this, s01, s02);
+				EventManager.TriggerOnUnLinkedSockets(this, inputSocket, outputSocket);
 			}
 		}
 
-		public void UnLink(Socket socket)
+		public void UnLink(AbstractSocket socket)
 		{
-			_needsUpdate = true;
-			Socket socket2 = null;
-			if (socket.Edge != null)
+			if (socket == null || !socket.IsConnected()) return;
+
+
+			if (socket.IsInput())
 			{
-				socket2 = socket.Edge.GetOtherSocket(socket);
+				InputSocket inputSocket = (InputSocket) socket;
+				if (inputSocket.Edge != null) UnLink(inputSocket, inputSocket.Edge.Output);
 			}
-			UnLink(socket, socket2);
+
+			if (socket.IsOutput())
+			{
+				OutputSocket outputSocket = (OutputSocket) socket;
+				Edge[] edgeCopy = new Edge[outputSocket.Edges.Count];
+				outputSocket.Edges.CopyTo(edgeCopy);
+				foreach (var edge in edgeCopy)
+				{
+					UnLink(edge.Input, outputSocket);
+				}
+			}
 		}
 
-		public bool Link(Socket inputSocket, Socket sourceSocket)
+		public bool Link(InputSocket inputSocket, OutputSocket outputSocket)
 		{
-			if (!CanBeLinked(inputSocket, sourceSocket))
+			if (!CanBeLinked(inputSocket, outputSocket))
 			{
 				Debug.LogWarning("Sockets can not be linked.");
 				return false;
 			}
 			_needsUpdate = true;
 
-			if (inputSocket.Type == sourceSocket.Type)
+			if (inputSocket.Type == outputSocket.Type)
 			{
-				Edge edge = new Edge(inputSocket, sourceSocket);
+				Edge edge = new Edge(outputSocket, inputSocket);
+				Edge oldEdge = inputSocket.Edge;
 				inputSocket.Edge = edge;
-				sourceSocket.Edge = edge;
+				outputSocket.Edges.Add(edge);
 
 				if (!AllowCicles && HasCicle())
 				{
 					// revert
-					Debug.Log("Can not link sockets. Circles are not allowed.");
+					inputSocket.Edge = oldEdge;
+					outputSocket.Edges.Remove(edge);
+					Log.Info("Can not link sockets. Circles are not allowed.");
 					return false;
 				}
 
@@ -230,11 +258,18 @@ namespace Assets.Code.Bon
 		{
 			if (node.VisitFlag) return true;
 			node.VisitFlag = true;
-			foreach (Socket s in node.Sockets)
+
+			foreach (AbstractSocket s in node.Sockets)
 			{
-				if (s.Direction == SocketDirection.Output && s.Edge != null)
+				if (s.IsOutput() && s.IsConnected())
 				{
-					return HasCicle(s.Edge.Input.Parent);
+					OutputSocket outputSocket = (OutputSocket) s;
+					bool foundCicle = false;
+					foreach (var edge in outputSocket.Edges)
+					{
+						foundCicle = HasCicle(edge.Input.Parent);
+					}
+					if (foundCicle) return true;
 				}
 			}
 			return false;
@@ -249,11 +284,12 @@ namespace Assets.Code.Bon
 
 		private static void AddUpperNodes(Node node, ref List<Node> upperNodesList)
 		{
-			foreach (Socket s in node.Sockets)
+			foreach (AbstractSocket s in node.Sockets)
 			{
-				if (s.Direction == SocketDirection.Input && s.Edge != null)
+				if (s.IsInput() && s.IsConnected())
 				{
-					Socket connected = s.GetConnectedSocket();
+					InputSocket inputSocket = (InputSocket) s;
+					AbstractSocket connected = inputSocket.GetConnectedSocket();
 					upperNodesList.Add(connected.Parent);
 					AddUpperNodes(connected.Parent, ref upperNodesList);
 				}
@@ -261,13 +297,12 @@ namespace Assets.Code.Bon
 		}
 
 		/// <summary> Returns true if the sockets can be linked.</summary>
-		/// <param name="socket01"> The first socket</param>
-		/// <param name="socket02"> The second socket</param>
+		/// <param name="inSocket"> The input socket</param>
+		/// <param name="outSocket"> The output socket</param>
 		/// <returns>True if the sockets can be linked.</returns>
-		public bool CanBeLinked(Socket socket01, Socket socket02)
+		public bool CanBeLinked(InputSocket inSocket, OutputSocket outSocket)
 		{
-			return socket02 != null && socket01 != null && socket01.Type == socket02.Type
-				   && socket01 != socket02 && socket01.Direction != socket02.Direction;
+			return inSocket != null && outSocket != null && outSocket.Type == inSocket.Type;
 		}
 
 		public void LogCircleError()
@@ -360,13 +395,10 @@ namespace Assets.Code.Bon
 				_serializedNodes.Add(node.ToSerializedNode());
 				foreach (var socket in node.Sockets)
 				{
-					if (socket.Edge != null)
+					if (socket.IsInput() && socket.IsConnected()) // serialize only input socket edges to avoid double edge serialization
 					{
-						// serialize only the edge of the source (to avoid doubled edges)
-						if (socket.Edge.Output.Parent == node)
-						{
-							_serializedEdges.Add(socket.Edge.ToSerializedEgde());
-						}
+						InputSocket inputSocket = (InputSocket) socket;
+						_serializedEdges.Add(inputSocket.Edge.ToSerializedEgde());
 					}
 				}
 			}
@@ -401,7 +433,11 @@ namespace Assets.Code.Bon
 
 					for (var i = 0; i < sNode.directInputValues.Length; i++)
 					{
-						n.Sockets[i].SetDirectInputNumber(sNode.directInputValues[i], false);
+						if (n.Sockets[i].IsInput())
+						{
+							InputSocket inputSocket = (InputSocket) n.Sockets[i];
+							inputSocket.SetDirectInputNumber(sNode.directInputValues[i], false);
+						}
 					}
 
 					if (sNode.Collapsed) n.Collapse();
@@ -425,9 +461,12 @@ namespace Assets.Code.Bon
 					Debug.LogWarning("Try to create an edge but can not find at least on of the sockets.");
 					continue;
 				}
-				Edge edge = new Edge(inputNode.Sockets[sEdge.InputSocketIndex], outputNode.Sockets[sEdge.OutputSocketIndex]);
-				inputNode.Sockets[sEdge.InputSocketIndex].Edge = edge;
-				outputNode.Sockets[sEdge.OutputSocketIndex].Edge = edge;
+
+				InputSocket inputSocket = (InputSocket) inputNode.Sockets[sEdge.InputSocketIndex];
+				OutputSocket outputSocket = (OutputSocket) outputNode.Sockets[sEdge.OutputSocketIndex];
+				Edge edge = new Edge(outputSocket, inputSocket);
+				inputSocket.Edge = edge;
+				outputSocket.Edges.Add(edge);
 			}
 			TriggerEvents = wasTriggering;
 		}

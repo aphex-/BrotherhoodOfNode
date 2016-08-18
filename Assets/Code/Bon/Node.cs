@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using Assets.Code.Bon.Nodes;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon
@@ -9,7 +10,7 @@ namespace Assets.Code.Bon
 
 	public abstract class Node : IUpdateable
 	{
- 		[NonSerialized] public List<Socket> Sockets = new List<Socket>();
+ 		[NonSerialized] public List<AbstractSocket> Sockets = new List<AbstractSocket>();
 		[NonSerialized] public  int Id;
 		[NonSerialized] public string Name;
 		[NonSerialized] private Graph _parent;
@@ -55,9 +56,6 @@ namespace Assets.Code.Bon
 		{
 			// for overriding: gets called after this Node has been deserialized
 		}
-
-		public abstract object GetResultOf(Socket outSocket);
-		public abstract bool CanGetResultOf(Socket outSocket);
 
 		/// The x position of the node
 		public float X
@@ -119,7 +117,7 @@ namespace Assets.Code.Bon
 		/// <summary> Returns true if this node contains the assigned socket.</summary>
 		/// <param name="socket"> The socket to use.</param>
 		/// <returns>True if this node contains the assigned socket.</returns>
-		public bool ContainsSocket(Socket socket)
+		public bool ContainsSocket(AbstractSocket socket)
 		{
 			return Sockets.Contains(socket);
 		}
@@ -127,22 +125,23 @@ namespace Assets.Code.Bon
 		public int GetInputSocketCount()
 		{
 			var count = 0;
-			foreach (var socket in Sockets) if (socket.Direction == SocketDirection.Input) count++;
+			foreach (var socket in Sockets) if (socket.IsInput()) count++;
 			return count;
 		}
 
+		// TODO update docu
 		/// <summary> Returns the socket of the type and index.</summary>
 		/// <param name="type"> The type of the socket.</param>
 		/// <param name="direction"> The input or output direction of the socket.</param>
 		/// <param name="index"> The index of sockets of this type.
 		/// You can have multiple sockets of the same type.</param>
 		/// <returns>The socket of the type with the index or null.</returns>
-		public Socket GetSocket(Type type, SocketDirection direction, int index)
+		public AbstractSocket GetSocket(Type edgeType, Type socketType, int index)
 		{
 			var searchIndex = -1;
 			foreach (var socket in Sockets)
 			{
-				if (socket.Type == type && socket.Direction == direction)
+				if (socket.Type == edgeType && socket.GetType() == socketType)
 				{
 					searchIndex++;
 					if (searchIndex == index) return socket;
@@ -163,7 +162,7 @@ namespace Assets.Code.Bon
 		/// <summary> Searches for a socket that intesects the assigned position.</summary>
 		/// <param name="canvasPosition">The position for intersection in canvas coordinates.</param>
 		/// <returns>The at the position or null.</returns>
-		public Socket SearchSocketAt(Vector2 canvasPosition)
+		public AbstractSocket SearchSocketAt(Vector2 canvasPosition)
 		{
 			//Vector2 nodePosition = ProjectToNode(canvasPosition);
 			foreach (var socket in Sockets)
@@ -189,7 +188,7 @@ namespace Assets.Code.Bon
 		{
 			foreach (var socket in Sockets)
 			{
-				if (socket.Edge == null && socket.Direction == SocketDirection.Input) return false;
+				if (!socket.IsConnected() && socket.IsInput()) return false;
 			}
 			return true;
 		}
@@ -203,7 +202,11 @@ namespace Assets.Code.Bon
 		{
 			foreach (var socket in Sockets)
 			{
-				if (socket.Edge != null && ContainsSocket(socket.Edge.Output)) socket.Edge.Draw();
+				if (socket.IsInput()) // draw only input sockets to avoid double drawing of edges
+				{
+					InputSocket inputSocket = (InputSocket) socket;
+					if (inputSocket.IsConnected()) inputSocket.Edge.Draw();
+				}
 			}
 		}
 
@@ -214,7 +217,7 @@ namespace Assets.Code.Bon
 			var rightCount = 0;
 			foreach (var socket in Sockets)
 			{
-				if (socket.Direction == SocketDirection.Input)
+				if (socket.IsInput())
 				{
 					socket.X = - BonConfig.SocketSize + WindowRect.x;
 					socket.Y = GUICalcSocketTopOffset(leftCount) + WindowRect.y + SocketTopOffsetInput;
@@ -262,10 +265,17 @@ namespace Assets.Code.Bon
 			n.Y = WindowRect.yMin;
 			n.Collapsed = Collapsed;
 			n.directInputValues = new float[Sockets.Count];
+
 			for (var i = 0; i < n.directInputValues.Length; i++)
 			{
-				if (Sockets[i].IsInDirectInputMode()) n.directInputValues[i] = Sockets[i].GetDirectInputNumber();
+				if (Sockets[i].IsInput())
+				{
+					InputSocket inputSocket = (InputSocket) Sockets[i];
+					if (inputSocket.IsInDirectInputMode()) n.directInputValues[i] = inputSocket.GetDirectInputNumber();
+				}
+
 			}
+
 			n.data = JsonUtility.ToJson(this); // custom node data can be used
 			OnSerialization(n);
 			return n;

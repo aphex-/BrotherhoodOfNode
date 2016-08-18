@@ -2,26 +2,26 @@
 using System.Collections.Generic;
 using Assets.Code.Bon;
 using Assets.Code.Bon.Nodes;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 [Serializable]
 [GraphContextMenuItem("Geometry", "Model")]
 public class ModelNode : Node
 {
-	private Socket _inputSocketPosition;
-	private Socket _inputSocketRotation;
-	private Socket _inputSocketScale;
-
-	private Socket _inputSocketModelName;
+	private InputSocket _inputSocketPosition;
+	private InputSocket _inputSocketRotation;
+	private InputSocket _inputSocketScale;
+	private InputSocket _inputSocketModelName;
 
 	private Rect _tmpRect;
 
 	public ModelNode(int id, Graph parent) : base(id, parent)
 	{
-		_inputSocketPosition = new Socket(this, typeof(AbstractVector3Node), SocketDirection.Input);
-		_inputSocketRotation = new Socket(this, typeof(AbstractVector3Node), SocketDirection.Input);
-		_inputSocketScale = new Socket(this, typeof(AbstractVector3Node), SocketDirection.Input);
-		_inputSocketModelName = new Socket(this, typeof(AbstractStringNode), SocketDirection.Input);
+		_inputSocketPosition = new InputSocket(this, typeof(AbstractVector3Node));
+		_inputSocketRotation = new InputSocket(this, typeof(AbstractVector3Node));
+		_inputSocketScale = new InputSocket(this, typeof(AbstractVector3Node));
+		_inputSocketModelName = new InputSocket(this, typeof(AbstractStringNode));
 
 		Sockets.Add(_inputSocketModelName);
 		Sockets.Add(_inputSocketPosition);
@@ -52,27 +52,17 @@ public class ModelNode : Node
 	public string GetModelFileName()
 	{
 		if (!_inputSocketModelName.CanGetResult()) return null;
-		return ((AbstractStringNode) _inputSocketModelName.GetConnectedSocket().Parent).GetString();
+		return ((AbstractStringNode) _inputSocketModelName.GetConnectedSocket().Parent).GetString(_inputSocketModelName.GetConnectedSocket());
 	}
 
-	public List<Vector3> GetPositions(float x, float y, float width, float depth, float seed)
+	public List<Vector3> GetPositions(float x, float y, float z, float sizeX, float sizeY, float sizeZ, float seed)
 	{
 		if (!_inputSocketPosition.CanGetResult()) return null;
-		return AbstractVector3Node.GetInputVector3List(_inputSocketPosition, x, y, 0, width, 0, depth, seed);
+		return AbstractVector3Node.GetInputVector3List(_inputSocketPosition, x, y, z, sizeX, sizeY, sizeZ, seed);
 	}
 
 	public override void Update()
 	{
 
-	}
-
-	public override object GetResultOf(Socket outSocket)
-	{
-		return null;
-	}
-
-	public override bool CanGetResultOf(Socket outSocket)
-	{
-		return false;
 	}
 }

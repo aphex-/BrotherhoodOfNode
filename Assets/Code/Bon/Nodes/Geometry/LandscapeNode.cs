@@ -1,20 +1,21 @@
 ﻿using System;
 using Assets.Code.Bon.Interface;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.Geometry
 {
 	[Serializable]
 	[GraphContextMenuItem("Geometry", "Lanscape")]
-	public class LandscapeNode : AbstractNumberNode, IColorSampler1D, IStringSampler {
+	public class LandscapeNode : AbstractNumberNode, IColorSampler, IStringSampler {
 
 		[NonSerialized] private Rect _heightValueLabel;
 		[NonSerialized] private Rect _colorRangeLabel;
 		[NonSerialized] private Rect _materialLabel;
 
-		[NonSerialized] private Socket _heightValueSocket;
-		[NonSerialized] private Socket _gradientSocket;
-		[NonSerialized] private Socket _materialSocket;
+		[NonSerialized] private InputSocket _heightValueSocket;
+		[NonSerialized] private InputSocket _gradientSocket;
+		[NonSerialized] private InputSocket _materialSocket;
 
 		public LandscapeNode(int id, Graph parent) : base(id, parent)
 		{
@@ -22,11 +23,11 @@ namespace Assets.Code.Bon.Nodes.Geometry
 			_colorRangeLabel = new Rect(8, 20, 75, 20);
 			_materialLabel = new Rect(8, 40, 75, 20);
 
-			_heightValueSocket = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_heightValueSocket = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_heightValueSocket);
-			_gradientSocket = new Socket(this, typeof(AbstractColorNode), SocketDirection.Input);
+			_gradientSocket = new InputSocket(this, typeof(AbstractColorNode));
 			Sockets.Add(_gradientSocket);
-			_materialSocket = new Socket(this, typeof(AbstractStringNode), SocketDirection.Input);
+			_materialSocket = new InputSocket(this, typeof(AbstractStringNode));
 			Sockets.Add(_materialSocket);
 		}
 
@@ -37,40 +38,38 @@ namespace Assets.Code.Bon.Nodes.Geometry
 			GUI.Label(_materialLabel, "material");
 		}
 
-		public override object GetResultOf(Socket outSocket)
-		{
-			return GetSampleAt(_x, _y, _seed);
-		}
-
-		public override bool CanGetResultOf(Socket outSocket)
-		{
-			return _heightValueSocket.GetConnectedSocket() != null;
-		}
-
-
 		public override void Update()
 		{
 
 		}
 
-		public override float GetSampleAt(float x, float y, float seed)
+		public override float GetNumber(OutputSocket socket, float x, float y, float z, float seed)
 		{
-			return GetInputNumber(_heightValueSocket, x, y, seed);
+			return GetInputNumber(_heightValueSocket, x, y, z, seed);
 		}
 
 		public UnityEngine.Color GetColorFrom(float i)
 		{
 			if (!_gradientSocket.IsConnected()) return UnityEngine.Color.black;
 			AbstractColorNode node = (AbstractColorNode) _gradientSocket.GetConnectedSocket().Parent;
-			node.SetPosition(i);
-			return (UnityEngine.Color) node.GetResultOf(_gradientSocket.GetConnectedSocket());
+			return node.GetColor(_gradientSocket.GetConnectedSocket(), i);
 		}
 
 		public string GetString()
 		{
 			if (!_materialSocket.IsConnected()) return "";
 			AbstractStringNode node = (AbstractStringNode) _materialSocket.GetConnectedSocket().Parent;
-			return node.GetString();
+			return node.GetString(_materialSocket.GetConnectedSocket());
+		}
+
+		public UnityEngine.Color GetColor(OutputSocket outSocket, float i)
+		{
+			return UnityEngine.Color.black;
+		}
+
+		public string GetString(OutputSocket outSocket)
+		{
+			return null;
 		}
 	}
 }

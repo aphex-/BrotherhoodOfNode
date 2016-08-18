@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.Noise
@@ -8,10 +9,10 @@ namespace Assets.Code.Bon.Nodes.Noise
 	public class OctaveNode : AbstractNumberNode {
 
 
-		[NonSerialized] private Socket _inputNoiseSocket;
-		[NonSerialized] private Socket _inputIterationSocket;
-		[NonSerialized] private Socket _inputLacunaritySocket;
-		[NonSerialized] private Socket _inputPersistanceSocket;
+		[NonSerialized] private InputSocket _inputNoiseSocket;
+		[NonSerialized] private InputSocket _inputIterationSocket;
+		[NonSerialized] private InputSocket _inputLacunaritySocket;
+		[NonSerialized] private InputSocket _inputPersistanceSocket;
 
 		[NonSerialized] private Rect _labelNoise;
 		[NonSerialized] private Rect _labelIteration;
@@ -25,10 +26,15 @@ namespace Assets.Code.Bon.Nodes.Noise
 			_labelLacunarity = new Rect(3, 40, 100, 20);
 			_labelPersistance = new Rect(3, 60, 100, 20);
 
-			_inputNoiseSocket = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-			_inputIterationSocket = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-			_inputLacunaritySocket = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-			_inputPersistanceSocket = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inputNoiseSocket = new InputSocket(this, typeof(AbstractNumberNode));
+			_inputIterationSocket = new InputSocket(this, typeof(AbstractNumberNode));
+			_inputLacunaritySocket = new InputSocket(this, typeof(AbstractNumberNode));
+			_inputPersistanceSocket = new InputSocket(this, typeof(AbstractNumberNode));
+
+			_inputIterationSocket.SetDirectInputNumber(4, false);
+			_inputLacunaritySocket.SetDirectInputNumber(3, false);
+			_inputPersistanceSocket.SetDirectInputNumber(0.2f, false);
+
 			Sockets.Add(_inputNoiseSocket);
 			Sockets.Add(_inputIterationSocket);
 			Sockets.Add(_inputLacunaritySocket);
@@ -38,10 +44,12 @@ namespace Assets.Code.Bon.Nodes.Noise
 
 		public override void OnGUI()
 		{
+			GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 			GUI.Label(_labelNoise, "noise");
 			GUI.Label(_labelIteration, "iteration");
 			GUI.Label(_labelLacunarity, "lacunarity");
 			GUI.Label(_labelPersistance, "persistance");
+			GUI.skin.label.alignment = TextAnchor.MiddleCenter;
 		}
 
 		public override void Update()
@@ -49,16 +57,11 @@ namespace Assets.Code.Bon.Nodes.Noise
 
 		}
 
-		public override object GetResultOf(Socket outSocket)
+		public override float GetNumber(OutputSocket outSocker, float x, float y, float z, float seed)
 		{
-			return GetSampleAt(_x, _y, _seed);
-		}
-
-		public override float GetSampleAt(float x, float y, float seed)
-		{
-			var iterations = GetInputNumber(_inputIterationSocket, x, y, seed);
-			var lacunarity = GetInputNumber(_inputLacunaritySocket, x, y, seed);
-			var persistance = GetInputNumber(_inputPersistanceSocket, x, y, seed);
+			var iterations = GetInputNumber(_inputIterationSocket, x, y, z, seed);
+			var lacunarity = GetInputNumber(_inputLacunaritySocket, x, y, z, seed);
+			var persistance = GetInputNumber(_inputPersistanceSocket, x, y, z, seed);
 
 			if (float.IsNaN(iterations) || float.IsNaN(lacunarity) || float.IsNaN(persistance)) return float.NaN;
 
@@ -68,7 +71,7 @@ namespace Assets.Code.Bon.Nodes.Noise
 
 			for (var i = 0; i < (int) iterations; i++)
 			{
-				var noise = GetInputNumber(_inputNoiseSocket, x * frequency, y * frequency, seed / i) * 2 - 1;
+				var noise = GetInputNumber(_inputNoiseSocket, x * frequency, y * frequency, z * frequency, seed / (i + 1)) * 2 - 1;
 				noiseHeight += noise * amplitude;
 				amplitude *= persistance;
 				frequency *= lacunarity;

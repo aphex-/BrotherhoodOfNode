@@ -1,8 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using Assets.Code.Bon.Socket;
 
-public interface IStringSampler {
-
-		string GetString();
-		int GetId();
+namespace Assets.Code.Bon.Interface
+{
+	public interface IStringSampler
+	{
+		string GetString(OutputSocket outSocket);
+	}
 }

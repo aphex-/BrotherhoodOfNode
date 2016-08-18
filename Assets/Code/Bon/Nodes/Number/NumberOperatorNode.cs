@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.Number
@@ -12,14 +13,14 @@ namespace Assets.Code.Bon.Nodes.Number
 		[SerializeField] private int _selectedMode;
 
 		[NonSerialized]  public static  string[] Operations = { "add", "sub", "mul", "div" };
-		[NonSerialized] private  Socket _inputSocket01;
-		[NonSerialized] private  Socket _inputSocket02;
+		[NonSerialized] private InputSocket _inputSocket01;
+		[NonSerialized] private InputSocket _inputSocket02;
 
 		public NumberOperatorNode(int id, Graph parent) : base(id, parent)
 		{
-			_inputSocket01 = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inputSocket01 = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_inputSocket01);
-			_inputSocket02 = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inputSocket02 = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_inputSocket02);
 			Height = 95;
 			Width = 65;
@@ -45,15 +46,10 @@ namespace Assets.Code.Bon.Nodes.Number
 
 		}
 
-		public override object GetResultOf(Socket outSocket)
+		public override float GetNumber(OutputSocket outSocket, float x, float y, float z, float seed)
 		{
-			return GetSampleAt(_x, _y, _seed);
-		}
-
-		public override float GetSampleAt(float x, float y, float seed)
-		{
-			var value01 = GetInputNumber(_inputSocket01, x, y, seed);
-			var value02 = GetInputNumber(_inputSocket02, x, y, seed);
+			var value01 = GetInputNumber(_inputSocket01, x, y, z, seed);
+			var value02 = GetInputNumber(_inputSocket02, x, y, z, seed);
 			if (!float.IsNaN(value01) && !float.IsNaN(value02)) return Calculate(value01, value02);
 			return float.NaN;
 		}

@@ -2,27 +2,28 @@
 using System.Collections.Generic;
 using Assets.Code.Bon;
 using Assets.Code.Bon.Nodes;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 [Serializable]
 [GraphContextMenuItem("Vector", "Split")]
 public class SplitNode : AbstractVector3Node
 {
-	private Socket _inputSocketVector;
-	private Socket _inputSocketMask;
+	private InputSocket _inputSocketVector;
+	private InputSocket _inputSocketMask;
 
-	private Socket _outputSocket01;
-	private Socket _outputSocket02;
+	private OutputSocket _outputSocket01;
+	private OutputSocket _outputSocket02;
 
 	private Rect _tmpRect;
 
 	public SplitNode(int id, Graph parent) : base(id, parent)
 	{
-		_inputSocketMask = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-		_inputSocketVector = new Socket(this, typeof(AbstractVector3Node), SocketDirection.Input);
+		_inputSocketMask = new InputSocket(this, typeof(AbstractNumberNode));
+		_inputSocketVector = new InputSocket(this, typeof(AbstractVector3Node));
 
-		_outputSocket01 = new Socket(this, typeof(AbstractVector3Node), SocketDirection.Output);
-		_outputSocket02 = new Socket(this, typeof(AbstractVector3Node), SocketDirection.Output);
+		_outputSocket01 = new OutputSocket(this, typeof(AbstractVector3Node));
+		_outputSocket02 = new OutputSocket(this, typeof(AbstractVector3Node));
 
 		Sockets.Add(_inputSocketVector);
 		Sockets.Add(_inputSocketMask);
@@ -57,26 +58,16 @@ public class SplitNode : AbstractVector3Node
 
 	}
 
-	public override object GetResultOf(Socket outSocket)
+	public override List<Vector3> GetVector3List(OutputSocket outSocket, float x, float y, float z, float sizeX, float sizeY, float sizeZ, float seed)
 	{
-		return GetVector3List(outSocket, _x, _y, _z, _width, _height, _depth, _seed);
-	}
-
-	public override bool CanGetResultOf(Socket outSocket)
-	{
-		return true;
-	}
-
-	public override List<Vector3> GetVector3List(Socket outSocket, float x, float y, float z, float width, float height, float depth, float seed)
-	{
-		List<Vector3> vec = GetInputVector3List(_inputSocketVector, x, y, z, width, height, depth, seed);
+		List<Vector3> vec = GetInputVector3List(_inputSocketVector, x, y, z, sizeX, sizeY, sizeZ, seed);
 		if (vec == null) return null;
 
 		List<Vector3> removeList = new List<Vector3>();
 
 		for (var i = 0; i < vec.Count; i++)
 		{
-			float maskValue = AbstractNumberNode.GetInputNumber(_inputSocketMask, vec[i].x, vec[i].y, seed);
+			float maskValue = AbstractNumberNode.GetInputNumber(_inputSocketMask, vec[i].x, vec[i].y, vec[i].z, seed);
 			if (maskValue < 0 && outSocket == _outputSocket01) removeList.Add(vec[i]);
 			if (maskValue >= 0 && outSocket == _outputSocket02) removeList.Add(vec[i]);
 		}

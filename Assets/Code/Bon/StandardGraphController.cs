@@ -37,52 +37,51 @@ namespace Assets.Code.Bon
 
 		public void OnFocus(Graph graph)
 		{
-			Debug.Log("OnFocus " + graph);
-
+			Log.Info("OnFocus " + graph);
 		}
 
 		public void OnClose(Graph graph)
 		{
-			Debug.Log("OnClose " + graph);
+			Log.Info("OnClose " + graph);
 		}
 
 		// ======= Events =======
 		public void OnLink(Graph graph, Edge edge)
 		{
-			Debug.Log("OnLink: Node " + edge.Output.Parent.Id + " with Node " + edge.Input.Parent.Id);
+			Log.Info("OnLink: Node " + edge.Output.Parent.Id + " with Node " + edge.Input.Parent.Id);
 			graph.UpdateNodes();
 		}
 
-		public void OnUnLink(Graph graph, Socket s01, Socket s02)
+		public void OnUnLink(Graph graph, AbstractSocket s01, AbstractSocket s02)
 		{
-			Debug.Log("OnUnLink: Node " + s01.Edge.Output.Parent.Id + " from Node " + s02.Edge.Input.Parent.Id);
+			// Log.Info("OnUnLink: Node " + s01.Edge.Output.Parent.Id + " from Node " + s02.Edge.Input.Parent.Id);
 		}
 
-		public void OnUnLinked(Graph graph, Socket s01, Socket s02)
+		public void OnUnLinked(Graph graph, AbstractSocket s01, AbstractSocket s02)
 		{
-			Debug.Log("OnUnLinked: Socket " + s02 + " and Socket " + s02);
+			Log.Info("OnUnLinked: Socket " + s02 + " and Socket " + s02);
 			graph.UpdateNodes();
 		}
 
 		public void OnNodeAdded(Graph graph, Node node)
 		{
-			Debug.Log("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
+			Log.Info("OnNodeAdded: Node " + node.GetType() + " with id " + node.Id);
 		}
 
 		public void OnNodeRemoved(Graph graph, Node node)
 		{
-			Debug.Log("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
+			Log.Info("OnNodeRemoved: Node " + node.GetType() + " with id " + node.Id);
 		}
 
 		public void OnNodeChanged(Graph graph, Node node)
 		{
-			Debug.Log("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
+			Log.Info("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
 			graph.ForceUpdateNodes();
 		}
 
 		public void OnFocusNode(Graph graph, Node node)
 		{
-			Debug.Log("OnFocus: " + node.Id);
+			Log.Info("OnFocus: " + node.Id);
 		}
 	}
 }

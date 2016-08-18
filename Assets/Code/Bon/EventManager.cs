@@ -7,7 +7,7 @@ public class EventManager
 
 	public delegate void GraphAction(Graph graph);
 	public delegate void EdgeAction(Graph graph, Edge edge);
-	public delegate void SocketAction(Graph graph, Socket s01, Socket s02);
+	public delegate void SocketAction(Graph graph, AbstractSocket s01, AbstractSocket s02);
 	public delegate void NodeAction(Graph graph, Node node);
 
 	public delegate void WindowAction();
@@ -49,12 +49,12 @@ public class EventManager
 		if (OnLinkEdge != null) OnLinkEdge(graph, edge);
 	}
 
-	public static void TriggerOnUnLinkSockets(Graph graph, Socket socket01, Socket socket02)
+	public static void TriggerOnUnLinkSockets(Graph graph, AbstractSocket socket01, AbstractSocket socket02)
 	{
 		if (OnUnLinkSockets != null) OnUnLinkSockets(graph, socket01, socket02);
 	}
 
-	public static void TriggerOnUnLinkedSockets(Graph graph, Socket socket01, Socket socket02)
+	public static void TriggerOnUnLinkedSockets(Graph graph, AbstractSocket socket01, AbstractSocket socket02)
 	{
 		if (OnUnLinkedSockets != null) OnUnLinkedSockets(graph, socket01, socket02);
 	}

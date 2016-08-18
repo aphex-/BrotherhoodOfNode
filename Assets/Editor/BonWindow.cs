@@ -4,6 +4,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using Assets.Code.Bon;
+using Assets.Code.Bon.Socket;
 using Assets.Editor.Bon;
 using System.Linq;
 
@@ -45,7 +46,7 @@ namespace Assets.Editor
 		private BonCanvas _currentCanvas;
 		private Rect _canvasRegion = new Rect();
 
-		private Socket _currentDragSocket = null;
+		private AbstractSocket _dragSourceSocket = null;
 		private Vector2 _lastMousePosition;
 
 		private GenericMenu _menu;
@@ -145,11 +146,11 @@ namespace Assets.Editor
 			if (GameObject.Find(BonConfig.GameObjectName) == null)
 			{
 				new GameObject(BonConfig.GameObjectName);
-				Debug.Log("Created GameObject '" + BonConfig.GameObjectName + "'");
+				Log.Info("Created GameObject '" + BonConfig.GameObjectName + "'");
 			}
 			if (GameObject.Find(BonConfig.GameObjectName).GetComponent<BonLauncher>() == null)
 			{
-				Debug.Log("Added BonLauncher component to the GameObject '" + BonConfig.GameObjectName + "'");
+				Log.Info("Added BonLauncher component to the GameObject '" + BonConfig.GameObjectName + "'");
 				GameObject.Find(BonConfig.GameObjectName).AddComponent<BonLauncher>();
 			}
 			return GameObject.Find(BonConfig.GameObjectName).GetComponent<BonLauncher>();
@@ -189,7 +190,7 @@ namespace Assets.Editor
 			if (_currentCanvas != null)
 			{
 				_canvasRegion.Set(0, TopOffset, Screen.width, Screen.height - 2 * TopOffset - BottomOffset);
-				_currentCanvas.Draw((EditorWindow) this, _canvasRegion, _currentDragSocket);
+				_currentCanvas.Draw((EditorWindow) this, _canvasRegion, _dragSourceSocket);
 			}
 			_lastMousePosition = Event.current.mousePosition;
 
@@ -351,61 +352,52 @@ namespace Assets.Editor
 			}
 		}
 
+		private void HandleSocketDrag(AbstractSocket dragSource)
+		{
+			if (dragSource != null)
+			{
+				if (dragSource.IsInput() && dragSource.IsConnected())
+				{
+					_dragSourceSocket = ((InputSocket) dragSource).Edge.GetOtherSocket(dragSource);
+					_currentCanvas.Graph.UnLink((InputSocket) dragSource, (OutputSocket) _dragSourceSocket);
+				}
+				if (dragSource.IsOutput()) _dragSourceSocket = dragSource;
+				Event.current.Use();
+			}
+			Repaint();
+		}
+
+		private void HandleSocketDrop(AbstractSocket dropTarget)
+		{
+			if (dropTarget != null && dropTarget.GetType() != _dragSourceSocket.GetType())
+			{
+				if (dropTarget.IsInput())
+				{
+					_currentCanvas.Graph.Link((InputSocket) dropTarget, (OutputSocket) _dragSourceSocket);
+				}
+				Event.current.Use();
+			}
+			_dragSourceSocket = null;
+			Repaint();
+		}
+
 		private void HandleDragAndDrop()
 		{
 			if (_currentCanvas == null) return;
 
 			if (Event.current.type == EventType.MouseDown)
 			{
-				Socket target = _currentCanvas.GetSocketAt(Event.current.mousePosition);
-				if (target != null && _currentDragSocket == null)
-				{
-					if (target.Edge == null)
-					{
-						_currentDragSocket = target;
-					}
-					else
-					{
-						_currentDragSocket = target.Edge.GetOtherSocket(target);
-						_currentCanvas.Graph.UnLink(_currentDragSocket, target);
-					}
-					Event.current.Use();
-				}
+				HandleSocketDrag(_currentCanvas.GetSocketAt(Event.current.mousePosition));
 			}
 
-			if (Event.current.type == EventType.MouseUp)
+			if (Event.current.type == EventType.MouseUp && _dragSourceSocket != null)
 			{
-				if (_currentDragSocket != null)
-				{
-					Socket target = _currentCanvas.GetSocketAt(Event.current.mousePosition);
-					if (_currentCanvas.Graph.CanBeLinked(target, _currentDragSocket))
-					{
-						// drop edge event
-						if (target.Edge != null)
-						{
-							// replace edge
-							_currentCanvas.Graph.UnLink(target);
-						}
-
-						if (_currentDragSocket.Direction == SocketDirection.Input)
-						{
-							_currentCanvas.Graph.Link(_currentDragSocket, target);
-						}
-						else
-						{
-							_currentCanvas.Graph.Link(target, _currentDragSocket);
-						}
-
-						Event.current.Use();
-					}
-					_currentDragSocket = null;
-					Repaint();
-				}
+				HandleSocketDrop(_currentCanvas.GetSocketAt(Event.current.mousePosition));
 			}
 
 			if (Event.current.type == EventType.MouseDrag)
 			{
-				if (_currentDragSocket != null) Event.current.Use();
+				if (_dragSourceSocket != null) Event.current.Use();
 			}
 		}
 

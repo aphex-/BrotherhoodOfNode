@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.Vector3
@@ -12,28 +13,28 @@ namespace Assets.Code.Bon.Nodes.Vector3
 		[SerializeField] private int _selectedMode;
 		[NonSerialized] public static string[] Operations = {"add", "sub", "mul", "div"};
 
-		private Socket _inputSocketVectors;
-		private Socket _inputSocketX;
-		private Socket _inputSocketY;
-		private Socket _inputSocketZ;
+		private InputSocket _inputSocketVectors;
+		private InputSocket _inputSocketX;
+		private InputSocket _inputSocketY;
+		private InputSocket _inputSocketZ;
 
 		private Rect _tmpRect;
 
 		public OperatorNode(int id, Graph parent) : base(id, parent)
 		{
 			_tmpRect = new Rect();
-			_inputSocketVectors = new Socket(this, typeof(AbstractVector3Node), SocketDirection.Input);
+			_inputSocketVectors = new InputSocket(this, typeof(AbstractVector3Node));
 
-			_inputSocketX = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-			_inputSocketY = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
-			_inputSocketZ = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_inputSocketX = new InputSocket(this, typeof(AbstractNumberNode));
+			_inputSocketY = new InputSocket(this, typeof(AbstractNumberNode));
+			_inputSocketZ = new InputSocket(this, typeof(AbstractNumberNode));
 
 			Sockets.Add(_inputSocketVectors);
 			Sockets.Add(_inputSocketX);
 			Sockets.Add(_inputSocketY);
 			Sockets.Add(_inputSocketZ);
 
-			Sockets.Add(new Socket(this, typeof(AbstractVector3Node), SocketDirection.Output));
+			Sockets.Add(new OutputSocket(this, typeof(AbstractVector3Node)));
 			Width = 100;
 		}
 
@@ -68,28 +69,20 @@ namespace Assets.Code.Bon.Nodes.Vector3
 
 		}
 
-		public override object GetResultOf(Socket outSocket)
+		public override List<UnityEngine.Vector3> GetVector3List(OutputSocket s, float x, float y, float z, float sizeX, float sizeY, float sizeZ, float seed)
 		{
-			return GetVector3List(outSocket, _x, _y, _z, _width, _height, _depth, _seed);
-		}
-
-		public override bool CanGetResultOf(Socket outSocket)
-		{
-			return true;
-		}
-
-		public override List<UnityEngine.Vector3> GetVector3List(Socket s, float x, float y, float z, float width, float height, float depth, float seed)
-		{
-			List<UnityEngine.Vector3> vectors = GetInputVector3List(_inputSocketVectors, x, y, z, width, height, depth, seed);
+			List<UnityEngine.Vector3> vectors = GetInputVector3List(_inputSocketVectors, x, y, z, sizeX, sizeY, sizeZ, seed);
 			if (vectors != null)
 			{
 				for (var i = 0; i < vectors.Count; i++)
 				{
 					UnityEngine.Vector3 v = vectors[i];
 
-					float valueX = AbstractNumberNode.GetInputNumber(_inputSocketX, v.x, v.y, v.z);
-					float valueY = AbstractNumberNode.GetInputNumber(_inputSocketY, v.x, v.y, v.z);
-					float valueZ = AbstractNumberNode.GetInputNumber(_inputSocketZ, v.x, v.y, v.z);
+					float valueX = AbstractNumberNode.GetInputNumber(_inputSocketX, v.x, v.y, v.z, seed);
+					float valueY = AbstractNumberNode.GetInputNumber(_inputSocketY, v.x, v.y, v.z, seed);
+					float valueZ = AbstractNumberNode.GetInputNumber(_inputSocketZ, v.x, v.y, v.z, seed);
+
+					//Debug.Log("valueX " + valueX + " valueY " + valueY + " valueZ " + valueZ);
 
 					if (_selectedMode == 0) v.Set(v.x + valueX, v.y + valueY, v.z + valueZ);
 					if (_selectedMode == 1) v.Set(v.x - valueX, v.y - valueY, v.z - valueZ);
@@ -97,6 +90,8 @@ namespace Assets.Code.Bon.Nodes.Vector3
 					if (_selectedMode == 3) v.Set(valueX != 0 ? v.x / valueX : v.x, valueY != 0 ? v.y / valueY : v.y, valueZ != 0 ? v.z / valueZ : valueZ);
 
 					vectors[i] = v;
+
+					//Debug.Log("x " + vectors[i].x + " y " + vectors[i].y + " z " + vectors[i].z + " valueY " + valueY);
 				}
 			}
 			return vectors;

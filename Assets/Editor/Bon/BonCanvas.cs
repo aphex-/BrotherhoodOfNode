@@ -67,7 +67,7 @@ namespace Assets.Editor.Bon
 			return texture;
 		}
 
-		public void Draw(EditorWindow window, Rect region, Socket currentDragingSocket)
+		public void Draw(EditorWindow window, Rect region, AbstractSocket currentDragingSocket)
 		{
 			if (centeredLabelStyle == null) centeredLabelStyle = GUI.skin.GetStyle("Label");
 			centeredLabelStyle.alignment = TextAnchor.MiddleCenter;
@@ -93,7 +93,7 @@ namespace Assets.Editor.Bon
 			EditorZoomArea.End();
 		}
 
-		private void DrawDragEdge(Socket currentDragingSocket)
+		private void DrawDragEdge(AbstractSocket currentDragingSocket)
 		{
 			if (currentDragingSocket != null)
 			{
@@ -196,14 +196,14 @@ namespace Assets.Editor.Bon
 		/// <summary> Returns the socket at the window position.</summary>
 		/// <param name="windowPosition"> The position to get the Socket from in window coordinates</param>
 		/// <returns>The socket at the posiiton or null or null.</returns>
-		public Socket GetSocketAt(Vector2 windowPosition)
+		public AbstractSocket GetSocketAt(Vector2 windowPosition)
 		{
 			Vector2 projectedPosition = ProjectToCanvas(windowPosition);
 
 			for (var i = 0; i < Graph.GetNodeCount(); i++)
 			{
 				Node node = Graph.GetNodeAt(i);
-				Socket socket = node.SearchSocketAt(projectedPosition);
+				AbstractSocket socket = node.SearchSocketAt(projectedPosition);
 				if (socket != null)
 				{
 					return socket;

@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Code.Bon.Socket;
 using UnityEngine;
 
 namespace Assets.Code.Bon.Nodes.Noise
@@ -11,16 +12,16 @@ namespace Assets.Code.Bon.Nodes.Noise
 		[NonSerialized] private Rect _textLabelScaleX;
 		[NonSerialized] private Rect _textLabelScaleY;
 
-		[NonSerialized] private Socket _socketInputX;
-		[NonSerialized] private Socket _socketInputY;
+		[NonSerialized] private InputSocket _socketInputX;
+		[NonSerialized] private InputSocket _socketInputY;
 
 		public SineMapNode(int id, Graph parent) : base(id, parent)
 		{
 			_textLabelScaleX = new Rect(6, 0, 65, BonConfig.SocketSize);
 			_textLabelScaleY = new Rect(6, 20, 65, BonConfig.SocketSize);
-			_socketInputX = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_socketInputX = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_socketInputX);
-			_socketInputY = new Socket(this, typeof(AbstractNumberNode), SocketDirection.Input);
+			_socketInputY = new InputSocket(this, typeof(AbstractNumberNode));
 			Sockets.Add(_socketInputY);
 
 			Height = 60;
@@ -39,25 +40,20 @@ namespace Assets.Code.Bon.Nodes.Noise
 			DrawTextures();
 		}
 
-		public override object GetResultOf(Socket outSocket)
+		public override float GetNumber(OutputSocket outSocket, float x, float y, float z, float seed)
 		{
-			return GetSampleAt(_x, _y, _seed);
-		}
+			var scaleX = GetInputNumber(_socketInputX, x, y, z, seed);
+			var scaleZ = GetInputNumber(_socketInputY, x, y, z, seed);
 
-		public override float GetSampleAt(float x, float y, float seed)
-		{
-			var scaleX = GetInputNumber(_socketInputX, x, y, seed);
-			var scaleY = GetInputNumber(_socketInputY, x, y, seed);
-
-			if (float.IsNaN(scaleX) || float.IsNaN(scaleY)) return float.NaN;
+			if (float.IsNaN(scaleX) || float.IsNaN(scaleZ)) return float.NaN;
 
 			if (scaleX == 0) scaleX = 1;
-			if (scaleY == 0) scaleY = 1;
+			if (scaleZ == 0) scaleZ = 1;
 
-			return (float) (Math.Sin(x / scaleX + seed) + Math.Sin(y / scaleY + seed)) / 2f;
+			return (float) (Math.Sin(x / scaleX + seed) + Math.Sin(y / scaleZ + seed)) / 2f;
 		}
 
-		/*protected override IColorSampler1D GetColorSampler()
+		/*protected override IColorSampler GetColorSampler()
 	{
 		return null;
 	}*/
