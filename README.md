@@ -36,7 +36,7 @@ To create your own nodes you need to create a new class. Let's call it MyNode.cs
 for this example. **MyNode** now needs to inherit from the class **Node** (or from its abstract subclasses). And this 
 class needs the annotation **[Serializable]** in order to save it as a json file.
 
-Notice that our **Node** is extending **AbstractNumberNode** and contains an output socket for numbers.
+Notice that our **Node** is extending **AbstractNumberNode** and contains an OutputSocket for numbers.
 
 ```cs
 using System;
