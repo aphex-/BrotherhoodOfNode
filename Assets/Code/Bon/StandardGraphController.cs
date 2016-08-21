@@ -49,7 +49,7 @@ namespace Assets.Code.Bon
 		public void OnLink(Graph graph, Edge edge)
 		{
 			Log.Info("OnLink: Node " + edge.Output.Parent.Id + " with Node " + edge.Input.Parent.Id);
-			graph.UpdateNodes();
+			graph.UpdateNodeAndDependents(edge.Output.Parent);
 		}
 
 		public void OnUnLink(Graph graph, AbstractSocket s01, AbstractSocket s02)
@@ -60,7 +60,8 @@ namespace Assets.Code.Bon
 		public void OnUnLinked(Graph graph, AbstractSocket s01, AbstractSocket s02)
 		{
 			Log.Info("OnUnLinked: Socket " + s02 + " and Socket " + s02);
-			graph.UpdateNodes();
+			var input = s01.IsInput () ? s01 : s02;
+			graph.UpdateNodeAndDependents(input.Parent);
 		}
 
 		public void OnNodeAdded(Graph graph, Node node)
@@ -76,7 +77,7 @@ namespace Assets.Code.Bon
 		public void OnNodeChanged(Graph graph, Node node)
 		{
 			Log.Info("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
-			graph.ForceUpdateNodes();
+			graph.ForceUpdateNodeAndDependents (node);
 		}
 
 		public void OnFocusNode(Graph graph, Node node)
