@@ -24,6 +24,8 @@ namespace Assets.Code.Bon
 		// an endless recursion this can crash unity.
 		[HideInInspector] [SerializeField] public bool AllowCicles = false;
 
+		private bool _invalidating = false;
+
 		private bool _needsUpdate = true; [NonSerialized] public bool TriggerEvents = true;
 
 		/// <summary>Returns an id for a Node that is unique for this Graph.</summary>
@@ -217,7 +219,7 @@ namespace Assets.Code.Bon
 				inputSocket.Edge = edge;
 				outputSocket.Edges.Add(edge);
 
-				if (!AllowCicles && HasCicle())
+				if (!AllowCicles && HasCycle())
 				{
 					// revert
 					inputSocket.Edge = oldEdge;
@@ -234,44 +236,74 @@ namespace Assets.Code.Bon
 			return true;
 		}
 
-
-		public bool HasCicle()
+		private void StartInvalidation() 
 		{
-			foreach (var node in _nodes)
+			if (_invalidating) 
 			{
-				if (HasCicle(node))
-				{
-					ResetVisitFlags();
-					return true;
-				}
-				ResetVisitFlags();
+				throw new UnityException ("Graph is already invalidating");
 			}
-			return false;
-		}
 
-		private void ResetVisitFlags()
-		{
-			foreach (var node in _nodes) node.VisitFlag = false;
-		}
+			_invalidating = true;
 
-		private bool HasCicle(Node node)
-		{
-			if (node.VisitFlag) return true;
-			node.VisitFlag = true;
-
-			foreach (AbstractSocket s in node.Sockets)
+			foreach (var node in _nodes) 
 			{
-				if (s.IsOutput() && s.IsConnected())
+				node.VisitCount = 0;
+			}
+		}
+
+		private void EndInvalidation() 
+		{
+			_invalidating = false;
+		}
+
+		public void InvalidateNodeDependents(Node node)
+		{
+			foreach (AbstractSocket s in node.Sockets) 
+			{
+				if (s.IsOutput () && s.IsConnected ()) 
 				{
 					OutputSocket outputSocket = (OutputSocket) s;
-					bool foundCicle = false;
-					foreach (var edge in outputSocket.Edges)
+					foreach (var edge in outputSocket.Edges) 
 					{
-						foundCicle = HasCicle(edge.Input.Parent);
+						var invalidations = ++edge.Input.Parent.VisitCount;
+
+						if (invalidations == edge.Input.Parent.GetNumConnectedInputEdges()) 
+						{
+							InvalidateNodeDependents (edge.Input.Parent);
+						}
 					}
-					if (foundCicle) return true;
+
 				}
 			}
+		}
+
+
+
+		private void InvalidateFromRootNodes() 
+		{
+			foreach (var node in _nodes) 
+			{
+				if (node.IsRootNode())
+					InvalidateNodeDependents (node);
+			}
+		}
+
+		public bool HasCycle() {
+
+			StartInvalidation ();
+
+			InvalidateFromRootNodes ();
+
+			foreach (var node in _nodes) 
+			{
+				if (node.VisitCount != node.GetNumConnectedInputEdges()) 
+				{
+					EndInvalidation ();
+					return true;
+				}
+			}
+
+			EndInvalidation ();
 			return false;
 		}
 
@@ -352,32 +384,65 @@ namespace Assets.Code.Bon
 			}
 		}
 
+
+		private void InternalUpdateNode(Node node) {
+			var updateable = node as IUpdateable;
+			if (updateable != null)
+			{
+				updateable.Update();
+			}
+
+			foreach (AbstractSocket s in node.Sockets) {
+				if (s.IsOutput () && s.IsConnected ()) {
+					OutputSocket outputSocket = (OutputSocket)s;
+					foreach (var edge in outputSocket.Edges) {
+						var invalidations = --edge.Input.Parent.VisitCount;
+						if (invalidations == 0) {
+							InternalUpdateNode (edge.Input.Parent);
+						}
+					}
+				}
+			}
+		}
+		public void UpdateNodeAndDependents(Node node)
+		{
+			if (!_needsUpdate) return;
+
+			StartInvalidation ();
+
+			InvalidateNodeDependents (node);
+
+			InternalUpdateNode (node);
+
+			EndInvalidation ();
+			_needsUpdate = false;
+		}
+
 		public void UpdateNodes()
 		{
 			if (!_needsUpdate) return;
 
-			if (HasCicle())
-			{
-				LogCircleError();
-				return;
+			StartInvalidation ();
+			InvalidateFromRootNodes ();
+
+			foreach (var node in _nodes) {
+				if (node.IsRootNode())
+					InternalUpdateNode (node);
 			}
 
-			for (var i = 0; i < GetNodeCount(); i++)
-			{
-				Node n = GetNodeAt(i);
-				var updateable = n as IUpdateable;
-				if (updateable != null)
-				{
-					updateable.Update();
-				}
-			}
+			EndInvalidation ();
 			_needsUpdate = false;
+		}
+
+		public void ForceUpdateNodeAndDependents(Node node) {
+			_needsUpdate = true;
+			UpdateNodeAndDependents (node);
 		}
 
 		public void ForceUpdateNodes()
 		{
 			_needsUpdate = true;
-			UpdateNodes();
+			UpdateNodes ();
 		}
 
 		/// <summary>Unity serialization callback.</summary>

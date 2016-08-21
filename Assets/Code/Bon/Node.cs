@@ -16,7 +16,7 @@ namespace Assets.Code.Bon
 		[NonSerialized] private Graph _parent;
 
 		[NonSerialized] public Rect WindowRect;
-		[NonSerialized] public bool VisitFlag = false;
+		[NonSerialized] public int VisitCount = 0;
 		[NonSerialized] public Rect ContentRect;
 		[NonSerialized] public static int LastFocusedNodeId;
 		[NonSerialized] public bool Resizable = true;
@@ -189,6 +189,27 @@ namespace Assets.Code.Bon
 			foreach (var socket in Sockets)
 			{
 				if (!socket.IsConnected() && socket.IsInput()) return false;
+			}
+			return true;
+		}
+
+		/// <summary> Returns the total number of edges connected into this node.</summary>
+		public int GetNumConnectedInputEdges() {
+			int count = 0;
+			foreach (var socket in Sockets) 
+			{
+				if (socket.IsInput () && socket.IsConnected ()) 
+				{
+					count++;
+				}
+			}
+			return count;
+		}
+
+		/// <summary> Returns true this node has no input edges.</summary>
+		public bool IsRootNode() {
+			foreach (var socket in Sockets) {
+				if (socket.IsInput() && socket.IsConnected()) return false;
 			}
 			return true;
 		}
