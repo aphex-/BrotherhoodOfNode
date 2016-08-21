@@ -126,8 +126,7 @@ the methods **OnSerialization** and **OnDeserialization** to add your logic.
 
 ### Next Up..
 * Remove the tab-pages and implement the possibility of multiple editor windows
-* Check for recursion in the graph.
 * Unit tests
 * A help dialog to explain the controls.
 * Code style and code documentation (no idea whats the state of the art. Following microsofts or unitys recommendations?)
-* cleanup code, refactor namespaces
+
