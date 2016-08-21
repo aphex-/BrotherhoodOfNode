@@ -264,7 +264,7 @@ namespace Assets.Code.Bon
 		public bool HasCycle() {
 			foreach (var node in _nodes)
 			{
-				StartVisitRun();
+				StartVisitRun(); // resets visit counter
 				bool foundCicle = IsConnectedToItself(node);
 				EndVisitRun();
 				if (foundCicle) return true;
@@ -332,26 +332,6 @@ namespace Assets.Code.Bon
 			}
 		}
 
-		public static List<Node> CreateUpperNodesList(Node node)
-		{
-			List<Node> upperNodes = new List<Node>();
-			AddUpperNodes(node, ref upperNodes);
-			return upperNodes;
-		}
-
-		private static void AddUpperNodes(Node node, ref List<Node> upperNodesList)
-		{
-			foreach (AbstractSocket s in node.Sockets)
-			{
-				if (s.IsInput() && s.IsConnected())
-				{
-					InputSocket inputSocket = (InputSocket) s;
-					AbstractSocket connected = inputSocket.GetConnectedSocket();
-					upperNodesList.Add(connected.Parent);
-					AddUpperNodes(connected.Parent, ref upperNodesList);
-				}
-			}
-		}
 
 		/// <summary> Returns true if the sockets can be linked.</summary>
 		/// <param name="inSocket"> The input socket</param>

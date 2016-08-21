@@ -206,13 +206,6 @@ namespace Assets.Code.Bon
 			return count;
 		}
 
-		/// <summary> Returns true if this node has no input edges.</summary>
-		public bool IsRootNode() {
-			foreach (var socket in Sockets) {
-				if (socket.IsInput() && socket.IsConnected()) return false;
-			}
-			return true;
-		}
 
 		public void GUIDrawSockets()
 		{
