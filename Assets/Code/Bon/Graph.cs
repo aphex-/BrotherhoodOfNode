@@ -236,7 +236,7 @@ namespace Assets.Code.Bon
 			return true;
 		}
 
-		private void StartInvalidation() 
+		private void StartVisitRun()
 		{
 			if (_invalidating) 
 			{
@@ -244,7 +244,6 @@ namespace Assets.Code.Bon
 			}
 
 			_invalidating = true;
-
 			ResetVisitCount();
 		}
 
@@ -256,49 +255,18 @@ namespace Assets.Code.Bon
 			}
 		}
 
-		private void EndInvalidation() 
+		private void EndVisitRun()
 		{
 			_invalidating = false;
 		}
 
-		private void InvalidateDependeningNodes(Node node)
-		{
-			/*foreach (AbstractSocket s in node.Sockets)
-			{
-				if (s.IsOutput () && s.IsConnected ()) 
-				{
-					OutputSocket outputSocket = (OutputSocket) s;
-					foreach (var edge in outputSocket.Edges) 
-					{
-						var invalidations = ++edge.Input.Parent.VisitCount;
-
-						if (invalidations == edge.Input.Parent.GetConnectedInputCount())
-						{
-							InvalidateDependeningNodes (edge.Input.Parent);
-						}
-					}
-
-				}
-			}*/
-		}
-
-
-
-		private void InvalidateFromRootNodes() 
-		{
-			/*foreach (var node in _nodes)
-			{
-				if (node.IsRootNode())
-					InvalidateDependeningNodes (node);
-			}*/
-		}
 
 		public bool HasCycle() {
 			foreach (var node in _nodes)
 			{
-				StartInvalidation();
+				StartVisitRun();
 				bool foundCicle = IsConnectedToItself(node);
-				EndInvalidation();
+				EndVisitRun();
 				if (foundCicle) return true;
 			}
 			return false;
@@ -308,6 +276,8 @@ namespace Assets.Code.Bon
 		/// This method returns true is a node is connected to itself along the output path.
 		/// Reset the 'VisitCount' counter of each node before calling! Call this
 		/// method ignoring the optional parameter. This is used internaly for recursion.
+		/// <param name="searchForNode">The node you want to check</param>
+		/// <param name="recursionNode">Do not use this parameter or assign null</param>
 		/// </summary>
 		private bool IsConnectedToItself(Node searchForNode, Node recursionNode = null)
 		{
@@ -331,14 +301,36 @@ namespace Assets.Code.Bon
 			return false;
 		}
 
-		/*private void UpdateOutputPath(Node searchForNode, Node recursionNode = null)
+		public void UpdateDependingNodes(Node node)
 		{
-			bool firstRun = recursionNode == null;
-			if (firstRun) recursionNode = searchForNode;
-			if (!firstRun && recursionNode.VisitCount > 0) return; // already updated
+			StartVisitRun();
+			UpdateOutputPath(node);
+			EndVisitRun();
+		}
 
-			return false;
-		}*/
+		/// <summary>
+		/// This method follows the ouput path of the node and updates all visited nodes.
+		/// Reset the 'VisitCount' counter of each node before calling!
+		/// </summary>
+		/// <param name="node">The node to update and its ouput path nodes</param>
+		private void UpdateOutputPath(Node node)
+		{
+			if (node.VisitCount > 0) return; // already updated
+			node.Update();
+			node.VisitCount++;
+
+			foreach (var socket in node.Sockets) // follow the OutputSockets of the node
+			{
+				if (socket.IsOutput() && socket.IsConnected())
+				{
+					OutputSocket outputSocket = (OutputSocket) socket;
+					foreach (var edge in outputSocket.Edges)
+					{
+						UpdateOutputPath(edge.Input.Parent);
+					}
+				}
+			}
+		}
 
 		public static List<Node> CreateUpperNodesList(Node node)
 		{
@@ -417,41 +409,6 @@ namespace Assets.Code.Bon
 			}
 		}
 
-
-		private void InternalUpdateNode(Node node) {
-			var updateable = node as IUpdateable;
-			if (updateable != null)
-			{
-				updateable.Update();
-			}
-
-			foreach (AbstractSocket s in node.Sockets) {
-				if (s.IsOutput () && s.IsConnected ()) {
-					OutputSocket outputSocket = (OutputSocket)s;
-					foreach (var edge in outputSocket.Edges) {
-						var invalidations = --edge.Input.Parent.VisitCount;
-						if (invalidations == 0) {
-							InternalUpdateNode (edge.Input.Parent);
-						}
-					}
-				}
-			}
-		}
-		public void UpdateDependingNodes(Node node)
-		{
-			if (!_needsUpdate) return;
-
-			/*StartInvalidation ();
-
-			InvalidateDependeningNodes (node);
-
-			InternalUpdateNode (node);
-
-			EndInvalidation ();*/
-			UpdateNodes();
-			_needsUpdate = false;
-		}
-
 		public void UpdateNodes()
 		{
 			if (!_needsUpdate) return;
@@ -460,22 +417,7 @@ namespace Assets.Code.Bon
 			{
 				node.Update();
 			}
-			/*StartInvalidation ();
-			InvalidateFromRootNodes ();
-
-			foreach (var node in _nodes) {
-				if (node.IsRootNode())
-					InternalUpdateNode (node);
-			}
-
-			EndInvalidation ();*/
-
 			_needsUpdate = false;
-		}
-
-		public void ForceUpdateDependingNodes(Node node) {
-			_needsUpdate = true;
-			UpdateDependingNodes (node);
 		}
 
 		public void ForceUpdateNodes()

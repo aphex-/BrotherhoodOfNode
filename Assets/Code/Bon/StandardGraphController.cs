@@ -77,7 +77,7 @@ namespace Assets.Code.Bon
 		public void OnNodeChanged(Graph graph, Node node)
 		{
 			Log.Info("OnNodeChanged: Node " + node.GetType() + " with id " + node.Id);
-			graph.ForceUpdateDependingNodes (node);
+			graph.UpdateDependingNodes(node);
 		}
 
 		public void OnFocusNode(Graph graph, Node node)
