@@ -256,7 +256,7 @@ namespace Assets.Code.Bon
 			_invalidating = false;
 		}
 
-		public void InvalidateNodeDependents(Node node)
+		public void InvalidateDependeningNodes(Node node)
 		{
 			foreach (AbstractSocket s in node.Sockets) 
 			{
@@ -267,9 +267,9 @@ namespace Assets.Code.Bon
 					{
 						var invalidations = ++edge.Input.Parent.VisitCount;
 
-						if (invalidations == edge.Input.Parent.GetNumConnectedInputEdges()) 
+						if (invalidations == edge.Input.Parent.GetConnectedInputCount())
 						{
-							InvalidateNodeDependents (edge.Input.Parent);
+							InvalidateDependeningNodes (edge.Input.Parent);
 						}
 					}
 
@@ -284,7 +284,7 @@ namespace Assets.Code.Bon
 			foreach (var node in _nodes) 
 			{
 				if (node.IsRootNode())
-					InvalidateNodeDependents (node);
+					InvalidateDependeningNodes (node);
 			}
 		}
 
@@ -296,7 +296,7 @@ namespace Assets.Code.Bon
 
 			foreach (var node in _nodes) 
 			{
-				if (node.VisitCount != node.GetNumConnectedInputEdges()) 
+				if (node.VisitCount != node.GetConnectedInputCount())
 				{
 					EndInvalidation ();
 					return true;
@@ -404,13 +404,13 @@ namespace Assets.Code.Bon
 				}
 			}
 		}
-		public void UpdateNodeAndDependents(Node node)
+		public void UpdateDependingNodes(Node node)
 		{
 			if (!_needsUpdate) return;
 
 			StartInvalidation ();
 
-			InvalidateNodeDependents (node);
+			InvalidateDependeningNodes (node);
 
 			InternalUpdateNode (node);
 
@@ -434,9 +434,9 @@ namespace Assets.Code.Bon
 			_needsUpdate = false;
 		}
 
-		public void ForceUpdateNodeAndDependents(Node node) {
+		public void ForceUpdateDependingNodes(Node node) {
 			_needsUpdate = true;
-			UpdateNodeAndDependents (node);
+			UpdateDependingNodes (node);
 		}
 
 		public void ForceUpdateNodes()

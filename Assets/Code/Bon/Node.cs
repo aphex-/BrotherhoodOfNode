@@ -193,8 +193,8 @@ namespace Assets.Code.Bon
 			return true;
 		}
 
-		/// <summary> Returns the total number of edges connected into this node.</summary>
-		public int GetNumConnectedInputEdges() {
+		/// <summary> Returns the total number of input edges connected into this node.</summary>
+		public int GetConnectedInputCount() {
 			int count = 0;
 			foreach (var socket in Sockets) 
 			{
@@ -206,7 +206,7 @@ namespace Assets.Code.Bon
 			return count;
 		}
 
-		/// <summary> Returns true this node has no input edges.</summary>
+		/// <summary> Returns true if this node has no input edges.</summary>
 		public bool IsRootNode() {
 			foreach (var socket in Sockets) {
 				if (socket.IsInput() && socket.IsConnected()) return false;
