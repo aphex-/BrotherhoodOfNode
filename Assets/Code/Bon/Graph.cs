@@ -24,7 +24,7 @@ namespace Assets.Code.Bon
 		// an endless recursion this can crash unity.
 		[HideInInspector] [SerializeField] public bool AllowCicles = false;
 
-		private bool _invalidating = false;
+		private bool _invalidating;
 
 		private bool _needsUpdate = true; [NonSerialized] public bool TriggerEvents = true;
 
@@ -245,7 +245,12 @@ namespace Assets.Code.Bon
 
 			_invalidating = true;
 
-			foreach (var node in _nodes) 
+			ResetVisitCount();
+		}
+
+		public void ResetVisitCount()
+		{
+			foreach (var node in _nodes)
 			{
 				node.VisitCount = 0;
 			}
@@ -256,9 +261,9 @@ namespace Assets.Code.Bon
 			_invalidating = false;
 		}
 
-		public void InvalidateDependeningNodes(Node node)
+		private void InvalidateDependeningNodes(Node node)
 		{
-			foreach (AbstractSocket s in node.Sockets) 
+			/*foreach (AbstractSocket s in node.Sockets)
 			{
 				if (s.IsOutput () && s.IsConnected ()) 
 				{
@@ -274,38 +279,66 @@ namespace Assets.Code.Bon
 					}
 
 				}
-			}
+			}*/
 		}
 
 
 
 		private void InvalidateFromRootNodes() 
 		{
-			foreach (var node in _nodes) 
+			/*foreach (var node in _nodes)
 			{
 				if (node.IsRootNode())
 					InvalidateDependeningNodes (node);
-			}
+			}*/
 		}
 
 		public bool HasCycle() {
-
-			StartInvalidation ();
-
-			InvalidateFromRootNodes ();
-
-			foreach (var node in _nodes) 
+			foreach (var node in _nodes)
 			{
-				if (node.VisitCount != node.GetConnectedInputCount())
-				{
-					EndInvalidation ();
-					return true;
-				}
+				StartInvalidation();
+				bool foundCicle = IsConnectedToItself(node);
+				EndInvalidation();
+				if (foundCicle) return true;
 			}
-
-			EndInvalidation ();
 			return false;
 		}
+
+		/// <summary>
+		/// This method returns true is a node is connected to itself along the output path.
+		/// Reset the 'VisitCount' counter of each node before calling! Call this
+		/// method ignoring the optional parameter. This is used internaly for recursion.
+		/// </summary>
+		private bool IsConnectedToItself(Node searchForNode, Node recursionNode = null)
+		{
+			bool firstRun = recursionNode == null;
+			if (firstRun) recursionNode = searchForNode;
+			if (!firstRun && recursionNode == searchForNode) return true; // visited the first node after recursion
+			if (recursionNode.VisitCount > 0) return false; // already checked
+			recursionNode.VisitCount++;
+
+			foreach (var socket in recursionNode.Sockets) // follow the OutputSockets of the node
+			{
+				if (socket.IsOutput() && socket.IsConnected())
+				{
+					OutputSocket outputSocket = (OutputSocket) socket;
+					foreach (var edge in outputSocket.Edges) // check every edge
+					{
+						if (edge.Input.Parent != null && IsConnectedToItself(searchForNode, edge.Input.Parent)) return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		/*private void UpdateOutputPath(Node searchForNode, Node recursionNode = null)
+		{
+			bool firstRun = recursionNode == null;
+			if (firstRun) recursionNode = searchForNode;
+			if (!firstRun && recursionNode.VisitCount > 0) return; // already updated
+
+			return false;
+		}*/
 
 		public static List<Node> CreateUpperNodesList(Node node)
 		{
@@ -408,13 +441,14 @@ namespace Assets.Code.Bon
 		{
 			if (!_needsUpdate) return;
 
-			StartInvalidation ();
+			/*StartInvalidation ();
 
 			InvalidateDependeningNodes (node);
 
 			InternalUpdateNode (node);
 
-			EndInvalidation ();
+			EndInvalidation ();*/
+			UpdateNodes();
 			_needsUpdate = false;
 		}
 
@@ -422,7 +456,11 @@ namespace Assets.Code.Bon
 		{
 			if (!_needsUpdate) return;
 
-			StartInvalidation ();
+			foreach (var node in _nodes)
+			{
+				node.Update();
+			}
+			/*StartInvalidation ();
 			InvalidateFromRootNodes ();
 
 			foreach (var node in _nodes) {
@@ -430,7 +468,8 @@ namespace Assets.Code.Bon
 					InternalUpdateNode (node);
 			}
 
-			EndInvalidation ();
+			EndInvalidation ();*/
+
 			_needsUpdate = false;
 		}
 

@@ -83,6 +83,11 @@ namespace Assets.Code.Bon
 		{
 			if (_controller == null) _controller = new StandardGraphController();
 			_controller.Register();
+
+			foreach (var graph in Graphs)
+			{
+				graph.ResetVisitCount();
+			}
 		}
 
 		/// <summary>
