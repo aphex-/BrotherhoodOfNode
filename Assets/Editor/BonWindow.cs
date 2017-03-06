@@ -175,7 +175,7 @@ namespace Assets.Editor
 
 			if (_currentCanvas != null) {
 				float infoPanelY = Screen.height - TopOffset - 6;
-				_tmpRect.Set(5, infoPanelY, 55, 20);
+				_tmpRect.Set(5, infoPanelY, 70, 20);
 				GUI.Label(_tmpRect, "zoom: " + Math.Round(_currentCanvas.Zoom, 1));
 				_tmpRect.Set(60, infoPanelY, 70, 20);
 				GUI.Label(_tmpRect, "x: " + Math.Round(_currentCanvas.Position.x));
@@ -183,8 +183,6 @@ namespace Assets.Editor
 				GUI.Label(_tmpRect, "y: " + Math.Round(_currentCanvas.Position.y));
 				_tmpRect.Set(200, infoPanelY, 70, 20);
 				GUI.Label(_tmpRect, "nodes: " + _currentCanvas.Graph.GetNodeCount());
-				_tmpRect.Set(5, Screen.height - TopOffset - 6, 100, 20);
-				GUI.Label(_tmpRect, "zoom: " + Math.Round(_currentCanvas.Zoom, 1));
 			}
 
 			if (_currentCanvas != null)
