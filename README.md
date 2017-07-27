@@ -1,4 +1,4 @@
-A improved version of this software is available at the Unity Asset Store: https://www.assetstore.unity3d.com/#!/content/72081
+An improved version of this software is available at the Unity Asset Store: https://www.assetstore.unity3d.com/#!/content/72081
 I am thinking about to open source the improved tool and deprecate BoN. The time investment would only make sense to me if there would be developers to contribute on GDI.
 
 # BrotherhoodOfNode
